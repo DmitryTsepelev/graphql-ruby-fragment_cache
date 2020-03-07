@@ -1,0 +1,26 @@
+AllCops:
+  TargetRubyVersion: 2.5
+  Include:
+    - 'lib/**/*.rb'
+    - 'spec/**/*.rb'
+  Exclude:
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'gemfiles/**/*.gemfile'
+    - 'gemfiles/vendor/**/*'
+    - 'Rakefile'
+    - 'Gemfile'
+    - '*.gemspec'
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Metrics/LineLength:
+  Max: 100
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
+
+Style/NumericLiterals:
+  Enabled: false
