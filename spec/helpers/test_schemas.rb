@@ -61,7 +61,6 @@ end
 class GraphqSchema < GraphQL::Schema
   use GraphQL::Execution::Interpreter
   use GraphQL::Analysis::AST
-
   use GraphQL::FragmentCache
 
   query QueryType
@@ -70,7 +69,6 @@ end
 class GraphqSchemaWithContextKey < GraphQL::Schema
   use GraphQL::Execution::Interpreter
   use GraphQL::Analysis::AST
-
   use GraphQL::FragmentCache, context_key: ->(context) { context[:current_user_id] }
 
   query QueryType

@@ -17,7 +17,6 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
     Class.new(GraphQL::Schema) do
       use GraphQL::Execution::Interpreter
       use GraphQL::Analysis::AST
-
       use GraphQL::FragmentCache
 
       query(

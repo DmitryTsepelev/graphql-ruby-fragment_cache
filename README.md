@@ -1,3 +1,128 @@
 # GraphQL::FragmentCache
 
 🚧**UNDER CONSTUCTION**🚧
+
+`GraphQL::FragmentCache` powers up [graphql-ruby](https://graphql-ruby.org) with the ability to cache _fragments_ of the response: you can mark any field as cached and it will never be resolved again (at least, while cache is valid). For instance, the following code caches `title` for each post:
+
+```ruby
+class PostType < GraphQL::Schema::Object
+  field :id, ID, null: false
+  field :title, String, null: false, cache_fragment: true
+end
+```
+
+<p align="center">
+  <a href="https://evilmartians.com/?utm_source=graphql-ruby-fragment_cache">
+    <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" alt="Sponsored by Evil Martians" width="236" height="54">
+  </a>
+</p>
+
+## Getting started
+
+Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class (make sure to turn interpreter mode on!):
+
+```ruby
+class GraphqSchema < GraphQL::Schema
+  use GraphQL::Execution::Interpreter
+  use GraphQL::Analysis::AST
+
+  use GraphQL::FragmentCache
+
+  query QueryType
+end
+```
+
+Now you can add `cache_fragment:` option to your fields to turn caching on:
+
+```ruby
+class PostType < GraphQL::Schema::Object
+  field :id, ID, null: false
+  field :title, String, null: false, cache_fragment: true
+end
+```
+
+Alternatively, you can use `cache_fragment` method inside resolvers:
+
+```ruby
+class QueryType < GraphQL::Schema::Object
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    cache_fragment { Post.find(id) }
+  end
+end
+```
+
+## Key building
+
+Keys are generated automatically. Key payload includes:
+
+- hexdigest of schema definition (to make sure cache is cleared when schema changes)
+- query fingerprint, which consists of path to the field with arguments and nested selections
+
+Key consists of the namespace (`graphql:fragment_cache` by default) and a hexdigest of the payload. Let's take a look at the example:
+
+```ruby
+query = <<~GQL
+  query {
+    post(id: 1) {
+      id
+      title
+      cachedAuthor {
+        id
+        name
+      }
+    }
+  }
+GQL
+
+
+payload = {
+  schema_cache_key: GraphqSchema.schema_cache_key,
+  query_cache_key: {
+    path_cache_key: ["post(id:1)", "cachedAuthor"],
+    selections_cache_key: { "cachedAuthor" => %w[id name] }
+  },
+}
+
+"graphql:fragment_cache:#{Digest::SHA1.hexdigest(payload.to_json)}"
+```
+
+You can override `fragment_cache_namespace`, `schema_cache_key` or `query_cache_key` by passing parameters to the `cache_fragment` calls:
+
+```ruby
+class QueryType < GraphQL::Schema::Object
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    cache_fragment(query_cache_key: "post(#{id})") { Post.find(id) }
+  end
+end
+```
+
+Same for the short version:
+
+```ruby
+class PostType < GraphQL::Schema::Object
+  field :id, ID, null: false
+  field :title, String, null: false, cache_fragment: { query_cache_key: "post_title" }
+end
+```
+
+TODO: describe keys for context
+
+## Credits
+
+Based on the original [gist](https://gist.github.com/palkan/faad9f6ff1db16fcdb1c071ec50e4190) by [@palkan](https://github.com/palkan) and [@ssnickolay](https://github.com/ssnickolay).
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache.
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
