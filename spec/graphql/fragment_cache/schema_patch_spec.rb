@@ -39,8 +39,11 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     let(:key) do
-      "#{GraphQL::FragmentCache::DEFAULT_CACHE_NAMESPACE}:#{GraphqSchema.schema_cache_key}" \
-      ":cachedPost(id:1):id,title"
+      build_key(
+        GraphqSchema,
+        path_cache_key: ["cachedPost(id:1)"],
+        selections_cache_key: { "cachedPost" => %w[id title] }
+      )
     end
 
     before do
@@ -75,8 +78,11 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     let(:key) do
-      "#{GraphQL::FragmentCache::DEFAULT_CACHE_NAMESPACE}:#{GraphqSchema.schema_cache_key}" \
-      ":cachedPost(id:1):id,title"
+      build_key(
+        GraphqSchema,
+        path_cache_key: ["cachedPost(id:1)"],
+        selections_cache_key: { "cachedPost" => %w[id title] }
+      )
     end
 
     let(:cached_post) { { "id" => "1", "title" => "Old cached title" } }

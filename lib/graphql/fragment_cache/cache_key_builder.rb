@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "forwardable"
+require "json"
+require "digest"
 
 module GraphQL
   module FragmentCache
@@ -16,15 +18,18 @@ module GraphQL
       end
 
       def build
-        [
-          fragment_cache_namespace,
-          schema_cache_key,
-          query_cache_key,
-          context_cache_key
-        ].compact.join(":")
+        "#{fragment_cache_namespace}:#{Digest::SHA1.hexdigest(payload.to_json)}"
       end
 
       private
+
+      def payload
+        {
+          schema_cache_key: schema_cache_key,
+          query_cache_key: query_cache_key,
+          context_cache_key: context_cache_key
+        }
+      end
 
       def interpreter_context
         @interpreter_context ||= @context.namespace(:interpreter)
@@ -39,7 +44,8 @@ module GraphQL
       end
 
       def query_cache_key
-        @options[:query_cache_key] || "#{path_cache_key}:#{selections_cache_key}"
+        @options[:query_cache_key] ||
+          { path_cache_key: path_cache_key, selections_cache_key: selections_cache_key }
       end
 
       def context_cache_key
@@ -47,16 +53,17 @@ module GraphQL
       end
 
       def selections_cache_key
-        interpreter_context.fetch(:current_path)
-                           .reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
-                           .selections.map { |selection| traverse(selection) }.sort
-                           .join(",")
+        current_root =
+          interpreter_context.fetch(:current_path)
+                             .reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
+
+        traverse(current_root)
       end
 
       def path_cache_key
         lookahead = query.lookahead
 
-        fields_with_args = interpreter_context[:current_path].map do |field_name|
+        interpreter_context[:current_path].map do |field_name|
           lookahead = lookahead.selection(field_name)
 
           next field_name if lookahead.arguments.empty?
@@ -64,16 +71,14 @@ module GraphQL
           args = lookahead.arguments.map { |k, v| "#{k}:#{v}" }.sort.join(",")
           "#{field_name}(#{args})"
         end
-
-        fields_with_args.join("->")
       end
 
       def traverse(lookahead)
-        return lookahead.field.name if lookahead.selections.empty?
+        field_name = lookahead.field.name
+        return field_name if lookahead.selections.empty?
 
-        subselections = lookahead.selections.map { |selection| traverse(selection) }.sort.join(",")
-
-        "#{lookahead.field.name}{#{subselections}}"
+        subselections = lookahead.selections.map { |selection| traverse(selection) }
+        { field_name => subselections }
       end
     end
   end

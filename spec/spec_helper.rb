@@ -2,6 +2,7 @@
 
 require "graphql"
 require "graphql/fragment_cache"
+require "helpers/key_builder"
 require "helpers/test_schemas"
 
 RSpec.configure do |config|
