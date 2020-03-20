@@ -33,34 +33,13 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
     end
   end
 
+  let(:id) { 1 }
+  let(:variables) { { id: id } }
+  let(:context) { {} }
+
   let(:schema) do
     build_schema(query_type, context_key: ->(context) { context[:current_user_id] })
   end
-
-  before do
-    allow(schema.fragment_cache_store).to receive(:set)
-  end
-
-  def ensure_generated_key(schema, expected_key)
-    expect(schema.fragment_cache_store).to have_received(:set) do |key|
-      expect(key).to eq(expected_key)
-    end
-  end
-
-  shared_examples "check used key" do
-    it "uses expected key" do
-      schema.execute(query, variables: variables, context: context)
-
-      expect(schema.fragment_cache_store).to have_received(:set) do |used_key|
-        expect(used_key).to eq(key)
-      end
-    end
-  end
-
-  let(:id) { 1 }
-
-  let(:variables) { { id: id } }
-  let(:context) { {} }
 
   let(:query) do
     <<~GQL
@@ -81,7 +60,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
     )
   end
 
-  include_examples "check used key"
+  include_context "check used key"
 
   context "when alias is used" do
     # TODO
@@ -111,7 +90,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       )
     end
 
-    include_examples "check used key"
+    include_context "check used key"
   end
 
   context "when cached fragment is nested" do
@@ -138,7 +117,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       )
     end
 
-    include_examples "check used key"
+    include_context "check used key"
   end
 
   context "when context_key is configured" do
@@ -152,11 +131,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       )
     end
 
-    it "caches value without context_cache_key" do
-      schema.execute(query, variables: { id: id }, context: context)
-
-      ensure_generated_key(schema, key)
-    end
+    include_context "check used key"
 
     context "when context_dependent is passed" do
       let(:context_dependent) { true }
@@ -182,14 +157,14 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
         )
       end
 
-      include_examples "check used key"
+      include_context "check used key"
 
       context "when symbol is passed as context key" do
         let(:schema) do
           build_schema(query_type, context_key: :current_user_id)
         end
 
-        include_examples "check used key"
+        include_context "check used key"
       end
     end
 
@@ -219,7 +194,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
         )
       end
 
-      include_examples "check used key"
+      include_context "check used key"
     end
   end
 end

@@ -21,3 +21,17 @@ def build_payload(schema, **options)
     context_cache_key: options[:context_cache_key]
   }
 end
+
+shared_context "check used key" do
+  before do
+    allow(schema.fragment_cache_store).to receive(:set)
+  end
+
+  it "uses expected key" do
+    schema.execute(query, variables: variables || {}, context: context || {})
+
+    expect(schema.fragment_cache_store).to have_received(:set) do |used_key|
+      expect(used_key).to eq(key)
+    end
+  end
+end

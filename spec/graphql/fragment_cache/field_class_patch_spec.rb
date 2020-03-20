@@ -3,12 +3,6 @@
 require "spec_helper"
 
 RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
-  def ensure_generated_key(schema, expected_key)
-    expect(schema.fragment_cache_store).to have_received(:set) do |key|
-      expect(key).to eq(expected_key)
-    end
-  end
-
   let(:cache_fragment) { true }
 
   let(:query_type_lambda) do
@@ -29,6 +23,9 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
     end
   end
 
+  let(:id) { 1 }
+  let(:variables) { { id: id } }
+  let(:context) { {} }
   let(:schema) { build_schema(query_type_lambda) }
 
   let(:query) do
@@ -42,10 +39,6 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
     GQL
   end
 
-  before do
-    allow(schema.fragment_cache_store).to receive(:set)
-  end
-
   context "when cache_fragment option is true" do
     let(:key) do
       build_key(
@@ -55,29 +48,14 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
       )
     end
 
-    it "caches field" do
-      schema.execute(query)
-
-      ensure_generated_key(schema, key)
-    end
+    include_context "check used key"
   end
 
   context "when cache_fragment option contains key settings" do
-    let(:cache_fragment) do
-      { query_cache_key: "custom" }
-    end
+    let(:cache_fragment) { { query_cache_key: "custom" } }
 
-    let(:key) do
-      build_key(
-        schema,
-        query_cache_key: cache_fragment[:query_cache_key]
-      )
-    end
+    let(:key) { build_key(schema, query_cache_key: cache_fragment[:query_cache_key]) }
 
-    it "caches field" do
-      schema.execute(query)
-
-      ensure_generated_key(schema, key)
-    end
+    include_context "check used key"
   end
 end

@@ -113,7 +113,70 @@ class PostType < GraphQL::Schema::Object
 end
 ```
 
-TODO: describe keys for context
+Some queries are _context–dependent_: the same query will produce different results depending on a context. For instance, imagine a query that allows to fetch some information about current user:
+
+```gql
+query {
+  user {
+    email
+  }
+}
+```
+
+In order to represent context in the cache key we should tell the plugin what to look for:
+
+```ruby
+class GraphqSchema < GraphQL::Schema
+  use GraphQL::Execution::Interpreter
+  use GraphQL::Analysis::AST
+
+  # we want to take :current_user_id from context
+  use GraphQL::FragmentCache, context_key: :current_user_id
+
+  query QueryType
+end
+```
+
+You can use lambda if you need more control:
+
+```ruby
+class GraphqSchema < GraphQL::Schema
+  use GraphQL::Execution::Interpreter
+  use GraphQL::Analysis::AST
+
+  use GraphQL::FragmentCache, context_key: ->(context) { context[:current_user_id] }
+
+  query QueryType
+end
+```
+
+In order to include the context key to the cache key you should pass `:context_dependent` option to `cache_fragment`:
+
+```ruby
+class PostType < GraphQL::Schema::Object
+  field :id, ID, null: false
+  field :title, String, null: false, cache_fragment: { context_dependent: true }
+end
+
+class QueryType < GraphQL::Schema::Object
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    cache_fragment(context_dependent: true) { Post.find(id) }
+  end
+end
+```
+
+Of course, you can override `context_key` for any field you need:
+
+```ruby
+class PostType < GraphQL::Schema::Object
+  field :id, ID, null: false
+  field :title, String, null: false, cache_fragment: { context_key: "custom_context_key" }
+end
+```
 
 ## Credits
 
