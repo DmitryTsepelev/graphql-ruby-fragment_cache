@@ -5,7 +5,6 @@ module GraphQL
     # Adds #cache_fragment method to GraphQL::Object descendants
     module Object
       def cache_fragment(options = {}, &block)
-        puts "cache_fragment #{options.inspect}"
         fragment ||= Fragment.new(context, options)
         read_cached_value(fragment) || eval_end_store(fragment, &block)
       end

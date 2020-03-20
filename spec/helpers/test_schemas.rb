@@ -40,36 +40,12 @@ class PostType < GraphQL::Schema::Object
   end
 end
 
-class QueryType < GraphQL::Schema::Object
-  field :cached_post, PostType, null: true do
-    argument :id, ID, required: true
+def build_schema(query_type, context_key: nil)
+  Class.new(GraphQL::Schema) do
+    use GraphQL::Execution::Interpreter
+    use GraphQL::Analysis::AST
+    use GraphQL::FragmentCache, context_key: context_key
+
+    query(query_type.is_a?(Proc) ? query_type.call : query_type)
   end
-
-  field :post, PostType, null: true do
-    argument :id, ID, required: true
-  end
-
-  def cached_post(id:)
-    cache_fragment { post(id: id) }
-  end
-
-  def post(id:)
-    Post.find(id)
-  end
-end
-
-class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-  use GraphQL::FragmentCache
-
-  query QueryType
-end
-
-class GraphqSchemaWithContextKey < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-  use GraphQL::FragmentCache, context_key: ->(context) { context[:current_user_id] }
-
-  query QueryType
 end

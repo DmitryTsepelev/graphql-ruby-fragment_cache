@@ -3,13 +3,21 @@
 require "spec_helper"
 
 RSpec.describe GraphQL::FragmentCache::SchemaPatch do
-  before(:each) do
-    [GraphqSchema, GraphqSchemaWithContextKey].each do |schema_class|
-      if schema_class.fragment_cache_store.instance_variable_defined?(:@storage)
-        schema_class.fragment_cache_store.instance_variable_set(:@storage, {})
+  let(:query_type) do
+    Class.new(GraphQL::Schema::Object) do
+      graphql_name "QueryType"
+
+      field :cached_post, PostType, null: true do
+        argument :id, GraphQL::Types::ID, required: true
+      end
+
+      def cached_post(id:)
+        cache_fragment { Post.find(id) }
       end
     end
   end
+
+  let(:schema) { build_schema(query_type) }
 
   context "when cache is cold" do
     let(:query) do
@@ -40,7 +48,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
 
     let(:key) do
       build_key(
-        GraphqSchema,
+        schema,
         path_cache_key: ["cachedPost(id:1)"],
         selections_cache_key: { "cachedPost" => %w[id title] }
       )
@@ -51,15 +59,15 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     it "evaluates post fields" do
-      GraphqSchema.execute(query)
+      schema.execute(query)
       expect(post_spy).to have_received(:id)
       expect(post_spy).to have_received(:title)
     end
 
     it "caches value in the store" do
-      GraphqSchema.execute(query)
+      schema.execute(query)
 
-      expect(GraphqSchema.fragment_cache_store.get(key)).to eq(
+      expect(schema.fragment_cache_store.get(key)).to eq(
         "id" => "1", "title" => "Post title"
       )
     end
@@ -79,7 +87,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
 
     let(:key) do
       build_key(
-        GraphqSchema,
+        schema,
         path_cache_key: ["cachedPost(id:1)"],
         selections_cache_key: { "cachedPost" => %w[id title] }
       )
@@ -103,13 +111,13 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     before do
-      GraphqSchema.fragment_cache_store.set(key, cached_post)
+      schema.fragment_cache_store.set(key, cached_post)
 
       allow(Post).to receive(:find).with("1") { post_spy }
     end
 
     it "not evaluates post and user fields" do
-      GraphqSchema.execute(query).inspect
+      schema.execute(query).inspect
 
       expect(post_spy).not_to have_received(:id)
       expect(post_spy).not_to have_received(:title)
@@ -120,7 +128,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     it "returns cached value" do
-      expect(GraphqSchema.execute(query)).to eq("data" => { "cachedPost" => cached_post })
+      expect(schema.execute(query)).to eq("data" => { "cachedPost" => cached_post })
     end
   end
 end

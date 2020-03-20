@@ -49,7 +49,15 @@ module GraphQL
       end
 
       def context_cache_key
-        schema.context_cache_key_resolver&.call(query.context)
+        return @options[:context_cache_key] if @options[:context_cache_key]
+        return unless @options[:context_dependent]
+
+        schema.context_cache_key_resolver.then do |resolver|
+          case resolver
+          when Proc then resolver.call(query.context)
+          when Symbol then query.context[resolver]
+          end
+        end
       end
 
       def selections_cache_key

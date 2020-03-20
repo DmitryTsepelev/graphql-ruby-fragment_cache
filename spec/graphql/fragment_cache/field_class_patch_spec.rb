@@ -11,29 +11,25 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
 
   let(:cache_fragment) { true }
 
-  let(:schema) do
+  let(:query_type_lambda) do
     cache_fragment_options = cache_fragment
 
-    Class.new(GraphQL::Schema) do
-      use GraphQL::Execution::Interpreter
-      use GraphQL::Analysis::AST
-      use GraphQL::FragmentCache
+    lambda do
+      Class.new(GraphQL::Schema::Object) do
+        graphql_name "QueryType"
 
-      query(
-        Class.new(GraphQL::Schema::Object) do
-          graphql_name "QueryType"
-
-          field :post, PostType, null: true, cache_fragment: cache_fragment_options do
-            argument :id, GraphQL::Types::ID, required: true
-          end
-
-          def post(id:)
-            Post.find(id)
-          end
+        field :post, PostType, null: true, cache_fragment: cache_fragment_options do
+          argument :id, GraphQL::Types::ID, required: true
         end
-      )
+
+        def post(id:)
+          Post.find(id)
+        end
+      end
     end
   end
+
+  let(:schema) { build_schema(query_type_lambda) }
 
   let(:query) do
     <<~GQL

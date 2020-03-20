@@ -12,7 +12,9 @@ module GraphQL
         cache_fragment_options = {
           schema_cache_key: @cache_options[:schema_cache_key],
           fragment_cache_namespace: @cache_options[:fragment_cache_namespace],
-          query_cache_key: @cache_options[:query_cache_key]
+          query_cache_key: @cache_options[:query_cache_key],
+          context_cache_key: @cache_options[:context_cache_key],
+          context_dependent: @cache_options[:context_dependent]
         }
 
         object.cache_fragment(cache_fragment_options) { yield(object, arguments) }
