@@ -11,7 +11,7 @@ module GraphQL
           raise NotImplementedError
         end
 
-        def set(_key, _value)
+        def set(_key, _value, **_options)
           raise NotImplementedError
         end
 

@@ -13,7 +13,12 @@ module GraphQL
           @storage[key]
         end
 
-        def set(key, value)
+        def set(key, value, **options)
+          if options[:ex]
+            raise ArgumentError,
+                  ":memory adapter does not accept :ex parameter, consider switching to :redis"
+          end
+
           @storage[key] = value
         end
 

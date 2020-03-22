@@ -55,6 +55,66 @@ class QueryType < GraphQL::Schema::Object
 end
 ```
 
+## Cache storage
+
+Cache is stored in memory by default. You can easily switch to Redis (make sure you have [redis](https://github.com/redis/redis-rb) gem installed):
+
+```ruby
+class GraphqSchema < GraphQL::Schema
+  use GraphQL::Execution::Interpreter
+  use GraphQL::Analysis::AST
+
+  use GraphQL::FragmentCache,
+      store: :redis,
+      redis_client: { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
+  # or
+  use GraphQL::FragmentCache,
+      store: :redis,
+      redis_client: Redis.new(url: "redis://127.0.0.2:2214/7")
+  # or
+  use GraphQL::FragmentCache,
+      store: :redis,
+      redis_client: ConnectionPool.new { Redis.new(url: "redis://127.0.0.2:2214/7") }
+
+  query QueryType
+end
+```
+
+You can also override default expiration time:
+
+```ruby
+class GraphqSchema < GraphQL::Schema
+  use GraphQL::Execution::Interpreter
+  use GraphQL::Analysis::AST
+
+  use GraphQL::FragmentCache,
+      store: :redis,
+      expiration: 172800, # optional, default is 24 hours
+      redis_client: { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
+
+  query QueryType
+end
+```
+
+When Redis storage is configured you can pass `ex` parameter to `cache_fragment`:
+
+```ruby
+class PostType < GraphQL::Schema::Object
+  field :id, ID, null: false
+  field :title, String, null: false, cache_fragment: { ex: 2.hours.to_i }
+end
+
+class QueryType < GraphQL::Schema::Object
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    cache_fragment(ex: 2.hours.to_i) { Post.find(id) }
+  end
+end
+```
+
 ## Key building
 
 Keys are generated automatically. Key payload includes:

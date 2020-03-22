@@ -19,6 +19,10 @@ module GraphQL
       def resolve(final_value)
         final_value.dig(*@path)
       end
+
+      def ex
+        @options[:ex]
+      end
     end
   end
 end

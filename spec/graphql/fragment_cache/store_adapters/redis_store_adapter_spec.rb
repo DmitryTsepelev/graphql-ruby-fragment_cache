@@ -11,8 +11,8 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::RedisStoreAdapter do
   let(:expiration) { nil }
   let(:options) do
     {
-      redis_client: redis_client
-      # expiration: expiration,
+      redis_client: redis_client,
+      expiration: expiration
     }
   end
 
@@ -48,23 +48,22 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::RedisStoreAdapter do
     end
   end
 
-  # TODO
-  # context "when expiration is not passed" do
-  #   let(:redis_client) { proc {} }
-  #
-  #   it "falls back to the default expiration" do
-  #     expect(subject.instance_variable_get("@expiration")).to eq(86400)
-  #   end
-  # end
+  context "when expiration is not passed" do
+    let(:redis_client) { proc {} }
 
-  # context "when expiration is passed" do
-  #   let(:redis_client) { proc {} }
-  #   let(:expiration) { 1_000_000 }
-  #
-  #   it "uses the passed expiration" do
-  #     expect(subject.instance_variable_get("@expiration")).to eq(expiration)
-  #   end
-  # end
+    it "falls back to the default expiration" do
+      expect(subject.instance_variable_get("@expiration")).to eq(86400)
+    end
+  end
+
+  context "when expiration is passed" do
+    let(:redis_client) { proc {} }
+    let(:expiration) { 1_000_000 }
+
+    it "uses the passed expiration" do
+      expect(subject.instance_variable_get("@expiration")).to eq(expiration)
+    end
+  end
 
   context "when not supported object is passed" do
     let(:redis_client) { 42 }

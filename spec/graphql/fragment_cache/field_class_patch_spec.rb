@@ -58,4 +58,20 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
 
     include_context "check used key"
   end
+
+  context "when :ex is passed" do
+    let(:cache_fragment) { { ex: 60 } }
+
+    let(:key) do
+      build_key(
+        schema,
+        path_cache_key: ["post(id:1)"],
+        selections_cache_key: { "post" => %w[id title] }
+      )
+    end
+
+    let(:schema) { build_schema(query_type_lambda) }
+
+    include_context "check used key", ex: 60
+  end
 end

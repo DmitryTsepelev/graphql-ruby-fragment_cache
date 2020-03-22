@@ -7,19 +7,23 @@ module GraphQL
     module StoreAdapters
       # Redis adapter for storing fragment cache
       class RedisStoreAdapter < BaseStoreAdapter
+        DEFAULT_EXPIRATION = 24 * 60 * 60
+
         def initialize(redis_client:, expiration: nil)
           @redis_proc = build_redis_proc(redis_client)
-          @expiration = expiration
+          @expiration = expiration || DEFAULT_EXPIRATION
         end
 
         def get(key)
           @redis_proc.call { |redis| redis.get(key) }
         end
 
-        def set(key, value)
-          # TODO: , ex: @expiration
-          @redis_proc.call { |redis| redis.set(key, value) }
+        # rubocop:disable Naming/UncommunicativeMethodParamName
+        def set(key, value, ex: nil)
+          ex ||= @expiration
+          @redis_proc.call { |redis| redis.set(key, value, ex: ex) }
         end
+        # rubocop:enable Naming/UncommunicativeMethodParamName
 
         def del(_key)
           @redis_proc.call { |redis| redis.del(key) }
