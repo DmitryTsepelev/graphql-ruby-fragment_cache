@@ -1,4 +1,4 @@
-# GraphQL::FragmentCache
+# GraphQL::FragmentCache [![Build Status](https://travis-ci.org/DmitryTsepelev/graphql-ruby-fragment_cache.svg?branch=master)](https://travis-ci.org/DmitryTsepelev/graphql-ruby-fragment_cache)
 
 🚧**UNDER CONSTUCTION**🚧
 

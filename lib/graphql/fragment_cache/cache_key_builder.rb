@@ -52,7 +52,7 @@ module GraphQL
         return @options[:context_cache_key] if @options[:context_cache_key]
         return unless @options[:context_dependent]
 
-        schema.context_cache_key_resolver.then do |resolver|
+        schema.context_cache_key_resolver.yield_self do |resolver|
           case resolver
           when Proc then resolver.call(query.context)
           when Symbol then query.context[resolver]
