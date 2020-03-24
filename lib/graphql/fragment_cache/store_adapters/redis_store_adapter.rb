@@ -20,12 +20,13 @@ module GraphQL
           @redis_proc.call { |redis| redis.get(with_namespace(key)) }
         end
 
-        # rubocop:disable Naming/UncommunicativeMethodParamName
-        def set(key, value, ex: nil)
-          ex ||= @expiration
-          @redis_proc.call { |redis| redis.set(with_namespace(key), value, ex: ex) }
+        def set(key, value, expires_in: nil)
+          expires_in ||= @expiration
+
+          @redis_proc.call do |redis|
+            redis.set(with_namespace(key), value, ex: expires_in)
+          end
         end
-        # rubocop:enable Naming/UncommunicativeMethodParamName
 
         def del(key)
           @redis_proc.call { |redis| redis.del(with_namespace(key)) }

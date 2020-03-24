@@ -9,11 +9,11 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::MemoryStoreAdapter do
   subject { described_class.new({}) }
 
   describe "#set" do
-    context "when :ex is passed" do
+    context "when :expires_in is passed" do
       it "raises error" do
-        expect { subject.set("key", "value", ex: 1) }.to raise_error(
+        expect { subject.set("key", "value", expires_in: 1) }.to raise_error(
           ArgumentError,
-          ":memory adapter does not accept :ex parameter, consider switching to :redis"
+          ":memory adapter does not accept :expires_in parameter, consider switching to :redis"
         )
       end
     end

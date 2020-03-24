@@ -46,7 +46,7 @@ module GraphQL
 
       def context_cache_key
         return @options[:context_cache_key] if @options[:context_cache_key]
-        return unless @options[:context_dependent]
+        return unless @options[:context_sensitive]
 
         schema.context_cache_key_resolver.yield_self do |resolver|
           case resolver

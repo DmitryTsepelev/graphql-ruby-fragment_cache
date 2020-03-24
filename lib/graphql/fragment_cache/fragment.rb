@@ -20,8 +20,8 @@ module GraphQL
         final_value.dig(*@path)
       end
 
-      def ex
-        @options[:ex]
+      def expires_in
+        @options[:expires_in]
       end
     end
   end

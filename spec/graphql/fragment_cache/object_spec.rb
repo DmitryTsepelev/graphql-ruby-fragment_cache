@@ -11,34 +11,32 @@ RSpec.describe GraphQL::FragmentCache::Object do
 
       field :post, TestTypes::PostType, null: true do
         argument :id, GraphQL::Types::ID, required: true
-        argument :ex, GraphQL::Types::Int, required: false
+        argument :expires_in, GraphQL::Types::Int, required: false
       end
 
-      # rubocop:disable Naming/UncommunicativeMethodParamName
-      def post(id:, ex: nil)
-        cache_fragment(ex: ex) { TestModels::Post.find(id) }
+      def post(id:, expires_in: nil)
+        cache_fragment(expires_in: expires_in) { TestModels::Post.find(id) }
       end
-      # rubocop:enable Naming/UncommunicativeMethodParamName
     end
   end
 
   let(:schema) { build_schema(query_type) }
-  let(:ex) { nil }
-  let(:variables) { { id: 1, ex: ex } }
+  let(:expires_in) { nil }
+  let(:variables) { { id: 1, expiresIn: expires_in } }
   let(:context) { {} }
 
   let(:key) do
     build_key(
       schema,
-      path_cache_key: ["post(ex:#{ex},id:#{variables[:id]})"],
+      path_cache_key: ["post(expires_in:#{variables[:expiresIn]},id:#{variables[:id]})"],
       selections_cache_key: { "post" => %w[id title] }
     )
   end
 
   let(:query) do
     <<~GQL
-      query GetPost($id: ID!, $ex: Int) {
-        post(id: $id, ex: $ex) {
+      query GetPost($id: ID!, $expiresIn: Int) {
+        post(id: $id, expiresIn: $expiresIn) {
           id
           title
         }
@@ -48,9 +46,9 @@ RSpec.describe GraphQL::FragmentCache::Object do
 
   include_context "check used key"
 
-  context "when ex is passed" do
-    let(:ex) { 60 }
+  context "when expires_in is passed" do
+    let(:expires_in) { 60 }
 
-    include_context "check used key", ex: 60
+    include_context "check used key", expires_in: 60
   end
 end

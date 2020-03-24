@@ -11,7 +11,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
 
       field :cached_post, TestTypes::PostType, null: true do
         argument :id, GraphQL::Types::ID, required: true
-        argument :context_dependent, GraphQL::Types::Boolean, required: false
+        argument :context_sensitive, GraphQL::Types::Boolean, required: false
         argument :context_cache_key, GraphQL::Types::String, required: false
       end
 
@@ -19,9 +19,9 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
         argument :id, GraphQL::Types::ID, required: true
       end
 
-      def cached_post(id:, context_dependent: nil, context_cache_key: nil)
+      def cached_post(id:, context_sensitive: nil, context_cache_key: nil)
         options = {}
-        options[:context_dependent] = true if context_dependent
+        options[:context_sensitive] = true if context_sensitive
         options[:context_cache_key] = context_cache_key unless context_cache_key.nil?
 
         cache_fragment(options) { post(id: id) }
@@ -133,14 +133,14 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     include_context "check used key"
 
-    context "when context_dependent is passed" do
-      let(:context_dependent) { true }
-      let(:variables) { { id: id, contextDependent: context_dependent } }
+    context "when context_sensitive is passed" do
+      let(:context_sensitive) { true }
+      let(:variables) { { id: id, contextSensitive: context_sensitive } }
 
       let(:query) do
         <<~GQL
-          query GetPost($id: ID!, $contextDependent: Boolean) {
-            cachedPost(id: $id, contextDependent: $contextDependent) {
+          query GetPost($id: ID!, $contextSensitive: Boolean) {
+            cachedPost(id: $id, contextSensitive: $contextSensitive) {
               id
               title
             }
@@ -151,7 +151,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       let(:key) do
         build_key(
           schema,
-          path_cache_key: ["cachedPost(context_dependent:#{context_dependent},id:#{id})"],
+          path_cache_key: ["cachedPost(context_sensitive:#{context_sensitive},id:#{id})"],
           selections_cache_key: { "cachedPost" => %w[id title] },
           context_cache_key: 42
         )

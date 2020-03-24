@@ -58,7 +58,7 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
   end
 
   context "when :ex is passed" do
-    let(:cache_fragment) { { ex: 60 } }
+    let(:cache_fragment) { { expires_in: 60 } }
 
     let(:key) do
       build_key(
@@ -70,6 +70,6 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
 
     let(:schema) { build_schema(query_type) }
 
-    include_context "check used key", ex: 60
+    include_context "check used key", expires_in: 60
   end
 end

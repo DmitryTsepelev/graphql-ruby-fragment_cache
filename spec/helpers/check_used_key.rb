@@ -11,7 +11,7 @@ shared_context "check used key" do |options = {}|
     expect(schema.fragment_cache_store).to \
       have_received(:set) do |used_key, _, passed_options|
         expect(used_key).to eq(key)
-        expect(passed_options[:ex]).to eq(options[:ex]) if options[:ex]
+        expect(passed_options[:expires_in]).to eq(options[:expires_in]) if options[:expires_in]
       end
   end
 end

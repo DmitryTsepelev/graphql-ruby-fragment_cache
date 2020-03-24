@@ -11,7 +11,7 @@ module GraphQL
       def perform
         fragments.each do |fragment|
           value = fragment.resolve(final_value)
-          cache_store.set(fragment.cache_key, value, ex: fragment.ex)
+          cache_store.set(fragment.cache_key, value, expires_in: fragment.expires_in)
         end
       end
 

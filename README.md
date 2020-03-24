@@ -110,7 +110,7 @@ When Redis storage is configured you can pass `ex` parameter to `cache_fragment`
 ```ruby
 class PostType < BaseObject
   field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { ex: 2.hours.to_i }
+  field :title, String, null: false, cache_fragment: { expires_in: 2.hours.to_i }
 end
 
 class QueryType < BaseObject
@@ -119,7 +119,7 @@ class QueryType < BaseObject
   end
 
   def post(id:)
-    cache_fragment(ex: 2.hours.to_i) { Post.find(id) }
+    cache_fragment(expires_in: 2.hours.to_i) { Post.find(id) }
   end
 end
 ```
@@ -219,12 +219,12 @@ class GraphqSchema < GraphQL::Schema
 end
 ```
 
-In order to include the context key to the cache key you should pass `:context_dependent` option to `cache_fragment`:
+In order to include the context key to the cache key you should pass `:context_sensitive` option to `cache_fragment`:
 
 ```ruby
 class PostType < BaseObject
   field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { context_dependent: true }
+  field :title, String, null: false, cache_fragment: { context_sensitive: true }
 end
 
 class QueryType < BaseObject
@@ -233,7 +233,7 @@ class QueryType < BaseObject
   end
 
   def post(id:)
-    cache_fragment(context_dependent: true) { Post.find(id) }
+    cache_fragment(context_sensitive: true) { Post.find(id) }
   end
 end
 ```
@@ -246,6 +246,8 @@ class PostType < BaseObject
   field :title, String, null: false, cache_fragment: { context_key: "custom_context_key" }
 end
 ```
+
+> **Heads up!** [Field aliases](https://spec.graphql.org/June2018/#sec-Field-Alias) are not currently supported (take a look at the failing spec [here](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/7))
 
 ## Credits
 
