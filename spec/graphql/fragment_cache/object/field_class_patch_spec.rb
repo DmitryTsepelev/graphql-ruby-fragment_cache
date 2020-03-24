@@ -2,23 +2,21 @@
 
 require "spec_helper"
 
-RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
+RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
   let(:cache_fragment) { true }
 
-  let(:query_type_lambda) do
+  let(:query_type) do
     cache_fragment_options = cache_fragment
 
-    lambda do
-      Class.new(GraphQL::Schema::Object) do
-        graphql_name "QueryType"
+    Class.new(TestTypes::BaseType) do
+      graphql_name "QueryType"
 
-        field :post, PostType, null: true, cache_fragment: cache_fragment_options do
-          argument :id, GraphQL::Types::ID, required: true
-        end
+      field :post, TestTypes::PostType, null: true, cache_fragment: cache_fragment_options do
+        argument :id, GraphQL::Types::ID, required: true
+      end
 
-        def post(id:)
-          Post.find(id)
-        end
+      def post(id:)
+        TestModels::Post.find(id)
       end
     end
   end
@@ -26,7 +24,7 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
   let(:id) { 1 }
   let(:variables) { { id: id } }
   let(:context) { {} }
-  let(:schema) { build_schema(query_type_lambda) }
+  let(:schema) { build_schema(query_type) }
 
   let(:query) do
     <<~GQL
@@ -70,7 +68,7 @@ RSpec.describe GraphQL::FragmentCache::FieldClassPatch do
       )
     end
 
-    let(:schema) { build_schema(query_type_lambda) }
+    let(:schema) { build_schema(query_type) }
 
     include_context "check used key", ex: 60
   end

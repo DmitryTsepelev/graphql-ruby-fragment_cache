@@ -6,16 +6,16 @@ require "digest"
 
 RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
   let(:query_type) do
-    Class.new(GraphQL::Schema::Object) do
+    Class.new(TestTypes::BaseType) do
       graphql_name "QueryType"
 
-      field :cached_post, PostType, null: true do
+      field :cached_post, TestTypes::PostType, null: true do
         argument :id, GraphQL::Types::ID, required: true
         argument :context_dependent, GraphQL::Types::Boolean, required: false
         argument :context_cache_key, GraphQL::Types::String, required: false
       end
 
-      field :post, PostType, null: true do
+      field :post, TestTypes::PostType, null: true do
         argument :id, GraphQL::Types::ID, required: true
       end
 
@@ -28,7 +28,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       end
 
       def post(id:)
-        Post.find(id)
+        TestModels::Post.find(id)
       end
     end
   end

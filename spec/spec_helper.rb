@@ -2,8 +2,17 @@
 
 require "graphql"
 require "graphql/fragment_cache"
-require "helpers/key_builder"
-require "helpers/test_schemas"
+
+require "helpers/build_key"
+require "helpers/build_schema"
+require "helpers/check_used_key"
+
+require "helpers/test_models/user"
+require "helpers/test_models/post"
+
+require "helpers/test_types/base_type"
+require "helpers/test_types/user_type"
+require "helpers/test_types/post_type"
 
 RSpec.configure do |config|
   config.order = :random

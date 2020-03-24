@@ -4,15 +4,15 @@ require "spec_helper"
 
 RSpec.describe GraphQL::FragmentCache::SchemaPatch do
   let(:query_type) do
-    Class.new(GraphQL::Schema::Object) do
+    Class.new(TestTypes::BaseType) do
       graphql_name "QueryType"
 
-      field :cached_post, PostType, null: true do
+      field :cached_post, TestTypes::PostType, null: true do
         argument :id, GraphQL::Types::ID, required: true
       end
 
       def cached_post(id:)
-        cache_fragment { Post.find(id) }
+        cache_fragment { TestModels::Post.find(id) }
       end
     end
   end
@@ -55,7 +55,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     before do
-      allow(Post).to receive(:find).with("1") { post_spy }
+      allow(TestModels::Post).to receive(:find).with("1") { post_spy }
     end
 
     it "evaluates post fields" do
@@ -113,7 +113,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     before do
       schema.fragment_cache_store.set(key, cached_post)
 
-      allow(Post).to receive(:find).with("1") { post_spy }
+      allow(TestModels::Post).to receive(:find).with("1") { post_spy }
     end
 
     it "not evaluates post and user fields" do

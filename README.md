@@ -5,7 +5,7 @@
 `GraphQL::FragmentCache` powers up [graphql-ruby](https://graphql-ruby.org) with the ability to cache _fragments_ of the response: you can mark any field as cached and it will never be resolved again (at least, while cache is valid). For instance, the following code caches `title` for each post:
 
 ```ruby
-class PostType < GraphQL::Schema::Object
+class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: true
 end
@@ -32,10 +32,18 @@ class GraphqSchema < GraphQL::Schema
 end
 ```
 
+Include `GraphQL::FragmentCache::Object` to your base type class:
+
+```ruby
+class BaseType < GraphQL::Schema::Object
+  include GraphQL::FragmentCache::Object
+end
+```
+
 Now you can add `cache_fragment:` option to your fields to turn caching on:
 
 ```ruby
-class PostType < GraphQL::Schema::Object
+class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: true
 end
@@ -44,7 +52,7 @@ end
 Alternatively, you can use `cache_fragment` method inside resolvers:
 
 ```ruby
-class QueryType < GraphQL::Schema::Object
+class QueryType < BaseObject
   field :post, PostType, null: true do
     argument :id, ID, required: true
   end
@@ -100,12 +108,12 @@ end
 When Redis storage is configured you can pass `ex` parameter to `cache_fragment`:
 
 ```ruby
-class PostType < GraphQL::Schema::Object
+class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: { ex: 2.hours.to_i }
 end
 
-class QueryType < GraphQL::Schema::Object
+class QueryType < BaseObject
   field :post, PostType, null: true do
     argument :id, ID, required: true
   end
@@ -154,7 +162,7 @@ key = Digest::SHA1.hexdigest(payload.to_json)
 You can override `fragment_cache_namespace`, `schema_cache_key` or `query_cache_key` by passing parameters to the `cache_fragment` calls:
 
 ```ruby
-class QueryType < GraphQL::Schema::Object
+class QueryType < BaseObject
   field :post, PostType, null: true do
     argument :id, ID, required: true
   end
@@ -168,7 +176,7 @@ end
 Same for the short version:
 
 ```ruby
-class PostType < GraphQL::Schema::Object
+class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: { query_cache_key: "post_title" }
 end
@@ -214,12 +222,12 @@ end
 In order to include the context key to the cache key you should pass `:context_dependent` option to `cache_fragment`:
 
 ```ruby
-class PostType < GraphQL::Schema::Object
+class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: { context_dependent: true }
 end
 
-class QueryType < GraphQL::Schema::Object
+class QueryType < BaseObject
   field :post, PostType, null: true do
     argument :id, ID, required: true
   end
@@ -233,7 +241,7 @@ end
 Of course, you can override `context_key` for any field you need:
 
 ```ruby
-class PostType < GraphQL::Schema::Object
+class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: { context_key: "custom_context_key" }
 end

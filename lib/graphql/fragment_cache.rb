@@ -2,7 +2,6 @@
 
 require "graphql/fragment_cache/cache_fragment_extension"
 require "graphql/fragment_cache/cache_instrumentation"
-require "graphql/fragment_cache/field_class_patch"
 require "graphql/fragment_cache/fragment"
 require "graphql/fragment_cache/object"
 require "graphql/fragment_cache/schema_patch"
@@ -23,9 +22,6 @@ module GraphQL
 
         store = options[:store] || :memory
         schema_defn.configure_fragment_cache_store(store, options)
-
-        GraphQL::Schema::Object.include(Object)
-        GraphQL::Schema::Object.field_class.prepend(FieldClassPatch)
       end
 
       private

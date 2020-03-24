@@ -6,17 +6,17 @@ require "digest"
 
 RSpec.describe GraphQL::FragmentCache::Object do
   let(:query_type) do
-    Class.new(GraphQL::Schema::Object) do
+    Class.new(TestTypes::BaseType) do
       graphql_name "QueryType"
 
-      field :post, PostType, null: true do
+      field :post, TestTypes::PostType, null: true do
         argument :id, GraphQL::Types::ID, required: true
         argument :ex, GraphQL::Types::Int, required: false
       end
 
       # rubocop:disable Naming/UncommunicativeMethodParamName
       def post(id:, ex: nil)
-        cache_fragment(ex: ex) { Post.find(id) }
+        cache_fragment(ex: ex) { TestModels::Post.find(id) }
       end
       # rubocop:enable Naming/UncommunicativeMethodParamName
     end
