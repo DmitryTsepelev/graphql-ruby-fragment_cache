@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
 def build_key(schema, **options)
-  hashed_part = Digest::SHA1.hexdigest(build_payload(schema, options).to_json)
-
-  fragment_cache_namespace =
-    options[:fragment_cache_namespace] || GraphQL::FragmentCache::DEFAULT_CACHE_NAMESPACE
-
-  "#{fragment_cache_namespace}:#{hashed_part}"
+  Digest::SHA1.hexdigest(build_payload(schema, options).to_json)
 end
 
 def build_payload(schema, **options)

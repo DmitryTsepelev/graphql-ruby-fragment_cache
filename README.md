@@ -80,7 +80,7 @@ class GraphqSchema < GraphQL::Schema
 end
 ```
 
-You can also override default expiration time:
+You can also override default expiration time and namespace:
 
 ```ruby
 class GraphqSchema < GraphQL::Schema
@@ -90,6 +90,7 @@ class GraphqSchema < GraphQL::Schema
   use GraphQL::FragmentCache,
       store: :redis,
       expiration: 172800, # optional, default is 24 hours
+      namespace: "my-custom-namespace"m # optional, default is "graphql-fragment-cache"
       redis_client: { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
 
   query QueryType
@@ -117,12 +118,12 @@ end
 
 ## Key building
 
-Keys are generated automatically. Key payload includes:
+Keys are generated automatically. Key is a hexdigest of the payload, while payload includes the following:
 
 - hexdigest of schema definition (to make sure cache is cleared when schema changes)
 - query fingerprint, which consists of path to the field with arguments and nested selections
 
-Key consists of the namespace (`graphql:fragment_cache` by default) and a hexdigest of the payload. Let's take a look at the example:
+Let's take a look at the example:
 
 ```ruby
 query = <<~GQL
@@ -147,7 +148,7 @@ payload = {
   },
 }
 
-"graphql:fragment_cache:#{Digest::SHA1.hexdigest(payload.to_json)}"
+key = Digest::SHA1.hexdigest(payload.to_json)
 ```
 
 You can override `fragment_cache_namespace`, `schema_cache_key` or `query_cache_key` by passing parameters to the `cache_fragment` calls:

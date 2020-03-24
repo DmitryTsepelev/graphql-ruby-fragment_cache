@@ -18,7 +18,7 @@ module GraphQL
       end
 
       def build
-        "#{fragment_cache_namespace}:#{Digest::SHA1.hexdigest(payload.to_json)}"
+        Digest::SHA1.hexdigest(payload.to_json)
       end
 
       private
@@ -37,10 +37,6 @@ module GraphQL
 
       def schema_cache_key
         @options[:schema_cache_key] || schema.schema_cache_key
-      end
-
-      def fragment_cache_namespace
-        @options[:fragment_cache_namespace] || schema.fragment_cache_namespace
       end
 
       def query_cache_key

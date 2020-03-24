@@ -8,28 +8,34 @@ module GraphQL
       # Redis adapter for storing fragment cache
       class RedisStoreAdapter < BaseStoreAdapter
         DEFAULT_EXPIRATION = 24 * 60 * 60
+        DEFAULT_NAMESPACE = "graphql-fragment-cache"
 
-        def initialize(redis_client:, expiration: nil)
+        def initialize(redis_client:, expiration: nil, namespace: nil)
           @redis_proc = build_redis_proc(redis_client)
           @expiration = expiration || DEFAULT_EXPIRATION
+          @namespace = namespace || DEFAULT_NAMESPACE
         end
 
         def get(key)
-          @redis_proc.call { |redis| redis.get(key) }
+          @redis_proc.call { |redis| redis.get(with_namespace(key)) }
         end
 
         # rubocop:disable Naming/UncommunicativeMethodParamName
         def set(key, value, ex: nil)
           ex ||= @expiration
-          @redis_proc.call { |redis| redis.set(key, value, ex: ex) }
+          @redis_proc.call { |redis| redis.set(with_namespace(key), value, ex: ex) }
         end
         # rubocop:enable Naming/UncommunicativeMethodParamName
 
-        def del(_key)
-          @redis_proc.call { |redis| redis.del(key) }
+        def del(key)
+          @redis_proc.call { |redis| redis.del(with_namespace(key)) }
         end
 
         private
+
+        def with_namespace(key)
+          "#{@namespace}:#{key}"
+        end
 
         # rubocop: disable Metrics/MethodLength
         # rubocop: disable Metrics/CyclomaticComplexity
