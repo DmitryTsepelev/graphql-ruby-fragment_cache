@@ -98,7 +98,7 @@ class GraphqSchema < GraphQL::Schema
   use GraphQL::FragmentCache,
       store: :redis,
       expiration: 172800, # optional, default is 24 hours
-      namespace: "my-custom-namespace"m # optional, default is "graphql-fragment-cache"
+      namespace: "my-custom-namespace", # optional, default is "graphql-fragment-cache"
       redis_client: { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
 
   query QueryType
