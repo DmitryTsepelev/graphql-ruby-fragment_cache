@@ -20,7 +20,7 @@ module GraphQL
 
         schema_defn.context_cache_key_resolver = options[:context_key]
 
-        store = options[:store] || :memory
+        store = options.delete(:store) || :memory
         schema_defn.configure_fragment_cache_store(store, options)
       end
 
