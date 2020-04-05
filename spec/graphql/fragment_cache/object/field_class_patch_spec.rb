@@ -22,7 +22,7 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
   end
 
   let(:id) { 1 }
-  let(:variables) { { id: id } }
+  let(:variables) { {id: id} }
   let(:context) { {} }
   let(:schema) { build_schema(query_type) }
 
@@ -42,7 +42,7 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
       build_key(
         schema,
         path_cache_key: ["post(id:1)"],
-        selections_cache_key: { "post" => %w[id title] }
+        selections_cache_key: {"post" => %w[id title]}
       )
     end
 
@@ -50,7 +50,7 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
   end
 
   context "when cache_fragment option contains key settings" do
-    let(:cache_fragment) { { query_cache_key: "custom" } }
+    let(:cache_fragment) { {query_cache_key: "custom"} }
 
     let(:key) { build_key(schema, query_cache_key: cache_fragment[:query_cache_key]) }
 
@@ -58,13 +58,13 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
   end
 
   context "when :ex is passed" do
-    let(:cache_fragment) { { expires_in: 60 } }
+    let(:cache_fragment) { {expires_in: 60} }
 
     let(:key) do
       build_key(
         schema,
         path_cache_key: ["post(id:1)"],
-        selections_cache_key: { "post" => %w[id title] }
+        selections_cache_key: {"post" => %w[id title]}
       )
     end
 

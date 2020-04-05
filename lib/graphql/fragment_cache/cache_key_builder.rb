@@ -41,7 +41,7 @@ module GraphQL
 
       def query_cache_key
         @options[:query_cache_key] ||
-          { path_cache_key: path_cache_key, selections_cache_key: selections_cache_key }
+          {path_cache_key: path_cache_key, selections_cache_key: selections_cache_key}
       end
 
       def context_cache_key
@@ -59,7 +59,7 @@ module GraphQL
       def selections_cache_key
         current_root =
           interpreter_context.fetch(:current_path)
-                             .reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
+            .reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
 
         traverse(current_root)
       end
@@ -82,7 +82,7 @@ module GraphQL
         return field_name if lookahead.selections.empty?
 
         subselections = lookahead.selections.map { |selection| traverse(selection) }
-        { field_name => subselections }
+        {field_name => subselections}
       end
     end
   end
