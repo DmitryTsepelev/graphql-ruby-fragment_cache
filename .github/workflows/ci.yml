@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [2.5, 2.6, 2.7]
+        gemfile: [
+          "gemfiles/graphql_1_10.gemfile",
+          "gemfiles/graphql_master.gemfile"
+        ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: /home/runner/bundle
+        key: bundle-${{ matrix.ruby }}-${{ matrix.gemfile }}-${{ hashFiles(matrix.gemfile) }}-${{ hashFiles('**/*.gemspec') }}
+        restore-keys: |
+          bundle-${{ matrix.ruby }}-${{ matrix.gemfile }}-
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install system deps
+      run: |
+        sudo apt-get update
+        sudo apt-get install libsqlite3-dev
+    - name: Bundle install
+      run: |
+        bundle config path /home/runner/bundle
+        bundle config --global gemfile ${{ matrix.gemfile }}
+        bundle install
+        bundle update
+    - name: Run RSpec
+      run: |
+        bundle exec rspec
+
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+    - name: Lint Ruby code with RuboCop
+      run: |
+        bundle install --gemfile gemfiles/rubocop.gemfile --jobs 4 --retry 3
+        bundle exec --gemfile gemfiles/rubocop.gemfile rubocop

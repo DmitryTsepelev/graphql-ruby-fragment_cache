@@ -1,0 +1,3 @@
+source "https://rubygems.org" do
+  gem "rubocop", "0.75"
+end
