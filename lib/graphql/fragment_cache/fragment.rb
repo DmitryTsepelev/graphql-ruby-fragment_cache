@@ -8,7 +8,7 @@ module GraphQL
     class Fragment
       def initialize(context, **options)
         @context = context
-        @options = options
+        @options = options || {}
         @path = context.namespace(:interpreter)[:current_path]
       end
 

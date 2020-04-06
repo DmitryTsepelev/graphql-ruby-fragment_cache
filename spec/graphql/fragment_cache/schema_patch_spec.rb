@@ -117,7 +117,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     it "not evaluates post and user fields" do
-      schema.execute(query).inspect
+      schema.execute(query)
 
       expect(post_spy).not_to have_received(:id)
       expect(post_spy).not_to have_received(:title)

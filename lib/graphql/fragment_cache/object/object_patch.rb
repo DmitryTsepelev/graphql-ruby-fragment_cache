@@ -5,9 +5,19 @@ module GraphQL
     module Object
       # Adds #cache_fragment method
       module ObjectPatch
-        def cache_fragment(options = {}, &block)
-          fragment ||= Fragment.new(context, options)
-          read_cached_value(fragment) || eval_end_store(fragment, &block)
+        def cache_fragment(object_to_cache = nil, **options, &block)
+          if object_to_cache && block
+            raise ArgumentError, "both object and block could not be passed to cache_fragment"
+          end
+
+          fragment = Fragment.new(context, options)
+
+          if (cached = read_cached_value(fragment))
+            return cached
+          end
+
+          fragments << fragment
+          object_to_cache || block.call
         end
 
         private
@@ -15,11 +25,6 @@ module GraphQL
         def read_cached_value(fragment)
           cached = context.schema.fragment_cache_store.get(fragment.cache_key)
           raw_value(cached) if cached
-        end
-
-        def eval_end_store(fragment, &block)
-          fragments << fragment
-          block.call
         end
 
         def current_path
