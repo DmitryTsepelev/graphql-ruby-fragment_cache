@@ -1,4 +1,4 @@
-name: CI
+name: RSpec
 
 on:
   push:
@@ -43,15 +43,3 @@ jobs:
     - name: Run RSpec
       run: |
         bundle exec rspec
-
-  rubocop:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 2.7
-    - name: Lint Ruby code with RuboCop
-      run: |
-        bundle install --gemfile gemfiles/rubocop.gemfile --jobs 4 --retry 3
-        bundle exec --gemfile gemfiles/rubocop.gemfile rubocop
