@@ -19,19 +19,6 @@ AllCops:
     - 'Gemfile'
     - '*.gemspec'
 
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-
-Layout/LineLength:
-  Max: 100
-
-Metrics/BlockLength:
-  Exclude:
-    - 'spec/**/*.rb'
-
-Style/NumericLiterals:
-  Enabled: false
-
 Lint/DuplicateMethods:
   Exclude:
     - '**/*.md'
