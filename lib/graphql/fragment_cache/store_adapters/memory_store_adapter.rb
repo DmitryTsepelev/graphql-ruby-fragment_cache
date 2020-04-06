@@ -16,8 +16,8 @@ module GraphQL
         def set(key, value, **options)
           if options[:expires_in]
             raise ArgumentError,
-                  ":memory adapter does not accept :expires_in " \
-                  "parameter, consider switching to :redis"
+              ":memory adapter does not accept :expires_in " \
+              "parameter, consider switching to :redis"
           end
 
           @storage[key] = value

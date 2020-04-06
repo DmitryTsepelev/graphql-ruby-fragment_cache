@@ -117,7 +117,7 @@ Same for the option:
 ```ruby
 class PostType < BaseObject
   field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { query_cache_key: "post_title" }
+  field :title, String, null: false, cache_fragment: {query_cache_key: "post_title"}
 end
 ```
 
@@ -144,7 +144,10 @@ end
 You can omit the block if its return value is the same as the cached object:
 
 ```ruby
-cache_fragment(post) == cache_fragment(post) { post }
+# the following line
+cache_fragment(post)
+# is the same as
+cache_fragment(post) { post }
 ```
 
 When using `cache_fragment:` option, it's only possible to use the resolved value as a cache key by setting:
@@ -235,7 +238,7 @@ You can pass store-specific options to `#cache_fragment` or `cache_fragment:`. F
 ```ruby
 class PostType < BaseObject
   field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { expires_in: 5.minutes }
+  field :title, String, null: false, cache_fragment: {expires_in: 5.minutes}
 end
 
 class QueryType < BaseObject

@@ -17,7 +17,7 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::RedisStoreAdapter do
   end
 
   context "when Hash instance is passed" do
-    let(:redis_client) { { redis_url: "redis://127.0.0.3:8791/3" } }
+    let(:redis_client) { {redis_url: "redis://127.0.0.3:8791/3"} }
 
     it "wraps with proc" do
       expect(subject.instance_variable_get("@redis_proc")).to be_kind_of(Proc)

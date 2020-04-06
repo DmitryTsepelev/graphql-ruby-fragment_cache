@@ -20,7 +20,7 @@ module GraphQL
 
         def build_extension(options)
           if options.is_a?(Hash)
-            { CacheFragmentExtension => options }
+            {CacheFragmentExtension => options}
           else
             CacheFragmentExtension
           end
