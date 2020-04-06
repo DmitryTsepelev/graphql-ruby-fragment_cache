@@ -8,7 +8,8 @@ module GraphQL
     module CacheInstrumentation
       module_function
 
-      def before_query(query); end
+      def before_query(query)
+      end
 
       def after_query(query)
         return unless query.valid?

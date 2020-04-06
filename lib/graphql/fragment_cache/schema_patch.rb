@@ -7,7 +7,7 @@ module GraphQL
     # Patches GraphQL::Schema to support fragment cache
     module SchemaPatch
       attr_reader :fragment_cache_store,
-                  :context_cache_key_resolver
+        :context_cache_key_resolver
 
       def context_cache_key_resolver=(resolver)
         @context_cache_key_resolver = resolver

@@ -10,7 +10,7 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::RedisClientBuilder do
 
     context "when redis_host, redis_port and redis_db_name are passed" do
       let(:options) do
-        { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
+        {redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7"}
       end
 
       it "builds redis URL" do
@@ -30,7 +30,7 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::RedisClientBuilder do
       end
 
       context "when redis_db_name is configured" do
-        let(:options) { { redis_db_name: "42" } }
+        let(:options) { {redis_db_name: "42"} }
 
         it "uses configured db" do
           expect(subject.connection[:id]).to eq("redis://127.0.0.1:6379/42")
@@ -39,7 +39,7 @@ RSpec.describe GraphQL::FragmentCache::StoreAdapters::RedisClientBuilder do
     end
 
     context "when redis_url is passed" do
-      let(:options) { { redis_url: "redis://127.0.0.4:2177/22" } }
+      let(:options) { {redis_url: "redis://127.0.0.4:2177/22"} }
 
       it "uses passed redis_url" do
         expect(subject.connection[:id]).to eq("redis://127.0.0.4:2177/22")

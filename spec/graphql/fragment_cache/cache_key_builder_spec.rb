@@ -34,7 +34,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
   end
 
   let(:id) { 1 }
-  let(:variables) { { id: id } }
+  let(:variables) { {id: id} }
   let(:context) { {} }
 
   let(:schema) do
@@ -56,7 +56,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
     build_key(
       schema,
       path_cache_key: ["cachedPost(id:#{id})"],
-      selections_cache_key: { "cachedPost" => %w[id title] }
+      selections_cache_key: {"cachedPost" => %w[id title]}
     )
   end
 
@@ -86,7 +86,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       build_key(
         schema,
         path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: { "cachedPost" => ["id", "title", "author" => %w[id name]] }
+        selections_cache_key: {"cachedPost" => ["id", "title", "author" => %w[id name]]}
       )
     end
 
@@ -113,7 +113,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       build_key(
         schema,
         path_cache_key: ["post(id:#{id})", "cachedAuthor"],
-        selections_cache_key: { "cachedAuthor" => %w[id name] }
+        selections_cache_key: {"cachedAuthor" => %w[id name]}
       )
     end
 
@@ -121,13 +121,13 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
   end
 
   context "when context_key is configured" do
-    let(:context) { { current_user_id: 42 } }
+    let(:context) { {current_user_id: 42} }
 
     let(:key) do
       build_key(
         schema,
         path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: { "cachedPost" => %w[id title] }
+        selections_cache_key: {"cachedPost" => %w[id title]}
       )
     end
 
@@ -135,7 +135,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     context "when context_sensitive is passed" do
       let(:context_sensitive) { true }
-      let(:variables) { { id: id, contextSensitive: context_sensitive } }
+      let(:variables) { {id: id, contextSensitive: context_sensitive} }
 
       let(:query) do
         <<~GQL
@@ -152,7 +152,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
         build_key(
           schema,
           path_cache_key: ["cachedPost(context_sensitive:#{context_sensitive},id:#{id})"],
-          selections_cache_key: { "cachedPost" => %w[id title] },
+          selections_cache_key: {"cachedPost" => %w[id title]},
           context_cache_key: 42
         )
       end
@@ -170,7 +170,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     context "when context_key is passed" do
       let(:context_cache_key) { "13" }
-      let(:variables) { { id: id, contextCacheKey: context_cache_key } }
+      let(:variables) { {id: id, contextCacheKey: context_cache_key} }
 
       let(:query) do
         <<~GQL
@@ -189,7 +189,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
           path_cache_key: [
             "cachedPost(context_cache_key:#{context_cache_key},id:#{id})"
           ],
-          selections_cache_key: { "cachedPost" => %w[id title] },
+          selections_cache_key: {"cachedPost" => %w[id title]},
           context_cache_key: context_cache_key
         )
       end

@@ -1,3 +1,10 @@
+require:
+  - standard/cop/semantic_blocks
+  - rubocop-md
+
+inherit_gem:
+  standard: config/base.yml
+
 AllCops:
   TargetRubyVersion: 2.5
   Include:
@@ -12,15 +19,10 @@ AllCops:
     - 'Gemfile'
     - '*.gemspec'
 
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-
-Metrics/LineLength:
-  Max: 100
-
-Metrics/BlockLength:
+Lint/DuplicateMethods:
   Exclude:
-    - 'spec/**/*.rb'
+    - '**/*.md'
 
-Style/NumericLiterals:
-  Enabled: false
+Layout/EmptyLineBetweenDefs:
+  Exclude:
+    - '**/*.md'

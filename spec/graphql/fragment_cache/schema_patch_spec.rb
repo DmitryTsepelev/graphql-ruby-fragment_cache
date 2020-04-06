@@ -50,7 +50,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
       build_key(
         schema,
         path_cache_key: ["cachedPost(id:1)"],
-        selections_cache_key: { "cachedPost" => %w[id title] }
+        selections_cache_key: {"cachedPost" => %w[id title]}
       )
     end
 
@@ -89,11 +89,11 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
       build_key(
         schema,
         path_cache_key: ["cachedPost(id:1)"],
-        selections_cache_key: { "cachedPost" => %w[id title] }
+        selections_cache_key: {"cachedPost" => %w[id title]}
       )
     end
 
-    let(:cached_post) { { "id" => "1", "title" => "Old cached title" } }
+    let(:cached_post) { {"id" => "1", "title" => "Old cached title"} }
 
     let(:user_spy) do
       spy("User").tap do |spy|
@@ -128,7 +128,7 @@ RSpec.describe GraphQL::FragmentCache::SchemaPatch do
     end
 
     it "returns cached value" do
-      expect(schema.execute(query)).to eq("data" => { "cachedPost" => cached_post })
+      expect(schema.execute(query)).to eq("data" => {"cachedPost" => cached_post})
     end
   end
 end

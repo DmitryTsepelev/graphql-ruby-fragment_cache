@@ -30,7 +30,7 @@ module GraphQL
         return if schema_defn.interpreter?
 
         raise StandardError,
-              "GraphQL::Execution::Interpreter should be enabled for partial caching"
+          "GraphQL::Execution::Interpreter should be enabled for partial caching"
       end
     end
   end

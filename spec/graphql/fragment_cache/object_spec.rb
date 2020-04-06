@@ -22,14 +22,14 @@ RSpec.describe GraphQL::FragmentCache::Object do
 
   let(:schema) { build_schema(query_type) }
   let(:expires_in) { nil }
-  let(:variables) { { id: 1, expiresIn: expires_in } }
+  let(:variables) { {id: 1, expiresIn: expires_in} }
   let(:context) { {} }
 
   let(:key) do
     build_key(
       schema,
       path_cache_key: ["post(expires_in:#{variables[:expiresIn]},id:#{variables[:id]})"],
-      selections_cache_key: { "post" => %w[id title] }
+      selections_cache_key: {"post" => %w[id title]}
     )
   end
 

@@ -5,7 +5,8 @@ module GraphQL
     module StoreAdapters
       # Base class for all store adapters
       class BaseStoreAdapter
-        def initialize(_options); end
+        def initialize(_options)
+        end
 
         def get(_key)
           raise NotImplementedError
