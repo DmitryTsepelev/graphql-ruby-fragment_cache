@@ -107,7 +107,7 @@ RSpec.describe GraphQL::FragmentCache::Object::ObjectPatch do
     end
   end
 
-  context "when block and object are passed" do
+  xcontext "when block and object are passed" do
     let(:query_type) do
       Class.new(TestTypes::BaseType) do
         graphql_name "QueryType"
@@ -124,11 +124,6 @@ RSpec.describe GraphQL::FragmentCache::Object::ObjectPatch do
       end
     end
 
-    it "raises ArgumentError" do
-      expect { schema.execute(query, variables: variables) }.to raise_error(
-        ArgumentError,
-        "both object and block could not be passed to cache_fragment"
-      )
-    end
+    # TODO: here will be test for passing object as a key
   end
 end
