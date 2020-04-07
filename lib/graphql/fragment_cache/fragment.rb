@@ -13,7 +13,7 @@ module GraphQL
       end
 
       def cache_key
-        @cache_key ||= CacheKeyBuilder.new(@context, @options).build
+        @cache_key ||= CacheKeyBuilder.call(path: @path, query: @context.query, **@options)
       end
 
       def resolve(final_value)

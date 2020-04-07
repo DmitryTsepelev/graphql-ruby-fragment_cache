@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "forwardable"
 require "json"
 require "digest"
 
@@ -8,12 +7,19 @@ module GraphQL
   module FragmentCache
     # Builds cache key for fragment
     class CacheKeyBuilder
-      extend Forwardable
+      class << self
+        def call(**options)
+          new(**options).build
+        end
+      end
 
-      def_delegators :@context, :schema, :query
+      attr_reader :query, :path, :object, :schema
 
-      def initialize(context, **options)
-        @context = context
+      def initialize(object: nil, query:, path:, **options)
+        @object = object
+        @query = query
+        @schema = query.schema
+        @path = path
         @options = options
       end
 
@@ -26,13 +32,8 @@ module GraphQL
       def payload
         {
           schema_cache_key: schema_cache_key,
-          query_cache_key: query_cache_key,
-          context_cache_key: context_cache_key
+          query_cache_key: query_cache_key
         }
-      end
-
-      def interpreter_context
-        @interpreter_context ||= @context.namespace(:interpreter)
       end
 
       def schema_cache_key
@@ -44,22 +45,9 @@ module GraphQL
           {path_cache_key: path_cache_key, selections_cache_key: selections_cache_key}
       end
 
-      def context_cache_key
-        return @options[:context_cache_key] if @options[:context_cache_key]
-        return unless @options[:context_sensitive]
-
-        schema.context_cache_key_resolver.yield_self do |resolver|
-          case resolver
-          when Proc then resolver.call(query.context)
-          when Symbol then query.context[resolver]
-          end
-        end
-      end
-
       def selections_cache_key
         current_root =
-          interpreter_context.fetch(:current_path)
-            .reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
+          path.reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
 
         traverse(current_root)
       end
@@ -67,7 +55,7 @@ module GraphQL
       def path_cache_key
         lookahead = query.lookahead
 
-        interpreter_context[:current_path].map do |field_name|
+        path.map do |field_name|
           lookahead = lookahead.selection(field_name)
 
           next field_name if lookahead.arguments.empty?

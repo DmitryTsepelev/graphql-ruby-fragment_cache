@@ -23,6 +23,7 @@ RSpec.configure do |config|
   config.color = true
 
   config.include SchemaHelper
+  config.include_context "graphql"
 
   config.after do
     Post.delete_all

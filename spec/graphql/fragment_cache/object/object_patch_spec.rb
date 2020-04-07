@@ -1,33 +1,31 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "json"
-require "digest"
 
-RSpec.describe GraphQL::FragmentCache::Object::ObjectPatch do
-  let(:schema) { build_schema(query_type) }
-  let(:expires_in) { nil }
-  let(:variables) { {id: 1, expiresIn: expires_in} }
-  let(:context) { {} }
+describe "#cache_fragment" do
+  let(:schema) do
+    field_resolver = resolver
 
-  let(:post_spy) do
-    spy("Post").tap do |spy|
-      allow(spy).to receive(:id).and_return("1")
-      allow(spy).to receive(:title).and_return("Post title")
+    build_schema do
+      query(
+        Class.new(Types::Query) {
+          field :post, Types::Post, null: true do
+            argument :id, GraphQL::Types::ID, required: true
+            argument :expires_in, GraphQL::Types::Int, required: false
+          end
+
+          define_method(:post, &field_resolver)
+        }
+      )
     end
   end
 
-  let(:key) do
-    build_key(
-      schema,
-      path_cache_key: ["post(expires_in:#{variables[:expiresIn]},id:#{variables[:id]})"],
-      selections_cache_key: {"post" => %w[id title]}
-    )
-  end
+  let(:expires_in) { nil }
+  let(:variables) { {id: 1, expires_in: expires_in} }
 
   let(:query) do
     <<~GQL
-      query GetPost($id: ID!, $expiresIn: Int) {
+      query getPost($id: ID!, $expiresIn: Int) {
         post(id: $id, expiresIn: $expiresIn) {
           id
           title
@@ -36,91 +34,80 @@ RSpec.describe GraphQL::FragmentCache::Object::ObjectPatch do
     GQL
   end
 
+  let!(:post) { Post.create(id: 1, title: "object test") }
+
   before do
-    allow(TestModels::Post).to receive(:find).with("1") { post_spy }
+    # warmup cache
+    execute_query
+    # make object dirty
+    post.title = "new object test"
   end
 
   context "when block is passed" do
-    let(:query_type) do
-      Class.new(TestTypes::BaseType) do
-        graphql_name "QueryType"
-
-        field :post, TestTypes::PostType, null: true do
-          argument :id, GraphQL::Types::ID, required: true
-          argument :expires_in, GraphQL::Types::Int, required: false
-        end
-
-        def post(id:, expires_in: nil)
-          cache_fragment(expires_in: expires_in) { TestModels::Post.find(id) }
-        end
+    let(:resolver) do
+      ->(id:, expires_in:) do
+        cache_fragment { Post.find(id) }
       end
     end
 
-    include_context "check used key"
-
-    it "evaluates post fields" do
-      schema.execute(query, variables: variables)
-
-      expect(post_spy).to have_received(:id)
-      expect(post_spy).to have_received(:title)
-    end
-
-    context "when :ex is passed" do
-      let(:expires_in) { 60 }
-      let(:schema) { build_schema(query_type) }
-
-      include_context "check used key", expires_in: 60
+    it "returns cached fragment" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "object test"
+      })
     end
   end
 
   context "when object is passed" do
-    let(:query_type) do
-      Class.new(TestTypes::BaseType) do
-        graphql_name "QueryType"
-
-        field :post, TestTypes::PostType, null: true do
-          argument :id, GraphQL::Types::ID, required: true
-          argument :expires_in, GraphQL::Types::Int, required: false
-        end
-
-        def post(id:, expires_in: nil)
-          post = TestModels::Post.find(id)
-          cache_fragment(post, expires_in: expires_in)
-        end
+    let(:resolver) do
+      ->(id:, expires_in:) do
+        post = Post.find(id)
+        cache_fragment(post, expires_in: expires_in)
       end
     end
 
-    include_context "check used key"
-
-    it "evaluates post fields" do
-      schema.execute(query, variables: variables)
-
-      expect(post_spy).to have_received(:id)
-      expect(post_spy).to have_received(:title)
+    it "returns cached fragment" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "object test"
+      })
     end
 
-    context "when :ex is passed" do
+    context "when :expires_in is provided" do
       let(:expires_in) { 60 }
-      let(:schema) { build_schema(query_type) }
 
-      include_context "check used key", expires_in: 60
+      it "returns new fragment after expiration" do
+        Timecop.travel(Time.now + 61)
+
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new object test"
+        })
+      end
+    end
+  end
+
+  context "when key part option is passed" do
+    let(:resolver) do
+      ->(id:, expires_in:) do
+        cache_fragment(query_cache_key: "my_key") { Post.find(id) }
+      end
+    end
+
+    it "returns the same cache fragment for a different query when query_cache_key is constant" do
+      variables[:id] = 2
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "object test"
+      })
     end
   end
 
   xcontext "when block and object are passed" do
-    let(:query_type) do
-      Class.new(TestTypes::BaseType) do
-        graphql_name "QueryType"
-
-        field :post, TestTypes::PostType, null: true do
-          argument :id, GraphQL::Types::ID, required: true
-          argument :expires_in, GraphQL::Types::Int, required: false
-        end
-
-        def post(id:, expires_in: nil)
-          post = TestModels::Post.find(id)
-          cache_fragment(post, expires_in: expires_in) { TestModels::Post.find(id) }
-        end
+    let(:resolver) do
+      ->(id:, expires_in:) do
+        cache_fragment(id, expires_in: expires_in) { Post.find(id) }
       end
     end
 

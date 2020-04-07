@@ -32,4 +32,8 @@ class Post
     @title = title
     @author = author
   end
+
+  def cache_key
+    "#{id}-#{title.gsub(/\s/, "")}"
+  end
 end

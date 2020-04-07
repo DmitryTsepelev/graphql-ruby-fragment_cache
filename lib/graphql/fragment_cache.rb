@@ -18,7 +18,7 @@ module GraphQL
         verify_interpreter(schema_defn)
 
         schema_defn.instrument(:query, CacheInstrumentation)
-        schema_defn.singleton_class.prepend(SchemaPatch)
+        schema_defn.extend(SchemaPatch)
 
         schema_defn.context_cache_key_resolver = options[:context_key]
 
