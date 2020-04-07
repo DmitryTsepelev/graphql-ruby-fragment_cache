@@ -3,26 +3,38 @@
 require "spec_helper"
 
 describe GraphQL::FragmentCache do
-  describe "interpreter mode checks" do
+  describe ".use" do
     it "raises if interpreter is not used" do
       expect {
         Class.new(GraphQL::Schema) { use GraphQL::FragmentCache }
       }.to raise_error(
-        StandardError, "GraphQL::Execution::Interpreter should be enabled for partial caching"
+        StandardError, "GraphQL::Execution::Interpreter should be enabled for fragment caching"
       )
+    end
+
+    it "raise if interpreter is used without AST" do
+      expect {
+        Class.new(GraphQL::Schema) do
+          use GraphQL::Execution::Interpreter
+          use GraphQL::FragmentCache
+        end
+      }.to raise_error(
+        StandardError, "GraphQL::Analysis::AST should be enabled for fragment caching"
+      )
+    end
+
+    it "doesn't raise if interpreter is used with AST" do
+      expect {
+        Class.new(GraphQL::Schema) do
+          use GraphQL::Execution::Interpreter
+          use GraphQL::Analysis::AST
+          use GraphQL::FragmentCache
+        end
+      }.not_to raise_error
     end
   end
 
-  it "doesn't raise if interpreter is used" do
-    expect {
-      Class.new(GraphQL::Schema) do
-        use GraphQL::Execution::Interpreter
-        use GraphQL::FragmentCache
-      end
-    }.not_to raise_error
-  end
-
-  describe "#cache_store=" do
+  describe ".cache_store=" do
     around do |ex|
       old_store = described_class.cache_store
       ex.run

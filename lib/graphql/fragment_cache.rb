@@ -38,10 +38,15 @@ module GraphQL
       private
 
       def verify_interpreter!(schema_defn)
-        return if schema_defn.interpreter?
+        unless schema_defn.interpreter?
+          raise StandardError,
+            "GraphQL::Execution::Interpreter should be enabled for fragment caching"
+        end
 
-        raise StandardError,
-          "GraphQL::Execution::Interpreter should be enabled for partial caching"
+        unless schema_defn.analysis_engine == GraphQL::Analysis::AST
+          raise StandardError,
+            "GraphQL::Analysis::AST should be enabled for fragment caching"
+        end
       end
     end
 
