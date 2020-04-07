@@ -28,8 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'combustion', '~> 1.1'
   spec.add_development_dependency "rake", ">= 13.0"
   spec.add_development_dependency "rspec", "~> 3.9"
-  spec.add_development_dependency "rubocop", "0.79"
-  spec.add_development_dependency "rubocop-md", "~> 0.3"
-  spec.add_development_dependency "standard", "0.2.0"
   spec.add_development_dependency "timecop"
 end
