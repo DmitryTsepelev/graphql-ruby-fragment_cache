@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+using RubyNext
+
 module GraphQL
   module FragmentCache
     # Memory adapter for storing cached fragments

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "graphql"
+require "ruby-next"
 
 require "graphql/fragment_cache/cache_fragment_extension"
 require "graphql/fragment_cache/cache_instrumentation"
