@@ -2,7 +2,9 @@
 
 require "spec_helper"
 
-RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
+describe GraphQL::FragmentCache::Object::FieldClassPatch do
+  include_context "graphql"
+
   let(:cache_fragment) { true }
 
   let(:query_type) do
@@ -16,7 +18,7 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
       end
 
       def post(id:)
-        TestModels::Post.find(id)
+        Post.find(id)
       end
     end
   end
@@ -28,8 +30,8 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
 
   let(:query) do
     <<~GQL
-      query {
-        post(id: 1) {
+      query getPost($id: ID!){
+        post(id: $id) {
           id
           title
         }
@@ -37,39 +39,59 @@ RSpec.describe GraphQL::FragmentCache::Object::FieldClassPatch do
     GQL
   end
 
-  context "when cache_fragment option is true" do
-    let(:key) do
-      build_key(
-        schema,
-        path_cache_key: ["post(id:1)"],
-        selections_cache_key: {"post" => %w[id title]}
-      )
-    end
+  let!(:post) { Post.create(id: id, title: "option test") }
 
-    include_context "check used key"
+  # warmup cache
+  before { execute_query }
+
+  context "when cache_fragment option is true" do
+    it "returns cached fragment" do
+      post.title = "new option test"
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "option test"
+      })
+    end
   end
 
   context "when cache_fragment option contains key settings" do
     let(:cache_fragment) { {query_cache_key: "custom"} }
 
-    let(:key) { build_key(schema, query_cache_key: cache_fragment[:query_cache_key]) }
+    it "returns the same cache fragment for a different query when query_cache_key is constant" do
+      variables[:id] = 2
 
-    include_context "check used key"
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "option test"
+      })
+    end
   end
 
-  context "when :ex is passed" do
+  context "when :expires_in is passed" do
     let(:cache_fragment) { {expires_in: 60} }
 
-    let(:key) do
-      build_key(
-        schema,
-        path_cache_key: ["post(id:1)"],
-        selections_cache_key: {"post" => %w[id title]}
-      )
+    it "invalidate cache after the specifed time" do
+      post.title = "new option test"
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "option test"
+      })
+
+      Timecop.travel(Time.now + 61)
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option test"
+      })
+
+      post.title = "yet another expiration?"
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option test"
+      })
     end
-
-    let(:schema) { build_schema(query_type) }
-
-    include_context "check used key", expires_in: 60
   end
 end

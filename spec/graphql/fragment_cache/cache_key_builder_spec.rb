@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "json"
-require "digest"
 
-RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
+describe GraphQL::FragmentCache::CacheKeyBuilder do
   let(:query_type) do
     Class.new(TestTypes::BaseType) do
       graphql_name "QueryType"
@@ -28,7 +26,7 @@ RSpec.describe GraphQL::FragmentCache::CacheKeyBuilder do
       end
 
       def post(id:)
-        TestModels::Post.find(id)
+        Post.find(id)
       end
     end
   end

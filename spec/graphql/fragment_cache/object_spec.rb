@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "json"
-require "digest"
 
-RSpec.describe GraphQL::FragmentCache::Object do
+describe GraphQL::FragmentCache::Object do
   let(:query_type) do
     Class.new(TestTypes::BaseType) do
       graphql_name "QueryType"
@@ -15,7 +13,7 @@ RSpec.describe GraphQL::FragmentCache::Object do
       end
 
       def post(id:, expires_in: nil)
-        cache_fragment(expires_in: expires_in) { TestModels::Post.find(id) }
+        cache_fragment(expires_in: expires_in) { Post.find(id) }
       end
     end
   end

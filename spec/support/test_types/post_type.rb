@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative "base_type"
+require_relative "user_type"
+
 module TestTypes
   class PostType < BaseType
     field :id, ID, null: false
