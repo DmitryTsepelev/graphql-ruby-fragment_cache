@@ -65,6 +65,10 @@ module GraphQL
         end
       end
 
+      def object_key(obj)
+        # TODO: implement me
+      end
+
       def traverse(lookahead)
         field_name = lookahead.field.name
         return field_name if lookahead.selections.empty?

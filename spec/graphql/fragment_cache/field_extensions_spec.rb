@@ -33,9 +33,11 @@ describe "cache_Fragment: option" do
     GQL
   end
 
-  let!(:post) { Post.create(id: id, title: "option test") }
+  let(:post) { Post.create(id: id, title: "option test") }
 
   before do
+    # prepare post
+    post
     # warmup cache
     execute_query
     # make object dirty
@@ -85,6 +87,111 @@ describe "cache_Fragment: option" do
       expect(execute_query.dig("data", "post")).to eq({
         "id" => "1",
         "title" => "new option test"
+      })
+    end
+  end
+
+  xcontext "with context_key" do
+    let(:user) { CacheableUser.new(id: 1, name: "admin") }
+
+    context "with single context_key" do
+      let(:cache_fragment) { {context_key: :user} }
+      let(:context) { {user: user} }
+
+      it "returns invalidates cached fragment when context is changed" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "option test"
+        })
+
+        context[:user] = CacheableUser.new(id: 2, name: "another-admin")
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new option test"
+        })
+      end
+    end
+
+    context "with multiple context keys" do
+      let(:cache_fragment) { {context_key: [:user, :account_id]} }
+      let(:context) { {user: user, account_id: 26} }
+
+      it "returns invalidates cached fragment when either of contexts is changed" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "option test"
+        })
+
+        context[:user] = CacheableUser.new(id: 2, name: "another-admin")
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new option test"
+        })
+
+        post.title = "yet another test"
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new option test"
+        })
+
+        context[:account_id] = 27
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "yet another test"
+        })
+      end
+    end
+  end
+
+  xcontext "with object_key: true" do
+    let(:schema) do
+      cache_fragment_options = cache_fragment
+
+      post_type = Class.new(Types::Post) {
+        field :cached_author, Types::User, null: true, cache_fragment: cache_fragment_options
+      }
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, post_type, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+          }
+        )
+      end
+    end
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!){
+          post(id: $id) {
+            id
+            title
+            cachedAuthor {
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:post) { Post.create(id: id, title: "option test", author: User.new(id: 22, name: "Jack")) }
+
+    let(:cache_fragment) { {object_key: true} }
+
+    it "returns a new version when post.cache_key has changed" do
+      post.author.name = "John"
+      expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
+        "id" => "22",
+        "name" => "Jack"
+      })
+
+      # change post title to change the post.cache_key
+      post.title = "new option"
+      expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
+        "id" => "22",
+        "name" => "John"
       })
     end
   end

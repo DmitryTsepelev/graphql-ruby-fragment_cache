@@ -148,11 +148,11 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   end
 
   xcontext "when array is passed as object" do
-    let(:object) { [post, :custom] }
+    let(:object) { [post, :custom, 99] }
 
     let(:key) do
       build_key(
-        cache_key: "#{post.cache_key}/custom",
+        cache_key: "#{post.cache_key}/custom/99",
         schema_cache_key: schema_cache_key,
         path_cache_key: ["cachedPost(id:#{id})"],
         selections_cache_key: {"cachedPost" => %w[id title]}

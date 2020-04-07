@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "graphql/fragment_cache/rails/cache_key_builder"
+
 module GraphQL
   module FragmentCache
     class Railtie < ::Rails::Railtie # :nodoc:

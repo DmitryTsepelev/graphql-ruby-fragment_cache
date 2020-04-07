@@ -9,3 +9,9 @@ class User
     @name = name
   end
 end
+
+class CacheableUser < User
+  def cache_key
+    "#{id}/#{name}"
+  end
+end
