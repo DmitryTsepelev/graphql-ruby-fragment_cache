@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-require "break"
+begin
+  require "break"
+rescue LoadError
+end
+
 require "graphql-fragment_cache"
 
 require "timecop"
