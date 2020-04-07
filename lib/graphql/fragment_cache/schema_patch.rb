@@ -16,10 +16,6 @@ module GraphQL
       def schema_cache_key
         @schema_cache_key ||= Digest::SHA1.hexdigest(to_definition)
       end
-
-      def configure_fragment_cache_store(store, options)
-        @fragment_cache_store = StoreAdapters.build(store, options)
-      end
     end
   end
 end

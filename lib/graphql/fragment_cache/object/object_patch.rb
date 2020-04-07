@@ -19,7 +19,7 @@ module GraphQL
         private
 
         def read_cached_value(fragment)
-          cached = context.schema.fragment_cache_store.get(fragment.cache_key)
+          cached = FragmentCache.cache_store.read(fragment.cache_key)
           raw_value(cached) if cached
         end
 

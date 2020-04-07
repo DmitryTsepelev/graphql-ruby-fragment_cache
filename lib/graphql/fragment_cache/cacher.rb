@@ -11,7 +11,7 @@ module GraphQL
       def perform
         fragments.each do |fragment|
           value = fragment.resolve(final_value)
-          cache_store.set(fragment.cache_key, value, expires_in: fragment.expires_in)
+          FragmentCache.cache_store.write(fragment.cache_key, value, expires_in: fragment.expires_in)
         end
       end
 
@@ -23,10 +23,6 @@ module GraphQL
 
       def fragments
         @fragments ||= @query.context.namespace(:fragment_cache)[:fragments] || []
-      end
-
-      def cache_store
-        @cache_store ||= @query.schema.fragment_cache_store
       end
     end
   end

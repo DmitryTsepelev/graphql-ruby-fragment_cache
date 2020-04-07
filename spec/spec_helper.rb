@@ -26,6 +26,7 @@ RSpec.configure do |config|
   config.include_context "graphql"
 
   config.after do
+    GraphQL::FragmentCache.cache_store.clear if GraphQL::FragmentCache.cache_store.respond_to?(:clear)
     Post.delete_all
     Timecop.return
   end
