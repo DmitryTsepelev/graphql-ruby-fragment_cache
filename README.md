@@ -225,7 +225,7 @@ Or, in Rails:
 # config/application.rb (or config/environments/<environment>.rb)
 Rails.application.configure do |config|
   # arguments and options are the same as for `config.cache_store`
-  config.graphql_fragment_cache.cache_store = :redis_cache_store
+  config.graphql_fragment_cache.store = :redis_cache_store
 end
 ```
 

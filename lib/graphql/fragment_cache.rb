@@ -9,6 +9,7 @@ require "graphql/fragment_cache/object"
 require "graphql/fragment_cache/schema_patch"
 require "graphql/fragment_cache/memory_store"
 require "graphql/fragment_cache/version"
+require "graphql/fragment_cache/railtie" if defined?(Rails::Railtie)
 
 module GraphQL
   # Plugin definition
