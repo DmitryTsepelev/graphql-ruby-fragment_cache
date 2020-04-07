@@ -2,9 +2,9 @@
 
 module GraphQL
   module FragmentCache
-    module Object
-      # Patches field class to add caching extension
-      module FieldClassPatch
+    # Wraps resolver with cache method
+    class FieldExtension < GraphQL::Schema::FieldExtension
+      module Patch
         def initialize(*args, **kwargs, &block)
           cache_fragment = kwargs.delete(:cache_fragment)
 
@@ -20,11 +20,19 @@ module GraphQL
 
         def build_extension(options)
           if options.is_a?(Hash)
-            {CacheFragmentExtension => options}
+            {FieldExtension => options}
           else
-            CacheFragmentExtension
+            FieldExtension
           end
         end
+      end
+
+      def initialize(options:, **_rest)
+        @cache_options = options || {}
+      end
+
+      def resolve(object:, arguments:, **_options)
+        object.cache_fragment(@cache_options) { yield(object, arguments) }
       end
     end
   end

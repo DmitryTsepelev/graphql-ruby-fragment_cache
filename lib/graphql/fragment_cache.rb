@@ -3,12 +3,14 @@
 require "graphql"
 require "ruby-next"
 
-require "graphql/fragment_cache/cache_fragment_extension"
-require "graphql/fragment_cache/cache_instrumentation"
-require "graphql/fragment_cache/fragment"
-require "graphql/fragment_cache/object"
+require "graphql/fragment_cache/ext/context_fragments"
+
 require "graphql/fragment_cache/schema_patch"
+require "graphql/fragment_cache/object"
+require "graphql/fragment_cache/instrumentation"
+
 require "graphql/fragment_cache/memory_store"
+
 require "graphql/fragment_cache/version"
 require "graphql/fragment_cache/railtie" if defined?(Rails::Railtie)
 
@@ -21,7 +23,7 @@ module GraphQL
       def use(schema_defn, options = {})
         verify_interpreter!(schema_defn)
 
-        schema_defn.instrument(:query, CacheInstrumentation)
+        schema_defn.instrument(:query, Instrumentation)
         schema_defn.extend(SchemaPatch)
       end
 
