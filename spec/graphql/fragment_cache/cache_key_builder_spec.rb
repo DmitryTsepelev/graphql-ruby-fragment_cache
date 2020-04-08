@@ -82,13 +82,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     specify { is_expected.to eq "schema_key/post(id:#{id})/cachedAuthor[id.name]" }
   end
 
-  xcontext "when object is passed and responds to #cache_key" do
+  context "when object is passed and responds to #cache_key" do
     let(:object) { post }
 
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}" }
   end
 
-  xcontext "when object is passed and responds to #graphql_cache_key" do
+  context "when object is passed and responds to #graphql_cache_key" do
     before do
       post.singleton_class.define_method(:graphql_cache_key) { "super-cache" }
     end
@@ -98,15 +98,15 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/super-cache" }
   end
 
-  xcontext "when object is passed deosn't respond to #cache_key neither #graphql_cache_key" do
+  context "when object is passed deosn't respond to #cache_key neither #graphql_cache_key" do
     let(:object) { post.author }
 
-    it "raises ArgumentError" do
-      expect { subject }.to raise_error(ArgumentError)
+    it "fallbacks to #to_s" do
+      is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.author}"
     end
   end
 
-  xcontext "when array is passed as object" do
+  context "when array is passed as object" do
     let(:object) { [post, :custom, 99] }
 
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}/custom/99" }

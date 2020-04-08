@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-xdescribe GraphQL::FragmentCache::CacheKeyBuilder do
+describe GraphQL::FragmentCache::CacheKeyBuilder do
   let(:schema) { TestSchema }
 
   let(:query) do
@@ -11,6 +11,10 @@ xdescribe GraphQL::FragmentCache::CacheKeyBuilder do
         cachedPost(id: $id) {
           id
           title
+          author {
+            id
+            name
+          }
         }
       }
     GQL
@@ -34,14 +38,7 @@ xdescribe GraphQL::FragmentCache::CacheKeyBuilder do
 
   it "uses Cache.expand_cache_key" do
     allow(ActiveSupport::Cache).to receive(:expand_cache_key).with(object) { "as:cache:key" }
-    expected_key =
-      build_key(
-        cache_key: "as:cache:key",
-        schema_cache_key: schema_cache_key,
-        path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: {"cachedPost" => ["id", "title", "author" => %w[id name]]}
-      )
 
-    is_expected.to eq expected_key
+    is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]/as:cache:key"
   end
 end

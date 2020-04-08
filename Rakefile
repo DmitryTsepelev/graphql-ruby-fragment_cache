@@ -5,4 +5,10 @@ require "rubocop/rake_task"
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
 
-task default: [:rubocop, :spec]
+desc "Run specs without Rails"
+RSpec::Core::RakeTask.new("spec:norails") do |task|
+  task.exclude_pattern = "**/rails/**"
+  task.verbose = false
+end
+
+task default: [:rubocop, :spec, "spec:norails"]

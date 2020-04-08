@@ -5,6 +5,8 @@ require "digest"
 
 module GraphQL
   module FragmentCache
+    using Ext
+
     using(Module.new {
       refine Array do
         def to_selections_key
@@ -35,7 +37,10 @@ module GraphQL
       end
 
       def build
-        Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}")
+        Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}").then do |base_key|
+          next base_key unless object
+          "#{base_key}/#{object_key(object)}"
+        end
       end
 
       private
@@ -69,7 +74,7 @@ module GraphQL
       end
 
       def object_key(obj)
-        # TODO: implement me
+        obj._graphql_cache_key
       end
     end
   end

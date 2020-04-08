@@ -4,6 +4,7 @@ require "graphql"
 require "ruby-next"
 
 require "graphql/fragment_cache/ext/context_fragments"
+require "graphql/fragment_cache/ext/graphql_cache_key"
 
 require "graphql/fragment_cache/schema_patch"
 require "graphql/fragment_cache/object"

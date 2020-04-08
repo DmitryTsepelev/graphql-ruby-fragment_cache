@@ -42,4 +42,7 @@ jobs:
         bundle update
     - name: Run RSpec
       run: |
-        bundle exec rspec
+        bundle exec rake spec
+    - name: Run RSpec without Rails
+      run: |
+        bundle exec rake spec:norails
