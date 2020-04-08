@@ -93,7 +93,7 @@ schema_cache_key = GraphqSchema.schema_cache_key
 path_cache_key = "post(id:1)/cachedAuthor"
 selections_cache_key = "[#{%w[id name].join(".")}]"
 
-query_cache_key = Digest::SHA1.hexdigest("#{path_cache_key}/#{selections_cache_key}")
+query_cache_key = Digest::SHA1.hexdigest("#{path_cache_key}#{selections_cache_key}")
 
 cache_key = "#{schema_cache_key}/#{query_cache_key}"
 ```

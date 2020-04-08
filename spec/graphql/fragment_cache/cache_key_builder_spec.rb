@@ -38,15 +38,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     allow(Digest::SHA1).to receive(:hexdigest) { |val| val }
   end
 
-  let(:key) do
-    build_key(
-      schema_cache_key: schema_cache_key,
-      path_cache_key: ["cachedPost(id:#{id})"],
-      selections_cache_key: {"cachedPost" => %w[id title]}
-    )
-  end
-
-  specify { is_expected.to eq key }
+  specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]" }
 
   context "when alias is used"
 
@@ -66,15 +58,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    let(:key) do
-      build_key(
-        schema_cache_key: schema_cache_key,
-        path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: {"cachedPost" => ["id", "title", "author" => %w[id name]]}
-      )
-    end
-
-    specify { is_expected.to eq key }
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
   end
 
   context "when cached fragment is nested" do
@@ -95,29 +79,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    let(:key) do
-      build_key(
-        schema_cache_key: schema_cache_key,
-        path_cache_key: ["post(id:#{id})", "cachedAuthor"],
-        selections_cache_key: {"cachedAuthor" => %w[id name]}
-      )
-    end
-
-    specify { is_expected.to eq key }
+    specify { is_expected.to eq "schema_key/post(id:#{id})/cachedAuthor[id.name]" }
   end
 
   xcontext "when object is passed and responds to #cache_key" do
     let(:object) { post }
 
-    let(:key) do
-      build_key(
-        schema_cache_key: schema_cache_key,
-        path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: {"cachedPost" => %w[id title]}
-      )
-    end
-
-    specify { is_expected.to eq key }
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}" }
   end
 
   xcontext "when object is passed and responds to #graphql_cache_key" do
@@ -127,16 +95,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     let(:object) { post }
 
-    let(:key) do
-      build_key(
-        cache_key: "super-cache",
-        schema_cache_key: schema_cache_key,
-        path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: {"cachedPost" => %w[id title]}
-      )
-    end
-
-    specify { is_expected.to eq key }
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/super-cache" }
   end
 
   xcontext "when object is passed deosn't respond to #cache_key neither #graphql_cache_key" do
@@ -150,15 +109,6 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   xcontext "when array is passed as object" do
     let(:object) { [post, :custom, 99] }
 
-    let(:key) do
-      build_key(
-        cache_key: "#{post.cache_key}/custom/99",
-        schema_cache_key: schema_cache_key,
-        path_cache_key: ["cachedPost(id:#{id})"],
-        selections_cache_key: {"cachedPost" => %w[id title]}
-      )
-    end
-
-    specify { is_expected.to eq key }
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}/custom/99" }
   end
 end
