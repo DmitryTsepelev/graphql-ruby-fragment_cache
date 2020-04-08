@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "break"
+gem "pry-byebug", platform: :mri
 
 eval_gemfile "gemfiles/rubocop.gemfile"
 
