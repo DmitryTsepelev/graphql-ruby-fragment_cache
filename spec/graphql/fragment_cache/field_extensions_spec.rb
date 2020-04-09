@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe "cache_Fragment: option" do
+describe "cache_fragment: option" do
   let(:cache_fragment) { true }
 
   let(:schema) do
@@ -91,7 +91,7 @@ describe "cache_Fragment: option" do
     end
   end
 
-  xcontext "with context_key" do
+  context "with context_key" do
     let(:user) { CacheableUser.new(id: 1, name: "admin") }
 
     context "with single context_key" do

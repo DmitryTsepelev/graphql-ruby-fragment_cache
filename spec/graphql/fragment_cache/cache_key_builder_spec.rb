@@ -27,7 +27,8 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   let(:post) { Post.find(42) }
 
   let(:object) { nil }
-  let(:query_obj) { GraphQL::Query.new(schema, query, variables: variables) }
+  let(:context) { {} }
+  let(:query_obj) { GraphQL::Query.new(schema, query, variables: variables, context: context) }
 
   subject { described_class.call(object: object, query: query_obj, path: path) }
 
@@ -110,5 +111,28 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     let(:object) { [post, :custom, 99] }
 
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}/custom/99" }
+  end
+
+  context "when context_key is passed" do
+    let(:user) { CacheableUser.new(id: 33, name: "John") }
+    let(:context) { {user: user} }
+    let(:context_key) { :user }
+    subject { described_class.call(object: object, query: query_obj, path: path, context_key: context_key) }
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{user.cache_key}" }
+
+    context "when context_key is array" do
+      let(:app_version) { 3 }
+      let(:context) { {user: user, app_version: app_version} }
+      let(:context_key) { [:user, :app_version] }
+
+      specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{user.cache_key}/#{app_version}" }
+
+      context "when context value contains nil" do
+        let(:user) { nil }
+
+        specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]//#{app_version}" }
+      end
+    end
   end
 end

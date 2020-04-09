@@ -38,12 +38,21 @@ module GraphQL
 
       def build
         Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}").then do |base_key|
-          next base_key unless object
-          "#{base_key}/#{object_key(object)}"
+          next base_key unless extended_key
+          "#{base_key}/#{extended_key}"
         end
       end
 
       private
+
+      def extended_key
+        @extended_key ||=
+          if @options[:context_key]
+            Array(@options[:context_key]).map { |key| object_key(query.context[key]) }.join("/")
+          elsif object
+            object_key(object)
+          end
+      end
 
       def schema_cache_key
         @options.fetch(:schema_cache_key, schema.schema_cache_key)
