@@ -143,12 +143,18 @@ describe "cache_fragment: option" do
     end
   end
 
-  xcontext "with object_key: true" do
+  context "with object_key: true" do
     let(:schema) do
       cache_fragment_options = cache_fragment
 
       post_type = Class.new(Types::Post) {
+        graphql_name "PostWithCachedAuthor"
+
         field :cached_author, Types::User, null: true, cache_fragment: cache_fragment_options
+
+        def cached_author
+          object.author
+        end
       }
 
       build_schema do
@@ -169,6 +175,7 @@ describe "cache_fragment: option" do
             id
             title
             cachedAuthor {
+              id
               name
             }
           }
@@ -181,13 +188,15 @@ describe "cache_fragment: option" do
     let(:cache_fragment) { {object_key: true} }
 
     it "returns a new version when post.cache_key has changed" do
+      # re-warmup cache
+      execute_query
+
       post.author.name = "John"
       expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
         "id" => "22",
         "name" => "Jack"
       })
 
-      # change post title to change the post.cache_key
       post.title = "new option"
       expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
         "id" => "22",
