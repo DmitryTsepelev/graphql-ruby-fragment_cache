@@ -29,10 +29,19 @@ module GraphQL
 
       def initialize(options:, **_rest)
         @cache_options = options || {}
+
+        @context_key = @cache_options.delete(:context_key)
+        @object_key = @cache_options.delete(:object_key)
       end
 
       def resolve(object:, arguments:, **_options)
-        object.cache_fragment(@cache_options) { yield(object, arguments) }
+        object_for_key = if @context_key
+          Array(@context_key).map { |key| object.context[key] }
+        elsif @object_key
+          object.object
+        end
+
+        object.cache_fragment(@cache_options.merge(object: object_for_key)) { yield(object, arguments) }
       end
     end
   end
