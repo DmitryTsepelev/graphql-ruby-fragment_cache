@@ -5,6 +5,9 @@ begin
 rescue LoadError
 end
 
+ENV["RUBY_NEXT_TRANSPILE_MODE"] = "rewrite"
+require "ruby-next/language/runtime" unless ENV["CI"]
+
 require "graphql-fragment_cache"
 
 require "timecop"

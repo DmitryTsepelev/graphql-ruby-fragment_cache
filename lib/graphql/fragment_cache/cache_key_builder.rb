@@ -20,6 +20,8 @@ module GraphQL
 
     # Builds cache key for fragment
     class CacheKeyBuilder
+      using RubyNext
+
       class << self
         def call(**options)
           new(**options).build
@@ -68,7 +70,7 @@ module GraphQL
 
           next field_name if lookahead.arguments.empty?
 
-          args = lookahead.arguments.map { |k, v| "#{k}:#{v}" }.sort.join(",")
+          args = lookahead.arguments.map { "#{_1}:#{_2}" }.sort.join(",")
           "#{field_name}(#{args})"
         }.join("/")
       end

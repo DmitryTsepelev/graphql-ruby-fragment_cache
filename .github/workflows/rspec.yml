@@ -10,6 +10,9 @@ jobs:
   rspec:
     runs-on: ubuntu-latest
 
+    env:
+      CI: true
+
     strategy:
       fail-fast: false
       matrix:
@@ -40,6 +43,8 @@ jobs:
         bundle config --global gemfile ${{ matrix.gemfile }}
         bundle install
         bundle update
+    - name: Run Ruby Next
+      run: bundle exec rake nextify
     - name: Run RSpec
       run: |
         bundle exec rake spec

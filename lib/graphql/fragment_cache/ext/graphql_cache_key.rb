@@ -23,7 +23,7 @@ module GraphQL
 
       refine Array do
         def _graphql_cache_key
-          map { |el| el._graphql_cache_key }.join("/")
+          map { _1._graphql_cache_key }.join("/")
         end
       end
 

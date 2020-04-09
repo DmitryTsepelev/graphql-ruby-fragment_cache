@@ -12,7 +12,7 @@ module GraphQL
 
           final_value = query.context.namespace(:interpreter)[:runtime].final_value
 
-          query.context.fragments.each { |fragment| fragment.persist(final_value) }
+          query.context.fragments.each { _1.persist(final_value) }
         end
       end
     end
