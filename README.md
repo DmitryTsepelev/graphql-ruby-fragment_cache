@@ -153,13 +153,27 @@ cache_fragment(post) { post }
 When using `cache_fragment:` option, it's only possible to use the resolved value as a cache key by setting:
 
 ```ruby
-field :post, PostType, null: true, cache_fragment: {object_key: true} do
+field :post, PostType, null: true, cache_fragment: {cache_key: :object} do
   argument :id, ID, required: true
 end
 
 # this is equal to
 def post(id:)
   cache_fragment(Post.find(id))
+end
+```
+
+Also, you can pass `:value` to the `cache_key:` argument to use the returned value to build a key:
+
+```ruby
+field :post, PostType, null: true, cache_fragment: {cache_key: :value} do
+  argument :id, ID, required: true
+end
+
+# this is equal to
+def post(id:)
+  post = Post.find(id)
+  cache_fragment(post) { post }
 end
 ```
 

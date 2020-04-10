@@ -143,7 +143,7 @@ describe "cache_fragment: option" do
     end
   end
 
-  context "with object_key: true" do
+  context "with cache_key: :object" do
     let(:schema) do
       cache_fragment_options = cache_fragment
 
@@ -185,9 +185,9 @@ describe "cache_fragment: option" do
 
     let(:post) { Post.create(id: id, title: "option test", author: User.new(id: 22, name: "Jack")) }
 
-    let(:cache_fragment) { {object_key: true} }
+    let(:cache_fragment) { {cache_key: :object} }
 
-    it "returns a new version when post.cache_key has changed" do
+    it "returns a new version of author when post.cache_key has changed" do
       # re-warmup cache
       execute_query
 
@@ -201,6 +201,50 @@ describe "cache_fragment: option" do
       expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
         "id" => "22",
         "name" => "John"
+      })
+    end
+  end
+
+  context "with cache_key: :value" do
+    let(:schema) do
+      cache_fragment_options = cache_fragment
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true, cache_fragment: cache_fragment_options do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+          }
+        )
+      end
+    end
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!){
+          post(id: $id) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let(:post) { Post.create(id: id, title: "option test") }
+
+    let(:cache_fragment) { {cache_key: :value} }
+
+    it "returns a new version of post when post.cache_key has changed" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option test"
+      })
+
+      post.title = "new option"
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option"
       })
     end
   end
