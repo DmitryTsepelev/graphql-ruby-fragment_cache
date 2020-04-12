@@ -3,6 +3,8 @@
 require "json"
 require "digest"
 
+using RubyNext
+
 module GraphQL
   module FragmentCache
     using Ext
