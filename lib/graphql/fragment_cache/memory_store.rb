@@ -6,6 +6,8 @@ module GraphQL
   module FragmentCache
     # Memory adapter for storing cached fragments
     class MemoryStore
+      using RubyNext
+
       class Entry < Struct.new(:value, :expires_at, keyword_init: true)
         def expired?
           expires_at && expires_at < Time.now

@@ -1,12 +1,13 @@
 require:
   - standard/cop/semantic_blocks
   - rubocop-md
+  - ruby-next/rubocop
 
 inherit_gem:
   standard: config/base.yml
 
 AllCops:
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.7
   Include:
     - 'lib/**/*.rb'
     - 'spec/**/*.rb'
@@ -18,6 +19,7 @@ AllCops:
     - 'Rakefile'
     - 'Gemfile'
     - '*.gemspec'
+    - 'lib/.rbnext/**/*'
 
 Lint/DuplicateMethods:
   Exclude:

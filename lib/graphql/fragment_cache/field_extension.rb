@@ -29,10 +29,25 @@ module GraphQL
 
       def initialize(options:, **_rest)
         @cache_options = options || {}
+
+        @context_key = @cache_options.delete(:context_key)
+        @cache_key = @cache_options.delete(:cache_key)
       end
 
       def resolve(object:, arguments:, **_options)
-        object.cache_fragment(@cache_options) { yield(object, arguments) }
+        resolved_value = yield(object, arguments)
+
+        object_for_key = if @context_key
+          Array(@context_key).map { |key| object.context[key] }
+        elsif @cache_key == :object
+          object.object
+        elsif @cache_key == :value
+          resolved_value
+        end
+
+        cache_fragment_options = @cache_options.merge(object: object_for_key)
+
+        object.cache_fragment(cache_fragment_options) { resolved_value }
       end
     end
   end

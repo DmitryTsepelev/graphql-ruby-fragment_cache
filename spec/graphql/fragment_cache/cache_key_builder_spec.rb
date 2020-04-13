@@ -27,7 +27,8 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   let(:post) { Post.find(42) }
 
   let(:object) { nil }
-  let(:query_obj) { GraphQL::Query.new(schema, query, variables: variables) }
+  let(:context) { {} }
+  let(:query_obj) { GraphQL::Query.new(schema, query, variables: variables, context: context) }
 
   subject { described_class.call(object: object, query: query_obj, path: path) }
 
