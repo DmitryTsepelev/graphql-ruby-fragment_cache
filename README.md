@@ -1,8 +1,6 @@
 # GraphQL::FragmentCache ![CI](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/workflows/CI/badge.svg?branch=master)
 
-🚧**UNDER CONSTUCTION**🚧
-
-`GraphQL::FragmentCache` powers up [graphql-ruby](https://graphql-ruby.org) with the ability to cache _fragments_ of the response: you can mark any field as cached and it will never be resolved again (at least, while cache is valid). For instance, the following code caches `title` for each post:
+`GraphQL::FragmentCache` powers up [graphql-ruby](https://graphql-ruby.org) with the ability to cache response _fragments_: you can mark any field as cached and it will never be resolved again (at least, while cache is valid). For instance, the following code caches `title` for each post:
 
 ```ruby
 class PostType < BaseObject
@@ -19,7 +17,7 @@ end
 
 ## Getting started
 
-Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class (make sure to turn interpreter mode on!):
+Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class (make sure to turn interpreter mode on with AST analysis!):
 
 ```ruby
 class GraphqSchema < GraphQL::Schema
@@ -63,73 +61,16 @@ class QueryType < BaseObject
 end
 ```
 
-## Cache storage
+## Cache key generation
 
-Cache is stored in memory by default. You can easily switch to Redis (make sure you have [redis](https://github.com/redis/redis-rb) gem installed):
+Cache keys consist of implicit and explicit (provided by user) parts.
 
-```ruby
-class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
+### Implicit cache key
 
-  use GraphQL::FragmentCache,
-      store: :redis,
-      redis_client: { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
-  # or
-  use GraphQL::FragmentCache,
-      store: :redis,
-      redis_client: Redis.new(url: "redis://127.0.0.2:2214/7")
-  # or
-  use GraphQL::FragmentCache,
-      store: :redis,
-      redis_client: ConnectionPool.new { Redis.new(url: "redis://127.0.0.2:2214/7") }
+Implicit part of a cache key (its prefix) contains the information about the schema and the current query. It includes:
 
-  query QueryType
-end
-```
-
-You can also override default expiration time and namespace:
-
-```ruby
-class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-
-  use GraphQL::FragmentCache,
-      store: :redis,
-      expiration: 172800, # optional, default is 24 hours
-      namespace: "my-custom-namespace", # optional, default is "graphql-fragment-cache"
-      redis_client: { redis_host: "127.0.0.2", redis_port: "2214", redis_db_name: "7" }
-
-  query QueryType
-end
-```
-
-When Redis storage is configured you can pass `ex` parameter to `cache_fragment`:
-
-```ruby
-class PostType < BaseObject
-  field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { expires_in: 2.hours.to_i }
-end
-
-class QueryType < BaseObject
-  field :post, PostType, null: true do
-    argument :id, ID, required: true
-  end
-
-  def post(id:)
-    cache_fragment(expires_in: 2.hours.to_i) { Post.find(id) }
-  end
-end
-```
-
-## Key building
-
-Keys are generated automatically. Key is a hexdigest of the payload, while payload includes the following:
-
-- hexdigest of schema definition (to make sure cache is cleared when schema changes)
-- query fingerprint, which consists of path to the field with arguments and nested selections
+- Hex gsdigest of the schema definition (to make sure cache is cleared when the schema changes).
+- The current query fingerprint consisting of a _path_ to the field, arguments information and the selections set.
 
 Let's take a look at the example:
 
@@ -147,19 +88,17 @@ query = <<~GQL
   }
 GQL
 
+schema_cache_key = GraphqSchema.schema_cache_key
 
-payload = {
-  schema_cache_key: GraphqSchema.schema_cache_key,
-  query_cache_key: {
-    path_cache_key: ["post(id:1)", "cachedAuthor"],
-    selections_cache_key: { "cachedAuthor" => %w[id name] }
-  },
-}
+path_cache_key = "post(id:1)/cachedAuthor"
+selections_cache_key = "[#{%w[id name].join(".")}]"
 
-key = Digest::SHA1.hexdigest(payload.to_json)
+query_cache_key = Digest::SHA1.hexdigest("#{path_cache_key}#{selections_cache_key}")
+
+cache_key = "#{schema_cache_key}/#{query_cache_key}"
 ```
 
-You can override `fragment_cache_namespace`, `schema_cache_key` or `query_cache_key` by passing parameters to the `cache_fragment` calls:
+You can override `schema_cache_key` or `query_cache_key` by passing parameters to the `cache_fragment` calls:
 
 ```ruby
 class QueryType < BaseObject
@@ -173,58 +112,147 @@ class QueryType < BaseObject
 end
 ```
 
-Same for the short version:
+Same for the option:
 
 ```ruby
 class PostType < BaseObject
   field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { query_cache_key: "post_title" }
+  field :title, String, null: false, cache_fragment: {query_cache_key: "post_title"}
 end
 ```
 
-Some queries are _context–dependent_: the same query will produce different results depending on a context. For instance, imagine a query that allows to fetch some information about current user:
+### User-provided cache key
+
+In most cases you want your cache key to depend on the resolved object (say, `ActiveRecord` model). You can do that by passing an argument to the `#cache_fragment` method in a similar way to Rails views [`#cache` method](https://guides.rubyonrails.org/caching_with_rails.html#fragment-caching):
+
+```ruby
+def post(id:)
+  post = Post.find(id)
+  cache_fragment(post) { post }
+end
+```
+
+You can pass arrays as well to build a compound cache key:
+
+```ruby
+def post(id:)
+  post = Post.find(id)
+  cache_fragment([post, current_account]) { post }
+end
+```
+
+You can omit the block if its return value is the same as the cached object:
+
+```ruby
+# the following line
+cache_fragment(post)
+# is the same as
+cache_fragment(post) { post }
+```
+
+When using `cache_fragment:` option, it's only possible to use the resolved value as a cache key by setting:
+
+```ruby
+field :post, PostType, null: true, cache_fragment: {cache_key: :object} do
+  argument :id, ID, required: true
+end
+
+# this is equal to
+def post(id:)
+  cache_fragment(Post.find(id))
+end
+```
+
+Also, you can pass `:value` to the `cache_key:` argument to use the returned value to build a key:
+
+```ruby
+field :post, PostType, null: true, cache_fragment: {cache_key: :value} do
+  argument :id, ID, required: true
+end
+
+# this is equal to
+def post(id:)
+  post = Post.find(id)
+  cache_fragment(post) { post }
+end
+```
+
+The way cache key part is generated for the passed argument is the following:
+
+- Use `#graphql_cache_key` if implemented.
+- Use `#cache_key` (or `#cache_key_with_version` for modern Rails) if implemented.
+- Use `self.to_s` for _primitive_ types (strings, symbols, numbers, booleans).
+- Raise `ArgumentError` if none of the above.
+
+### Context cache key
+
+By default, we do not take context into account when calculating cache keys. That's because caching is more efficient when it's _context-free_.
+
+However, if you want some fields to be cached per context, you can do that either by passing context objects directly to the `#cache_fragment` method (see above) or by adding a `context_key` option to `cache_fragment:`.
+
+For instance, imagine a query that allows the current user's social profiles:
 
 ```gql
 query {
-  user {
-    email
+  socialProfiles {
+    provider
+    id
   }
 }
 ```
 
-In order to represent context in the cache key we should tell the plugin what to look for:
+You can cache the result using the context (`context[:user]`) as a cache key:
 
 ```ruby
-class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
+class QueryType < BaseObject
+  field :social_profiles, [SocialProfileType], null: false, cache_fragment: {context_key: :user}
 
-  # we want to take :current_user_id from context
-  use GraphQL::FragmentCache, context_key: :current_user_id
-
-  query QueryType
+  def social_profiles
+    context[:user].social_profiles
+  end
 end
 ```
 
-You can use lambda if you need more control:
+This is equal to using `#cache_fragment` the following way:
 
 ```ruby
-class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
+class QueryType < BaseObject
+  field :social_profiles, [SocialProfileType], null: false
 
-  use GraphQL::FragmentCache, context_key: ->(context) { context[:current_user_id] }
-
-  query QueryType
+  def social_profiles
+    cache_fragment(context[:user]) { context[:user].social_profiles }
+  end
 end
 ```
 
-In order to include the context key to the cache key you should pass `:context_sensitive` option to `cache_fragment`:
+## Cache storage and options
+
+It's up to your to decide which caching engine to use, all you need is to configure the cache store:
+
+```ruby
+GraphQL::FragmentCache.cache_store = MyCacheStore.new
+```
+
+Or, in Rails:
+
+```ruby
+# config/application.rb (or config/environments/<environment>.rb)
+Rails.application.configure do |config|
+  # arguments and options are the same as for `config.cache_store`
+  config.graphql_fragment_cache.store = :redis_cache_store
+end
+```
+
+⚠️ Cache store must implement `#read(key)` and `#write(key, value, **options)` methods.
+
+The gem provides only in-memory store out-of-the-box (`GraphQL::FragmentCache::MemoryStore`). It's used by default.
+
+You can pass store-specific options to `#cache_fragment` or `cache_fragment:`. For example, to set expiration (assuming the store's `#write` method supports `expires_in` option):
 
 ```ruby
 class PostType < BaseObject
   field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { context_sensitive: true }
+  field :title, String, null: false, cache_fragment: {expires_in: 5.minutes}
 end
 
 class QueryType < BaseObject
@@ -233,21 +261,14 @@ class QueryType < BaseObject
   end
 
   def post(id:)
-    cache_fragment(context_sensitive: true) { Post.find(id) }
+    cache_fragment(expires_in: 5.minutes) { Post.find(id) }
   end
 end
 ```
 
-Of course, you can override `context_key` for any field you need:
+## Limitations
 
-```ruby
-class PostType < BaseObject
-  field :id, ID, null: false
-  field :title, String, null: false, cache_fragment: { context_key: "custom_context_key" }
-end
-```
-
-> **Heads up!** [Field aliases](https://spec.graphql.org/June2018/#sec-Field-Alias) are not currently supported (take a look at the failing spec [here](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/7))
+- [Field aliases](https://spec.graphql.org/June2018/#sec-Field-Alias) are not currently supported (take a look at the failing spec [here](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/7))
 
 ## Credits
 
@@ -255,7 +276,7 @@ Based on the original [gist](https://gist.github.com/palkan/faad9f6ff1db16fcdb1c
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache.
+Bug reports and pull requests are welcome on GitHub at [https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache).
 
 ## License
 

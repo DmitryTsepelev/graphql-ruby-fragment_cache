@@ -2,31 +2,18 @@
 
 module GraphQL
   module FragmentCache
+    using Ext
+
     # Saves resolved fragment values to cache store
-    class Cacher
-      def initialize(query)
-        @query = query
-      end
+    module Cacher
+      class << self
+        def call(query)
+          return unless query.context.fragments?
 
-      def perform
-        fragments.each do |fragment|
-          value = fragment.resolve(final_value)
-          cache_store.set(fragment.cache_key, value, expires_in: fragment.expires_in)
+          final_value = query.context.namespace(:interpreter)[:runtime].final_value
+
+          query.context.fragments.each { _1.persist(final_value) }
         end
-      end
-
-      private
-
-      def final_value
-        @final_value ||= @query.context.namespace(:interpreter)[:runtime].final_value
-      end
-
-      def fragments
-        @fragments ||= @query.context.namespace(:fragment_cache)[:fragments] || []
-      end
-
-      def cache_store
-        @cache_store ||= @query.schema.fragment_cache_store
       end
     end
   end

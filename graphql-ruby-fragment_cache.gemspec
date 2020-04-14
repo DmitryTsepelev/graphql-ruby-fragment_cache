@@ -1,38 +1,34 @@
-lib = File.expand_path("lib", __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "graphql/fragment_cache/version"
+# frozen_string_literal: true
+
+require_relative "lib/graphql/fragment_cache/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "graphql-fragment_cache"
-  spec.version       = GraphQL::FragmentCache::VERSION
-  spec.authors       = ["DmitryTsepelev"]
-  spec.email         = ["dmitry.a.tsepelev@gmail.com"]
+  spec.name = "graphql-fragment_cache"
+  spec.version = GraphQL::FragmentCache::VERSION
+  spec.authors = ["DmitryTsepelev"]
+  spec.email = ["dmitry.a.tsepelev@gmail.com"]
 
-  spec.summary       = "Fragment cache for graphql-ruby"
-  spec.description   = "Fragment cache for graphql-ruby"
-  spec.homepage      = "https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache"
-  spec.license       = "MIT"
+  spec.summary = "Fragment cache for graphql-ruby"
+  spec.description = "Fragment cache for graphql-ruby"
+  spec.homepage = "https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache"
+  spec.license = "MIT"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/CHANGELOG.md"
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
-    `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  end
-  spec.bindir        = "exe"
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + Dir.glob("bin/**/*") + %w[README.md LICENSE.txt CHANGELOG.md]
   spec.require_paths = ["lib"]
 
   spec.required_ruby_version = ">= 2.5"
 
   spec.add_dependency "graphql", ">= 1.10.3"
 
-  spec.add_development_dependency "rake", ">= 10.0"
+  spec.add_runtime_dependency "ruby-next-core", ">= 0.5.1"
+
+  spec.add_development_dependency 'combustion', '~> 1.1'
+  spec.add_development_dependency "rake", ">= 13.0"
   spec.add_development_dependency "rspec", "~> 3.9"
-  spec.add_development_dependency "rubocop", "0.75"
-  spec.add_development_dependency "redis"
-  spec.add_development_dependency "connection_pool"
+  spec.add_development_dependency "timecop"
+  spec.add_development_dependency "ruby-next", ">= 0.5"
 end
