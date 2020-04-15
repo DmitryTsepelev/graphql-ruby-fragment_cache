@@ -69,7 +69,14 @@ describe "#cache_fragment" do
     it "returns cached fragment" do
       expect(execute_query.dig("data", "post")).to eq({
         "id" => "1",
-        "title" => "object test"
+        "title" => "new object test"
+      })
+
+      post.id = 2
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new object test"
       })
     end
 
@@ -104,13 +111,27 @@ describe "#cache_fragment" do
     end
   end
 
-  xcontext "when block and object are passed" do
+  context "when block and object are passed" do
     let(:resolver) do
       ->(id:, expires_in:) do
-        cache_fragment(id, expires_in: expires_in) { Post.find(id) }
+        post_id = id
+        cache_fragment(id, expires_in: expires_in) { Post.find(post_id) }
       end
     end
 
-    # TODO: here will be test for passing object as a key
+    it "uses object as key and return block result" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "object test"
+      })
+
+      post.title = "new object title"
+
+      # it still return the cached data
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "object test"
+      })
+    end
   end
 end
