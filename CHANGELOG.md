@@ -2,6 +2,10 @@
 
 ## master
 
+## 0.1.1 (2020-04-15)
+
+- Fix using passed object as a cache key ([@palkan][])
+
 ## 0.1.0 (2020-04-14)
 
 - Initial version ([@DmitryTsepelev][], [@palkan][], [@ssnickolay][])
