@@ -24,8 +24,7 @@ class Post
     end
   end
 
-  attr_reader :id
-  attr_accessor :title, :author
+  attr_accessor :id, :title, :author
 
   def initialize(id:, title:, author: nil)
     @id = id
@@ -34,6 +33,6 @@ class Post
   end
 
   def cache_key
-    "#{id}-#{title.gsub(/\s/, "")}"
+    title.gsub(/\s/, "")
   end
 end
