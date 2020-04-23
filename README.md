@@ -61,6 +61,15 @@ class QueryType < BaseObject
 end
 ```
 
+If you use [connections](https://graphql-ruby.org/pagination/connection_concepts.html) and plan to cache them—please turn on [brand new](https://github.com/rmosolgo/graphql-ruby/blob/master/lib/graphql/pagination/connections.rb#L5) connections hierarchy in your schema:
+
+```ruby
+class GraphqSchema < GraphQL::Schema
+  # ...
+  use GraphQL::Pagination::Connections
+end
+```
+
 ## Cache key generation
 
 Cache keys consist of implicit and explicit (provided by user) parts.

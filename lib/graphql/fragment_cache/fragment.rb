@@ -6,7 +6,9 @@ module GraphQL
   module FragmentCache
     # Represents a single fragment to cache
     class Fragment
-      attr_reader :options, :path, :context
+      attr_reader :options, :path, :context, :raw_connection
+
+      attr_writer :raw_connection
 
       def initialize(context, **options)
         @context = context
@@ -19,7 +21,7 @@ module GraphQL
       end
 
       def persist(final_value)
-        value = resolve(final_value)
+        value = raw_connection || resolve(final_value)
         FragmentCache.cache_store.write(cache_key, value, **options)
       end
 
