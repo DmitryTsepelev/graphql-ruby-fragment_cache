@@ -51,6 +51,12 @@ describe "cache_fragment: option" do
         "title" => "option test"
       })
     end
+
+    it "not calls resolver method" do
+      allow(::Post).to receive(:find).and_call_original
+      execute_query
+      expect(::Post).not_to have_received(:find)
+    end
   end
 
   context "when cache_fragment option contains key settings" do
@@ -145,12 +151,10 @@ describe "cache_fragment: option" do
 
   context "with cache_key: :object" do
     let(:schema) do
-      cache_fragment_options = cache_fragment
-
       post_type = Class.new(Types::Post) {
         graphql_name "PostWithCachedAuthor"
 
-        field :cached_author, Types::User, null: true, cache_fragment: cache_fragment_options
+        field :cached_author, Types::User, null: true, cache_fragment: {cache_key: :object}
 
         def cached_author
           object.author
@@ -185,8 +189,6 @@ describe "cache_fragment: option" do
 
     let(:post) { Post.create(id: id, title: "option test", author: User.new(id: 22, name: "Jack")) }
 
-    let(:cache_fragment) { {cache_key: :object} }
-
     it "returns a new version of author when post.cache_key has changed" do
       # re-warmup cache
       execute_query
@@ -203,16 +205,20 @@ describe "cache_fragment: option" do
         "name" => "John"
       })
     end
+
+    it "calls resolver method" do
+      allow(::Post).to receive(:find).and_call_original
+      execute_query
+      expect(::Post).to have_received(:find).once
+    end
   end
 
   context "with cache_key: :value" do
     let(:schema) do
-      cache_fragment_options = cache_fragment
-
       build_schema do
         query(
           Class.new(Types::Query) {
-            field :post, Types::Post, null: true, cache_fragment: cache_fragment_options do
+            field :post, Types::Post, null: true, cache_fragment: {cache_key: :value} do
               argument :id, GraphQL::Types::ID, required: true
             end
           }
@@ -233,8 +239,6 @@ describe "cache_fragment: option" do
 
     let(:post) { Post.create(id: id, title: "option test") }
 
-    let(:cache_fragment) { {cache_key: :value} }
-
     it "returns a new version of post when post.cache_key has changed" do
       expect(execute_query.dig("data", "post")).to eq({
         "id" => "1",
@@ -246,6 +250,12 @@ describe "cache_fragment: option" do
         "id" => "1",
         "title" => "new option"
       })
+    end
+
+    it "calls resolver method" do
+      allow(::Post).to receive(:find).and_call_original
+      execute_query
+      expect(::Post).to have_received(:find).once
     end
   end
 end
