@@ -25,6 +25,16 @@ module Types
     end
   end
 
+  class PostInput < GraphQL::Schema::InputObject
+    argument :id, GraphQL::Types::ID, required: true
+    argument :int_arg, Integer, required: true
+  end
+
+  class ComplexPostInput < GraphQL::Schema::InputObject
+    argument :string_arg, String, required: true
+    argument :input_with_id, PostInput, required: true
+  end
+
   class Query < Base
     graphql_name "QueryType"
 
@@ -36,12 +46,28 @@ module Types
       argument :id, GraphQL::Types::ID, required: true
     end
 
+    field :cached_post_by_input, Post, null: true do
+      argument :input_with_id, PostInput, required: true
+    end
+
+    field :cached_post_by_complex_input, Post, null: true do
+      argument :complex_post_input, ComplexPostInput, required: true
+    end
+
     def post(id:)
       ::Post.find(id)
     end
 
     def cached_post(id:)
       cache_fragment { ::Post.find(id) }
+    end
+
+    def cached_post_by_input(input_with_id:)
+      cache_fragment { ::Post.find(input_with_id.id) }
+    end
+
+    def cached_post_by_complex_input(complex_post_input:)
+      cache_fragment { ::Post.find(complex_post_input.input_with_id.id) }
     end
   end
 end
