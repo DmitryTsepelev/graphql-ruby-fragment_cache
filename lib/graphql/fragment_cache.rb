@@ -12,7 +12,6 @@ require "graphql/fragment_cache/instrumentation"
 require "graphql/fragment_cache/memory_store"
 
 require "graphql/fragment_cache/version"
-require "graphql/fragment_cache/railtie" if defined?(Rails::Railtie)
 
 module GraphQL
   # Plugin definition
@@ -57,3 +56,5 @@ module GraphQL
     self.cache_store = MemoryStore.new
   end
 end
+
+require "graphql/fragment_cache/railtie" if defined?(Rails::Railtie)
