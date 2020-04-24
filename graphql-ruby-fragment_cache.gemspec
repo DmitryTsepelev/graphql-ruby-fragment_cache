@@ -30,5 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", ">= 13.0"
   spec.add_development_dependency "rspec", "~> 3.9"
   spec.add_development_dependency "timecop"
-  spec.add_development_dependency "ruby-next", ">= 0.5"
+  spec.add_development_dependency "ruby-next", ">= 0.6"
 end
