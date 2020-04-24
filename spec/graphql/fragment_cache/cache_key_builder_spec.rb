@@ -62,6 +62,52 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
   end
 
+  context "when argument is input" do
+    let(:query) do
+      <<~GQL
+        query GetPostByInput($inputWithId: PostInput!) {
+          cachedPostByInput(inputWithId: $inputWithId) {
+            id
+            title
+            author {
+              id
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:path) { ["cachedPostByInput"] }
+
+    let(:variables) { {inputWithId: {id: id, intArg: 42}} }
+
+    specify { is_expected.to eq "schema_key/cachedPostByInput(input_with_id:{id:#{id},int_arg:42})[id.title.author[id.name]]" }
+
+    context "when argument is complext input" do
+      let(:query) do
+        <<~GQL
+          query GetPostByComplexInput($complexPostInput: ComplexPostInput!) {
+            cachedPostByComplexInput(complexPostInput: $complexPostInput) {
+              id
+              title
+              author {
+                id
+                name
+              }
+            }
+          }
+        GQL
+      end
+
+      let(:path) { ["cachedPostByComplexInput"] }
+
+      let(:variables) { {complexPostInput: {stringArg: "woo", inputWithId: {id: id, intArg: 42}}} }
+
+      specify { is_expected.to eq "schema_key/cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id},int_arg:42},string_arg:woo})[id.title.author[id.name]]" }
+    end
+  end
+
   context "when cached fragment is nested" do
     let(:path) { ["post", "cachedAuthor"] }
 

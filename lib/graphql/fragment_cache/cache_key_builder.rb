@@ -72,9 +72,15 @@ module GraphQL
 
           next field_name if lookahead.arguments.empty?
 
-          args = lookahead.arguments.map { "#{_1}:#{_2}" }.sort.join(",")
+          args = lookahead.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
           "#{field_name}(#{args})"
         }.join("/")
+      end
+
+      def traverse_argument(argument)
+        return argument unless argument.is_a?(GraphQL::Schema::InputObject)
+
+        "{#{argument.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")}}"
       end
 
       def object_key(obj)
