@@ -269,6 +269,7 @@ end
 ## Limitations
 
 - [Field aliases](https://spec.graphql.org/June2018/#sec-Field-Alias) are not currently supported (take a look at the failing spec [here](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/7))
+- [Connections](https://graphql-ruby.org/relay/connections.html) support hasn't be implemented yet
 
 ## Credits
 
