@@ -60,28 +60,21 @@ module GraphQL
       def selections_cache_key
         current_root =
           path.reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
-        puts "selections_cache_key #{current_root.inspect}"
 
         current_root.selections.to_selections_key
       end
 
       def path_cache_key
-        # lookahead = query.lookahead
-        # puts "#{path.join("/")}(#{query.variables.to_h.map { "#{_1}:#{_2}" }.sort.join(",")})"
-        # path.map { |field_name|
-        #   lookahead = lookahead.selection(field_name)
-        #
-        #   next field_name if lookahead.arguments.empty?
-        #
-        #   # puts query.variables.to_h
-        #
-        #   arguments = query.context.namespace(:interpreter)[:current_arguments]
-        #   arguments_key = arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
-        #
-        #   "#{field_name}(#{arguments_key})"
-        # }.join("/")
+        lookahead = query.lookahead
 
-        "#{path.join("/")}(#{query.variables.to_h.map { "#{_1}:#{_2}" }.sort.join(",")})"
+        path.map { |field_name|
+          lookahead = lookahead.selection(field_name)
+
+          next field_name if lookahead.arguments.empty?
+
+          args = lookahead.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
+          "#{field_name}(#{args})"
+        }.join("/")
       end
 
       def traverse_argument(argument)

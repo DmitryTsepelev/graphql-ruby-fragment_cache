@@ -41,27 +41,6 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
   specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]" }
 
-  context "when alias is used" do
-    let(:query) do
-      <<~GQL
-        query GetPost($id: ID!) {
-          postById: cachedPost(id: $id) {
-            id
-            title
-            author {
-              id
-              name
-            }
-          }
-        }
-      GQL
-    end
-
-    let(:path) { ["postById"] }
-
-    specify { is_expected.to eq "schema_key/postById(id:#{id})[id.title.author[id.name]]" }
-  end
-
   context "when fragment has nested selections" do
     let(:query) do
       <<~GQL

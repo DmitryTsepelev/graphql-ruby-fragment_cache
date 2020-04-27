@@ -20,6 +20,8 @@ module Types
     field :author, User, null: false
     field :cached_author, User, null: false
 
+    field :meta, String, null: true
+
     def cached_author
       cache_fragment { object.author }
     end

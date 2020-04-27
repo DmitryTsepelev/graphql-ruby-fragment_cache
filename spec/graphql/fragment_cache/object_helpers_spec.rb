@@ -138,8 +138,8 @@ describe "#cache_fragment" do
   context "when alias is used" do
     let(:query) do
       <<~GQL
-        query getPost($id: ID!, $expiresIn: Int) {
-          postById: post(id: $id, expiresIn: $expiresIn) {
+        query getPost($id: ID!) {
+          postById: post(id: $id) {
             id
           }
         }
@@ -148,8 +148,8 @@ describe "#cache_fragment" do
 
     let(:another_query) do
       <<~GQL
-        query getPost($id: ID!, $expiresIn: Int) {
-          postById: post(id: $id, expiresIn: $expiresIn) {
+        query getPost($id: ID!) {
+          postById: post(id: $id) {
             id
             title
           }
@@ -158,10 +158,12 @@ describe "#cache_fragment" do
     end
 
     let(:resolver) do
-      ->(id:, expires_in:) do
+      ->(id:) do
         cache_fragment { Post.find(id) }
       end
     end
+
+    let(:variables) { {id: 1} }
 
     it "returns cached fragment" do
       expect(execute_query.dig("data", "postById")).to eq({
@@ -174,6 +176,64 @@ describe "#cache_fragment" do
         "id" => "1",
         "title" => "new object title"
       })
+    end
+
+    context "with multiple aliases" do
+      let(:query) do
+        <<~GQL
+          query getPost($id: ID!, $anotherId: ID!) {
+            postById: post(id: $id) {
+              id
+              title
+              meta
+            }
+            postById2: post(id: $anotherId) {
+              id
+              title
+              meta
+            }
+          }
+        GQL
+      end
+
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(Post.find(id))
+        end
+      end
+
+      let(:variables) { {id: 1, another_id: 2} }
+
+      let!(:post2) { Post.create(id: 2, title: "another test") }
+
+      it "returns cached fragment for different aliases independently" do
+        expect(execute_query.dig("data", "postById")).to eq({
+          "id" => "1",
+          "title" => "new object test",
+          "meta" => nil
+        })
+
+        expect(execute_query.dig("data", "postById2")).to eq({
+          "id" => "2",
+          "title" => "another test",
+          "meta" => nil
+        })
+
+        post.title = "new object title"
+        post2.meta = "invisible"
+
+        expect(execute_query.dig("data", "postById")).to eq({
+          "id" => "1",
+          "title" => "new object title",
+          "meta" => nil
+        })
+
+        expect(execute_query.dig("data", "postById2")).to eq({
+          "id" => "2",
+          "title" => "another test",
+          "meta" => nil
+        })
+      end
     end
   end
 end
