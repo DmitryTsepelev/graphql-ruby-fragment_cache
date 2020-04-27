@@ -134,4 +134,30 @@ describe "#cache_fragment" do
       })
     end
   end
+
+  context "when alias is used" do
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!, $expiresIn: Int) {
+          postById: post(id: $id, expiresIn: $expiresIn) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let(:resolver) do
+      ->(id:, expires_in:) do
+        cache_fragment { Post.find(id) }
+      end
+    end
+
+    it "returns cached fragment" do
+      expect(execute_query.dig("data", "postById")).to eq({
+        "id" => "1",
+        "title" => "object test"
+      })
+    end
+  end
 end
