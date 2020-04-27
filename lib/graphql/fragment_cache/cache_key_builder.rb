@@ -18,6 +18,18 @@ module GraphQL
           }.join(".")
         end
       end
+
+      refine ::GraphQL::Language::Nodes::AbstractNode do
+        def alias?(_)
+          false
+        end
+      end
+
+      refine ::GraphQL::Language::Nodes::Field do
+        def alias?(val)
+          self.alias == val
+        end
+      end
     })
 
     # Builds cache key for fragment
@@ -59,7 +71,7 @@ module GraphQL
 
       def selections_cache_key
         current_root =
-          path.reduce(query.lookahead) { |lkhd, name| lkhd.selection(name) }
+          path.reduce(query.lookahead) { |lkhd, name| lkhd.selection(without_alias(name, lkhd)) }
 
         current_root.selections.to_selections_key
       end
@@ -68,13 +80,27 @@ module GraphQL
         lookahead = query.lookahead
 
         path.map { |field_name|
-          lookahead = lookahead.selection(field_name)
-
+          lookahead = lookahead.selection(without_alias(field_name, lookahead))
           next field_name if lookahead.arguments.empty?
 
           args = lookahead.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
           "#{field_name}(#{args})"
         }.join("/")
+      end
+
+      def without_alias(field_name, lookahead)
+        return field_name if lookahead.selects?(field_name)
+
+        lookup_alias(lookahead.ast_nodes, field_name)&.name
+      end
+
+      def lookup_alias(nodes, name)
+        return if nodes.empty?
+        nodes.find do |node|
+          return node if node.alias?(name)
+          child = lookup_alias(node.children, name)
+          return child if child
+        end
       end
 
       def traverse_argument(argument)

@@ -11,7 +11,7 @@ module GraphQL
       def initialize(context, **options)
         @context = context
         @options = options
-        @path = normalize_current_path(context)
+        @path = context.namespace(:interpreter)[:current_path]
       end
 
       def read
@@ -31,42 +31,6 @@ module GraphQL
 
       def resolve(final_value)
         final_value.dig(*path)
-      end
-
-      # Replace aliases with field names
-      def normalize_current_path(ctx)
-        lookahead = context.query.lookahead
-        current_path = context.namespace(:interpreter)[:current_path]
-
-        current_path.map do |name|
-          field_name = lookahead.selects?(name) ? name : lookup_alias(lookahead.ast_nodes, name)&.name
-          raise "Couldn't find graph node for alias: #{name}" unless field_name
-          lookahead = lookahead.selection(name)
-          field_name
-        end
-      end
-
-      using(Module.new do
-        refine ::GraphQL::Language::Nodes::AbstractNode do
-          def alias?(_)
-            false
-          end
-        end
-
-        refine ::GraphQL::Language::Nodes::Field do
-          def alias?(val)
-            self.alias == val
-          end
-        end
-      end)
-
-      def lookup_alias(nodes, name)
-        return if nodes.empty?
-        nodes.find do |node|
-          return node if node.alias?(name)
-          child = lookup_alias(node.children, name)
-          return child if child
-        end
       end
     end
   end
