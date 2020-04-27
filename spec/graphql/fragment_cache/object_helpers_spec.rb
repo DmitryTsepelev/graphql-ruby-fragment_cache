@@ -141,6 +141,16 @@ describe "#cache_fragment" do
         query getPost($id: ID!, $expiresIn: Int) {
           postById: post(id: $id, expiresIn: $expiresIn) {
             id
+          }
+        }
+      GQL
+    end
+
+    let(:another_query) do
+      <<~GQL
+        query getPost($id: ID!, $expiresIn: Int) {
+          postById: post(id: $id, expiresIn: $expiresIn) {
+            id
             title
           }
         }
@@ -155,8 +165,14 @@ describe "#cache_fragment" do
 
     it "returns cached fragment" do
       expect(execute_query.dig("data", "postById")).to eq({
+        "id" => "1"
+      })
+
+      post.title = "new object title"
+
+      expect(execute_query(another_query).dig("data", "postById")).to eq({
         "id" => "1",
-        "title" => "object test"
+        "title" => "new object title"
       })
     end
   end
