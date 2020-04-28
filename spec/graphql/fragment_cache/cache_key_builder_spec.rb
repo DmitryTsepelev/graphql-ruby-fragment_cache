@@ -41,8 +41,6 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
   specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]" }
 
-  context "when alias is used"
-
   context "when fragment has nested selections" do
     let(:query) do
       <<~GQL

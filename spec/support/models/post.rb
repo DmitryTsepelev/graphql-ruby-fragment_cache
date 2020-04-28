@@ -24,12 +24,13 @@ class Post
     end
   end
 
-  attr_accessor :id, :title, :author
+  attr_accessor :id, :title, :author, :meta
 
-  def initialize(id:, title:, author: nil)
+  def initialize(id:, title:, author: nil, meta: nil)
     @id = id
     @title = title
     @author = author
+    @meta = meta
   end
 
   def cache_key
