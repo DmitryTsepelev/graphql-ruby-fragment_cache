@@ -221,14 +221,15 @@ describe "#cache_fragment" do
 
         post.title = "new object title"
         post2.meta = "invisible"
+        variables.replace(id: 2, another_id: 1)
 
-        expect(execute_query.dig("data", "postById")).to eq({
+        expect(execute_query.dig("data", "postById2")).to eq({
           "id" => "1",
           "title" => "new object title",
           "meta" => nil
         })
 
-        expect(execute_query.dig("data", "postById2")).to eq({
+        expect(execute_query.dig("data", "postById")).to eq({
           "id" => "2",
           "title" => "another test",
           "meta" => nil
