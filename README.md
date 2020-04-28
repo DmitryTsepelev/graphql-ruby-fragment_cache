@@ -275,10 +275,6 @@ class QueryType < BaseObject
 end
 ```
 
-## Limitations
-
-- [Connections](https://graphql-ruby.org/relay/connections.html) support hasn't be implemented yet
-
 ## Credits
 
 Based on the original [gist](https://gist.github.com/palkan/faad9f6ff1db16fcdb1c071ec50e4190) by [@palkan](https://github.com/palkan) and [@ssnickolay](https://github.com/ssnickolay).

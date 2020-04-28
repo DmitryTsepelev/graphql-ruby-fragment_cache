@@ -2,11 +2,12 @@
 
 ## master
 
+## 0.1.5 (2020-04-28)
+
 - [PR#19](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/19) Add connections support ([@DmitryTsepelev][])
+- [PR#18](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/18) Support aliases in cache key generation ([@palkan][], [@DmitryTsepelev][])
 
 ## 0.1.4 (2020-04-25)
-
-- [PR#18](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/18) Support aliases in cache key generation ([@palkan][], [@DmitryTsepelev][])
 
 - Fix railtie to set up null store for tests ([@DmitryTsepelev][])
 
