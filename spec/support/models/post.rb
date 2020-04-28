@@ -9,6 +9,10 @@ class Post
       end
     end
 
+    def all
+      @store.values
+    end
+
     def create(id:, **attributes)
       store[id] = new(id: id, **attributes)
     end

@@ -9,3 +9,5 @@
 Gemfile.lock
 .DS_Store
 .rbnext/
+*.sqlite3
+spec/internal/log/*.log

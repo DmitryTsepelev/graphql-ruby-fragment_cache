@@ -77,6 +77,7 @@ end
 class TestSchema < GraphQL::Schema
   use GraphQL::Execution::Interpreter
   use GraphQL::Analysis::AST
+  use GraphQL::Pagination::Connections
   use GraphQL::FragmentCache
 
   query Types::Query
