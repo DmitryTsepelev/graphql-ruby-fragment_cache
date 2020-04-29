@@ -5,7 +5,7 @@ RSpec::Core::RakeTask.new(:spec)
 
 desc "Run Ruby Next nextify"
 task :nextify do
-  sh "bundle exec ruby-next nextify ./lib --transpile-mode=rewrite -V"
+  sh "bundle exec ruby-next nextify ./lib -V"
 end
 
 desc "Run specs without Rails"
