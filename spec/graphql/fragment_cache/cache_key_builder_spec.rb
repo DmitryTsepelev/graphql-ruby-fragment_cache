@@ -41,7 +41,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
   specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]" }
 
-  context "when fragment has nested selections" do
+  context "when cached field has nested selections" do
     let(:query) do
       <<~GQL
         query GetPost($id: ID!) {
@@ -106,7 +106,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     end
   end
 
-  context "when cached fragment is nested" do
+  context "when cached cached field is nested" do
     let(:path) { ["post", "cachedAuthor"] }
 
     let(:query) do
@@ -125,6 +125,54 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     end
 
     specify { is_expected.to eq "schema_key/post(id:#{id})/cachedAuthor[id.name]" }
+  end
+
+  context "when fragment is used" do
+    let(:query) do
+      <<~GQL
+        fragment PostFragment on PostType {
+          id
+          title
+          author {
+            id
+            name
+          }
+        }
+
+        query GetPost($id: ID!) {
+          cachedPost(id: $id) {
+            ...PostFragment
+          }
+        }
+      GQL
+    end
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
+
+    context "when nested fragment is used" do
+      let(:path) { ["post", "cachedAuthor"] }
+
+      let(:query) do
+        <<~GQL
+          fragment UserFragment on UserType {
+            id
+            name
+          }
+
+          query GetPost($id: ID!) {
+            post(id: $id) {
+              id
+              title
+              cachedAuthor {
+                ...UserFragment
+              }
+            }
+          }
+        GQL
+      end
+
+      specify { is_expected.to eq "schema_key/post(id:#{id})/cachedAuthor[id.name]" }
+    end
   end
 
   context "when object is passed and responds to #cache_key" do
