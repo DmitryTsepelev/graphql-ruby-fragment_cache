@@ -17,7 +17,7 @@ module Types
 
     field :id, ID, null: false
     field :title, String, null: false
-    field :cached_title, String, null: false, cache_fragment: true
+    field :cached_title, String, null: false, cache_fragment: true, method: :title
     field :author, User, null: false
     field :cached_author, User, null: false
 
