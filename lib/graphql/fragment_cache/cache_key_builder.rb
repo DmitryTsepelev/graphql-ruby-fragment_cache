@@ -124,7 +124,12 @@ module GraphQL
 
       def selections_cache_key
         current_root =
-          path.reduce(query.lookahead) { |lkhd, name| lkhd.selection_with_alias(name) }
+          path.reduce(query.lookahead) { |lkhd, field_name|
+            # Handle cached fields inside collections:
+            next lkhd if field_name.is_a?(Integer)
+
+            lkhd.selection_with_alias(field_name)
+          }
 
         current_root.selections.to_selections_key
       end
@@ -133,6 +138,9 @@ module GraphQL
         lookahead = query.lookahead
 
         path.map { |field_name|
+          # Handle cached fields inside collections:
+          next field_name if field_name.is_a?(Integer)
+
           lookahead = lookahead.selection_with_alias(field_name)
           raise "Failed to look ahead the field: #{field_name}" if lookahead.is_a?(::GraphQL::Execution::Lookahead::NullLookahead)
 

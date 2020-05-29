@@ -204,4 +204,21 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}/custom/99" }
   end
+
+  context "when scalar field is cached inside the collection" do
+    let(:query) do
+      <<~GQL
+        query GetPosts {
+          posts {
+            id
+            cachedTitle
+          }
+        }
+      GQL
+    end
+
+    let(:path) { ["posts", 0, "cachedTitle"] }
+
+    specify { is_expected.to eq "schema_key/posts/0/cachedTitle[]" }
+  end
 end
