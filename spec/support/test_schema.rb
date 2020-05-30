@@ -17,6 +17,7 @@ module Types
 
     field :id, ID, null: false
     field :title, String, null: false
+    field :cached_title, String, null: false, cache_fragment: true, method: :title
     field :author, User, null: false
     field :cached_author, User, null: false
 
@@ -44,6 +45,8 @@ module Types
       argument :id, GraphQL::Types::ID, required: true
     end
 
+    field :posts, [Post], null: false
+
     field :cached_post, Post, null: true do
       argument :id, GraphQL::Types::ID, required: true
     end
@@ -58,6 +61,10 @@ module Types
 
     def post(id:)
       ::Post.find(id)
+    end
+
+    def posts
+      ::Post.all
     end
 
     def cached_post(id:)

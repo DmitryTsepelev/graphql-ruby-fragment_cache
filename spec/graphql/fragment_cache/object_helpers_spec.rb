@@ -386,4 +386,47 @@ describe "#cache_fragment" do
       end
     end
   end
+
+  describe "caching fields inside collection elements" do
+    let(:query) do
+      <<~GQL
+        query GetPosts {
+          posts {
+            id
+            cachedTitle
+          }
+        }
+      GQL
+    end
+
+    let(:schema) do
+      build_schema do
+        query(Types::Query)
+      end
+    end
+
+    let!(:post1) { Post.create(id: 1, title: "object test 1") }
+    let!(:post2) { Post.create(id: 2, title: "object test 2") }
+
+    before do
+      # warmup cache
+      execute_query
+      # make objects dirty
+      post1.title = "new object test 1"
+      post2.title = "new object test 2"
+    end
+
+    it "returns cached results" do
+      expect(execute_query.dig("data", "posts")).to eq([
+        {
+          "id" => "1",
+          "cachedTitle" => "object test 1"
+        },
+        {
+          "id" => "2",
+          "cachedTitle" => "object test 2"
+        }
+      ])
+    end
+  end
 end
