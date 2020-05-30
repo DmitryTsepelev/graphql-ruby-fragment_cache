@@ -2,6 +2,8 @@
 
 ## master
 
+## 0.1.6 (2020-05-30)
+
 - [PR#22](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/22) Properly cache entites inside collections ([@DmitryTsepelev][])
 
 ## 0.1.5 (2020-04-28)
