@@ -10,9 +10,7 @@ module GraphQL
         def call(query)
           return unless query.context.fragments?
 
-          final_value = query.context.namespace(:interpreter)[:runtime].final_value
-
-          query.context.fragments.each { _1.persist(final_value) }
+          query.context.fragments.each(&:persist)
         end
       end
     end
