@@ -2,6 +2,8 @@
 
 ## master
 
+## 0.1.7 (2020-06-02)
+
 - [PR#23](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/23) Avoid extra queries after restoring connection from cache ([@DmitryTsepelev][])
 
 ## 0.1.6 (2020-05-30)
