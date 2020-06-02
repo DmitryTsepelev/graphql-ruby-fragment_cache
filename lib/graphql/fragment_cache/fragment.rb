@@ -6,22 +6,24 @@ module GraphQL
   module FragmentCache
     # Represents a single fragment to cache
     class Fragment
-      attr_reader :options, :path, :context, :raw_connection
+      attr_reader :options, :path, :context
 
-      attr_writer :raw_connection
+      attr_accessor :resolved_value
 
       def initialize(context, **options)
         @context = context
         @options = options
-        @path = context.namespace(:interpreter)[:current_path]
+        @path = interpreter_context[:current_path]
       end
 
       def read
         FragmentCache.cache_store.read(cache_key)
       end
 
-      def persist(final_value)
-        value = raw_connection || resolve(final_value)
+      def persist
+        # Connections are not available from the runtime object, so
+        # we rely on Schema::Tracer to save it for us
+        value = resolved_value || resolve_from_runtime
         FragmentCache.cache_store.write(cache_key, value, **options)
       end
 
@@ -31,8 +33,16 @@ module GraphQL
         @cache_key ||= CacheKeyBuilder.call(path: path, query: context.query, **options)
       end
 
-      def resolve(final_value)
+      def interpreter_context
+        context.namespace(:interpreter)
+      end
+
+      def resolve_from_runtime
         final_value.dig(*path)
+      end
+
+      def final_value
+        @final_value ||= interpreter_context[:runtime].final_value
       end
     end
   end

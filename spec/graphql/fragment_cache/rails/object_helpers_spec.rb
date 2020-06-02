@@ -67,7 +67,7 @@ describe GraphQL::FragmentCache::ObjectHelpers do
         "endCursor" => schema.cursor_encoder.encode("2"),
         "hasPreviousPage" => false,
         "hasNextPage" => false
-      },
+      }
     )
   end
 
@@ -90,7 +90,7 @@ describe GraphQL::FragmentCache::ObjectHelpers do
           "endCursor" => schema.cursor_encoder.encode("2"),
           "hasPreviousPage" => true,
           "hasNextPage" => false
-        },
+        }
       )
     end
 
@@ -114,7 +114,7 @@ describe GraphQL::FragmentCache::ObjectHelpers do
           "endCursor" => schema.cursor_encoder.encode("1"),
           "hasPreviousPage" => false,
           "hasNextPage" => true
-        },
+        }
       )
     end
 

@@ -299,7 +299,7 @@ describe "#cache_fragment" do
             "endCursor" => schema.cursor_encoder.encode("2"),
             "hasNextPage" => false,
             "hasPreviousPage" => false
-          },
+          }
         )
       end
 
@@ -322,7 +322,7 @@ describe "#cache_fragment" do
               "endCursor" => schema.cursor_encoder.encode("2"),
               "hasNextPage" => false,
               "hasPreviousPage" => true
-            },
+            }
           )
         end
 
@@ -346,7 +346,7 @@ describe "#cache_fragment" do
               "endCursor" => schema.cursor_encoder.encode("1"),
               "hasNextPage" => true,
               "hasPreviousPage" => false
-            },
+            }
           )
         end
 

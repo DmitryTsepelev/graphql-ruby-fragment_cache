@@ -4,10 +4,11 @@ require "graphql"
 
 require "graphql/fragment_cache/ext/context_fragments"
 require "graphql/fragment_cache/ext/graphql_cache_key"
-
-require "graphql/fragment_cache/schema_patch"
 require "graphql/fragment_cache/object"
-require "graphql/fragment_cache/instrumentation"
+
+require "graphql/fragment_cache/schema/patch"
+require "graphql/fragment_cache/schema/tracer"
+require "graphql/fragment_cache/schema/instrumentation"
 
 require "graphql/fragment_cache/memory_store"
 
@@ -22,8 +23,9 @@ module GraphQL
       def use(schema_defn, options = {})
         verify_interpreter!(schema_defn)
 
-        schema_defn.instrument(:query, Instrumentation)
-        schema_defn.extend(SchemaPatch)
+        schema_defn.tracer(Schema::Tracer)
+        schema_defn.instrument(:query, Schema::Instrumentation)
+        schema_defn.extend(Schema::Patch)
       end
 
       def cache_store=(store)
