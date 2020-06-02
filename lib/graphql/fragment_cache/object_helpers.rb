@@ -44,10 +44,6 @@ module GraphQL
       def interpreter_context
         @interpreter_context ||= context.namespace(:interpreter)
       end
-
-      def wrap_connection(items)
-        context.schema.connections.wrap(field, items, interpreter_context[:current_arguments], context)
-      end
     end
   end
 end
