@@ -22,6 +22,7 @@ module GraphQL
         fragment = Fragment.new(context, options)
 
         if (cached = fragment.read)
+          return nil if cached == Fragment::NIL_IN_CACHE
           return restore_cached_value(cached)
         end
 

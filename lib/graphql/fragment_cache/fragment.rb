@@ -16,8 +16,12 @@ module GraphQL
         @path = interpreter_context[:current_path]
       end
 
+      NIL_IN_CACHE = Object.new
+
       def read
-        FragmentCache.cache_store.read(cache_key)
+        FragmentCache.cache_store.read(cache_key).tap do |cached|
+          return NIL_IN_CACHE if cached.nil? && FragmentCache.cache_store.exist?(cache_key)
+        end
       end
 
       def persist

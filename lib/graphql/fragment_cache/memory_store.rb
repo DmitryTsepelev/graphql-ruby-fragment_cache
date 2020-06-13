@@ -23,6 +23,10 @@ module GraphQL
         @storage = {}
       end
 
+      def exist?(key)
+        storage.key?(key)
+      end
+
       def read(key)
         key = key.to_s
         storage[key]&.then do |entry|

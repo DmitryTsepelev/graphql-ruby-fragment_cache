@@ -252,7 +252,7 @@ Rails.application.configure do |config|
 end
 ```
 
-⚠️ Cache store must implement `#read(key)` and `#write(key, value, **options)` methods.
+⚠️ Cache store must implement `#read(key)`, `#write(key, value, **options)` and `#exist?(key)` methods.
 
 The gem provides only in-memory store out-of-the-box (`GraphQL::FragmentCache::MemoryStore`). It's used by default.
 
