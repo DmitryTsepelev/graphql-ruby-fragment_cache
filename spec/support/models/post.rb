@@ -21,8 +21,6 @@ class Post
       store.clear
     end
 
-    private
-
     def store
       @store ||= {}
     end

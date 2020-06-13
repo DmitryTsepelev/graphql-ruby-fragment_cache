@@ -21,8 +21,9 @@ describe "#cache_fragment" do
       end
     end
 
+    let(:id) { 1 }
     let(:expires_in) { nil }
-    let(:variables) { {id: 1, expires_in: expires_in} }
+    let(:variables) { {id: id, expires_in: expires_in} }
 
     let(:query) do
       <<~GQL
@@ -427,6 +428,65 @@ describe "#cache_fragment" do
           "cachedTitle" => "object test 2"
         }
       ])
+    end
+  end
+
+  describe "nil caching" do
+    let(:schema) do
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+              argument :expires_in, GraphQL::Types::Int, required: false
+            end
+
+            def post(id:, expires_in: nil)
+              cache_fragment { Post.find(id) }
+            end
+          }
+        )
+      end
+    end
+
+    let(:id) { 1 }
+    let(:expires_in) { nil }
+    let(:variables) { {id: id, expires_in: expires_in} }
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!, $expiresIn: Int) {
+          post(id: $id, expiresIn: $expiresIn) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    before do
+      # make sure post won't be created
+      Post.store[id] = nil
+      # warmup cache
+      execute_query
+      # create object
+      Post.store[id] = Post.create(id: id, title: "object test")
+    end
+
+    let(:resolver) do
+      ->(id:, expires_in:) do
+        cache_fragment { Post.find(id) }
+      end
+    end
+
+    it "returns cached nil" do
+      expect(execute_query.dig("data", "post")).to eq(nil)
+    end
+
+    it "not calls resolver method" do
+      allow(::Post).to receive(:all).and_call_original
+      execute_query
+      expect(::Post).not_to have_received(:all)
     end
   end
 end
