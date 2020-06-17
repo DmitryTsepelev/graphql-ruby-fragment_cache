@@ -76,7 +76,13 @@ module GraphQL
 
         def lookup_alias_node(nodes, name)
           return if nodes.empty?
+
           nodes.find do |node|
+            if node.is_a?(GraphQL::Language::Nodes::FragmentSpread)
+              node = @query.fragments[node.name]
+              raise("Invariant: Can't look ahead to nonexistent fragment #{node.name} (found: #{@query.fragments.keys})") unless node
+            end
+
             return node if node.alias?(name)
             child = lookup_alias_node(node.children, name)
             return child if child
