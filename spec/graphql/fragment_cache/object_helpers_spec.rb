@@ -180,6 +180,94 @@ describe "#cache_fragment" do
         })
       end
 
+      context "when query has fragment" do
+        let(:author) { User.new(id: 1, name: "John") }
+        let!(:post) { Post.create(id: 1, title: "object test", author: author) }
+
+        let(:query_with_fragment) do
+          <<~GQL
+            fragment PostFragment on PostType {
+              id
+              author: cachedAuthor {
+                name
+              }
+            }
+
+            query getPost($id: ID!) {
+              post(id: $id) {
+                ...PostFragment
+              }
+            }
+          GQL
+        end
+
+        let(:resolver) do
+          ->(id:) do
+            Post.find(id)
+          end
+        end
+
+        it "returns cached fragment" do
+          author_data = execute_query(query_with_fragment).dig("data", "post", "author")
+          expect(author_data).to eq({"name" => author.name})
+        end
+
+        context "when fragment name is wrong" do
+          let(:query_with_fragment) do
+            <<~GQL
+              fragment PostFragment on PostType {
+                id
+                author: cachedAuthor {
+                  name
+                }
+              }
+
+              query getPost($id: ID!) {
+                post(id: $id) {
+                  ...WrongPostFragment
+                }
+              }
+            GQL
+          end
+
+          it "returns cached fragment" do
+            error_message = execute_query(query_with_fragment).dig("errors").first["message"]
+            expect(error_message).to eq("Fragment WrongPostFragment was used, but not defined")
+          end
+        end
+      end
+
+      context "when query has inline fragment" do
+        let(:author) { User.new(id: 1, name: "John") }
+        let!(:post) { Post.create(id: 1, title: "object test", author: author) }
+
+        let(:query_with_fragment) do
+          <<~GQL
+            query getPost($id: ID!) {
+              post(id: $id) {
+                ...on PostType {
+                  id
+                  author: cachedAuthor {
+                    name
+                  }
+                }
+              }
+            }
+          GQL
+        end
+
+        let(:resolver) do
+          ->(id:) do
+            Post.find(id)
+          end
+        end
+
+        it "returns cached fragment" do
+          author_data = execute_query(query_with_fragment).dig("data", "post", "author")
+          expect(author_data).to eq({"name" => author.name})
+        end
+      end
+
       context "with multiple aliases" do
         let(:query) do
           <<~GQL

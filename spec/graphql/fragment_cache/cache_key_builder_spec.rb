@@ -221,4 +221,48 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     specify { is_expected.to eq "schema_key/posts/0/cachedTitle[]" }
   end
+
+  context "when query has fragment" do
+    let(:query) do
+      <<~GQL
+        fragment PostFragment on PostType {
+          id
+          author: cachedAuthor {
+            name
+          }
+        }
+
+        query getPost($id: ID!) {
+          post(id: $id) {
+            ...PostFragment
+          }
+        }
+      GQL
+    end
+
+    let(:path) { ["post", "author"] }
+
+    specify { is_expected.to eq "schema_key/post(id:1)/cachedAuthor[name]" }
+  end
+
+  context "when query has inline fragment" do
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!) {
+          post(id: $id) {
+            ...on PostType {
+              id
+              author: cachedAuthor {
+                name
+              }
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:path) { ["post", "author"] }
+
+    specify { is_expected.to eq "schema_key/post(id:1)/cachedAuthor[name]" }
+  end
 end
