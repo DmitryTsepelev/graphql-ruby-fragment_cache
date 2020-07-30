@@ -39,4 +39,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.9"
   spec.add_development_dependency "timecop"
   spec.add_development_dependency "ruby-next", ">= 0.6"
+  spec.add_development_dependency "ruby-next-parser", "2.8.0.7"
 end
