@@ -50,6 +50,17 @@ describe GraphQL::FragmentCache::MemoryStore do
     end
   end
 
+  context "supports keys interface" do
+    it "returns actual keys" do
+      subject.write(:test_1, "test_1")
+      subject.write(:test_2, "test_2")
+      expect(subject.keys).to eq %w[test_1 test_2]
+
+      subject.delete(:test_2)
+      expect(subject.keys).to eq %w[test_1]
+    end
+  end
+
   it "raises if unsupported options are passed" do
     expect { described_class.new(namespace: "test") }
       .to raise_error(ArgumentError, /unsupported options: namespace/i)
