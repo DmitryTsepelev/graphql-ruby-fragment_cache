@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.0.2 (2020-08-19)
+
+- [PR#28](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/28) Support #keys method for GraphQL::FragmentCache::MemoryStore instance ([@reabiliti][])
+
 ## 1.0.1 (2020-06-17)
 
 - [PR#25](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/25) Support fragments with aliases for CacheKeyBuilder ([@DmitryTsepelev][])
@@ -47,3 +51,4 @@
 [@DmitryTsepelev]: https://github.com/DmitryTsepelev
 [@palkan]: https://github.com/palkan
 [@ssnickolay]: https://github.com/ssnickolay
+[@reabiliti]: https://github.com/reabiliti
