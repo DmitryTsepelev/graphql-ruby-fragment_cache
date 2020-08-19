@@ -11,3 +11,4 @@ Gemfile.lock
 .rbnext/
 *.sqlite3
 spec/internal/log/*.log
+.idea/

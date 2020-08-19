@@ -23,6 +23,10 @@ module GraphQL
         @storage = {}
       end
 
+      def keys
+        storage.keys
+      end
+
       def exist?(key)
         storage.key?(key)
       end
