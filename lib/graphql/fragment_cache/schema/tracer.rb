@@ -10,18 +10,15 @@ module GraphQL
         class << self
           def trace(key, data)
             yield.tap do |resolved_value|
-              next unless connection_to_cache?(key, data)
+              next unless connection_field?(key, data)
 
-              # We need to attach connection object to fragment and save it later
-              context = data[:query].context
-              verify_connections!(context)
-              cache_connection(resolved_value, context)
+              verify_connections!(data[:query].context)
             end
           end
 
           private
 
-          def connection_to_cache?(key, data)
+          def connection_field?(key, data)
             key == "execute_field" && data[:field].connection?
           end
 
@@ -30,12 +27,6 @@ module GraphQL
 
             raise StandardError,
               "GraphQL::Pagination::Connections should be enabled for connection caching"
-          end
-
-          def cache_connection(resolved_value, context)
-            current_path = context.namespace(:interpreter)[:current_path]
-            fragment = context.fragments.find { |fragment| fragment.path == current_path }
-            fragment.resolved_value = resolved_value if fragment
           end
         end
       end

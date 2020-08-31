@@ -22,8 +22,7 @@ module GraphQL
         fragment = Fragment.new(context, options)
 
         if (cached = fragment.read)
-          return nil if cached == Fragment::NIL_IN_CACHE
-          return restore_cached_value(cached)
+          return cached == Fragment::NIL_IN_CACHE ? nil : raw_value(cached)
         end
 
         (block_given? ? block.call : object_to_cache).tap do |resolved_value|
@@ -32,11 +31,6 @@ module GraphQL
       end
 
       private
-
-      def restore_cached_value(cached)
-        # If we return connection object from resolver, Interpreter stops processing it
-        connection? ? cached : raw_value(cached)
-      end
 
       def field
         interpreter_context[:current_field]
