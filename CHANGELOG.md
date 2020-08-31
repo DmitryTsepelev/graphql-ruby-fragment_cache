@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.0.3 (2020-08-31)
+
 - [PR#29](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/29) Cache result JSON instead of connection objects ([@DmitryTsepelev][])
 
 ## 1.0.2 (2020-08-19)
