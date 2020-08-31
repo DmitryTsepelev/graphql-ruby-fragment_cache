@@ -8,8 +8,6 @@ module GraphQL
     class Fragment
       attr_reader :options, :path, :context
 
-      attr_accessor :resolved_value
-
       def initialize(context, **options)
         @context = context
         @options = options
@@ -25,9 +23,7 @@ module GraphQL
       end
 
       def persist
-        # Connections are not available from the runtime object, so
-        # we rely on Schema::Tracer to save it for us
-        value = resolved_value || resolve_from_runtime
+        value = final_value.dig(*path)
         FragmentCache.cache_store.write(cache_key, value, **options)
       end
 
@@ -39,10 +35,6 @@ module GraphQL
 
       def interpreter_context
         context.namespace(:interpreter)
-      end
-
-      def resolve_from_runtime
-        final_value.dig(*path)
       end
 
       def final_value

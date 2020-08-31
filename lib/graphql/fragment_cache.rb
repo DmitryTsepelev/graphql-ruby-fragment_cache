@@ -6,6 +6,8 @@ require "graphql/fragment_cache/ext/context_fragments"
 require "graphql/fragment_cache/ext/graphql_cache_key"
 require "graphql/fragment_cache/object"
 
+require "graphql/fragment_cache/connections/patch"
+
 require "graphql/fragment_cache/schema/patch"
 require "graphql/fragment_cache/schema/tracer"
 require "graphql/fragment_cache/schema/instrumentation"
@@ -26,6 +28,8 @@ module GraphQL
         schema_defn.tracer(Schema::Tracer)
         schema_defn.instrument(:query, Schema::Instrumentation)
         schema_defn.extend(Schema::Patch)
+
+        GraphQL::Pagination::Connections.prepend(Connections::Patch)
       end
 
       def cache_store=(store)
