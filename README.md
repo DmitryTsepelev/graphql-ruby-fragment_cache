@@ -275,6 +275,10 @@ class QueryType < BaseObject
 end
 ```
 
+## Limitations
+
+Caching does not work for Union types, because of the [bug](https://github.com/rmosolgo/graphql-ruby/pull/3007) in the `lookahead` implementation.
+
 ## Credits
 
 Based on the original [gist](https://gist.github.com/palkan/faad9f6ff1db16fcdb1c071ec50e4190) by [@palkan](https://github.com/palkan) and [@ssnickolay](https://github.com/ssnickolay).
