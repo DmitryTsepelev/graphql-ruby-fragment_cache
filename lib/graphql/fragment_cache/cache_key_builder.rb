@@ -32,9 +32,23 @@ module GraphQL
       end
 
       refine ::GraphQL::Execution::Lookahead do
+        using RubyNext
+
         def selection_with_alias(name, **kwargs)
-          return selection(name, **kwargs) if selects?(name, **kwargs)
-          alias_selection(name, **kwargs)
+          # In case of union we have to pass a type of object explicitly
+          # More info https://github.com/rmosolgo/graphql-ruby/pull/3007
+          if @selected_type.kind.union?
+            # TODO: we need to guess a type of an object at path to pass it
+            kwargs[:selected_type] = @query.context.namespace(:interpreter)[:current_object].class
+          end
+
+          selection(name, **kwargs).then do |next_selection|
+            if next_selection.is_a?(GraphQL::Execution::Lookahead::NullLookahead)
+              alias_selection(name, **kwargs)
+            else
+              next_selection
+            end
+          end
         end
 
         def alias_selection(name, selected_type: @selected_type, arguments: nil)
@@ -48,7 +62,9 @@ module GraphQL
           # From https://github.com/rmosolgo/graphql-ruby/blob/1a9a20f3da629e63ea8e5ee8400be82218f9edc3/lib/graphql/execution/lookahead.rb#L91
           next_field_defn = get_class_based_field(selected_type, next_field_name)
 
-          alias_selections[name] =
+          alias_name = "#{name}_#{selected_type.name}"
+
+          alias_selections[alias_name] =
             if next_field_defn
               next_nodes = []
               arguments = @query.arguments_for(alias_node, next_field_defn)

@@ -57,6 +57,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
+
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
   end
 
@@ -77,7 +78,6 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     end
 
     let(:path) { ["cachedPostByInput"] }
-
     let(:variables) { {inputWithId: {id: id, intArg: 42}} }
 
     specify { is_expected.to eq "schema_key/cachedPostByInput(input_with_id:{id:#{id},int_arg:42})[id.title.author[id.name]]" }
@@ -146,6 +146,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
         }
       GQL
     end
+
 
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
 
@@ -216,7 +217,6 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
         }
       GQL
     end
-
     let(:path) { ["posts", 0, "cachedTitle"] }
 
     specify { is_expected.to eq "schema_key/posts/0/cachedTitle[]" }
@@ -264,5 +264,74 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     let(:path) { ["post", "author"] }
 
     specify { is_expected.to eq "schema_key/post(id:1)/cachedAuthor[name]" }
+  end
+
+  context "when query has union type" do
+    let(:path) { ["lastActivity", "cachedAvatarUrl"] }
+
+    let(:query) do
+      <<~GQL
+        query getLastActivity {
+          lastActivity {
+            ...on PostType {
+              id
+              cachedAvatarUrl
+            }
+            ...on UserType {
+              id
+              cachedAvatarUrl
+            }
+          }
+        }
+      GQL
+    end
+
+    specify { is_expected.to eq "schema_key/lastActivity/cachedAvatarUrl[]" }
+
+    context "when array of union typed objects is returned" do
+      let(:query) do
+        <<~GQL
+          query getFeed {
+            feed {
+              ...on PostType {
+                id
+                cachedAvatarUrl
+              }
+              ...on UserType {
+                id
+                cachedAvatarUrl
+              }
+            }
+          }
+        GQL
+      end
+
+      let(:path) { ["feed", 0, "cachedAvatarUrl"] }
+
+      specify { is_expected.to eq "schema_key/feed/0/cachedAvatarUrl[]" }
+
+      context "when cached field has alias" do
+        let(:query) do
+          <<~GQL
+            query getFeed {
+              feed {
+                ...on PostType {
+                  id
+                  avatarUrl: cachedAvatarUrl
+                }
+                ...on UserType {
+                  id
+                  avatarUrl: cachedAvatarUrl
+                }
+              }
+            }
+          GQL
+        end
+
+        let(:path) { ["feed", 0, "avatarUrl"] }
+
+        specify { is_expected.to eq "schema_key/feed/0/cachedAvatarUrl[]" }
+      end
+    end
   end
 end

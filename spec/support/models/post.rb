@@ -4,7 +4,7 @@ class Post
   class << self
     def find(id)
       store.fetch(id.to_i) do
-        author = User.new(id: id, name: "User ##{id}")
+        author = User.fetch(id)
         new(id: id, title: "Post ##{id}", author: author)
       end
     end

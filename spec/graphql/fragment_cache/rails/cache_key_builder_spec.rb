@@ -26,6 +26,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
   let(:object) { Post.find(42) }
   let(:query_obj) { GraphQL::Query.new(schema, query, variables: variables) }
+  let(:selected_type) { Types::Post }
 
   # Make cache keys raw for easier debugging
   let(:schema_cache_key) { "schema_key" }
@@ -34,7 +35,11 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     allow(Digest::SHA1).to receive(:hexdigest) { |val| val }
   end
 
-  subject { described_class.call(object: object, query: query_obj, path: path) }
+  subject do
+    described_class.call(
+      object: object, query: query_obj, selected_type: selected_type, path: path
+    )
+  end
 
   it "uses Cache.expand_cache_key" do
     allow(ActiveSupport::Cache).to receive(:expand_cache_key).with(object) { "as:cache:key" }

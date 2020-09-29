@@ -10,6 +10,14 @@ module Types
 
     field :id, ID, null: false
     field :name, String, null: false
+    field :cached_avatar_url, String, null: true
+
+    def cached_avatar_url
+      cache_fragment { "http://example.com/img/users/#{object.id}" }
+    end
+  end
+
+  class Activity < GraphQL::Schema::Union
   end
 
   class Post < Base
@@ -18,13 +26,35 @@ module Types
     field :id, ID, null: false
     field :title, String, null: false
     field :cached_title, String, null: false, cache_fragment: true, method: :title
+    field :cached_avatar_url, String, null: true
     field :author, User, null: false
     field :cached_author, User, null: false
+    field :related_activity, Activity, null: true
 
     field :meta, String, null: true
 
     def cached_author
       cache_fragment { object.author }
+    end
+
+    def cached_avatar_url
+      cache_fragment { "http://example.com/img/posts/#{object.id}" }
+    end
+
+    def related_activity
+      ::User.all.last
+    end
+  end
+
+  class Activity < GraphQL::Schema::Union
+    graphql_name "ActivityType"
+
+    description "Represents chat message"
+
+    possible_types Post, User
+
+    def self.resolve_type(object, _context)
+      Kernel.const_get("Types::#{object.class.name}")
     end
   end
 
@@ -59,12 +89,24 @@ module Types
       argument :complex_post_input, ComplexPostInput, required: true
     end
 
+    field :feed, [Activity], null: false
+
+    field :last_activity, Activity, null: false
+
     def post(id:)
       ::Post.find(id)
     end
 
     def posts
       ::Post.all
+    end
+
+    def feed
+      ::Post.all + ::User.all
+    end
+
+    def last_activity
+      ::Post.find(1)
     end
 
     def cached_post(id:)

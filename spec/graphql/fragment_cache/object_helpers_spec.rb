@@ -577,4 +577,124 @@ describe "#cache_fragment" do
       expect(::Post).not_to have_received(:all)
     end
   end
+
+  describe "union caching" do
+    let!(:post) { Post.create(id: 1, title: "Post #1") }
+    let!(:user) { User.create(id: 2, name: "User #2") }
+
+    let(:schema) do
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :last_activity, Types::Activity, null: false
+
+            define_method(:last_activity, -> { ::Post.find(1) })
+          }
+        )
+      end
+    end
+
+    let(:query) do
+      <<~GQL
+        query getLastActivity {
+          lastActivity {
+            ...on PostType {
+              id
+              cachedAvatarUrl
+            }
+            ...on UserType {
+              id
+              cachedAvatarUrl
+            }
+          }
+        }
+      GQL
+    end
+
+    it "returns cached data" do
+      expect(execute_query.dig("data")).to eq(
+        "lastActivity" =>
+          {"cachedAvatarUrl" => "http://example.com/img/posts/#{post.id}", "id" => post.id.to_s}
+      )
+    end
+
+    context "when unions are nested" do
+      let(:query) do
+        <<~GQL
+          query getLastActivity {
+            lastActivity {
+              ...on PostType {
+                id
+                relatedActivity {
+                  ...on PostType {
+                    id
+                    cachedAvatarUrl
+                  }
+                  ...on UserType {
+                    id
+                    cachedAvatarUrl
+                  }
+                }
+              }
+              ...on UserType {
+                id
+              }
+            }
+          }
+        GQL
+      end
+
+      it "returns cached data" do
+        expect(execute_query.dig("data")).to eq(
+          "lastActivity" => {
+            "id" => "1",
+            "relatedActivity" => {
+              "cachedAvatarUrl" => "http://example.com/img/posts/#{user.id}",
+              "id" => user.id.to_s
+            }
+          }
+        )
+      end
+    end
+
+    context "when array of union typed objects is returned" do
+      let(:schema) do
+        build_schema do
+          query(
+            Class.new(Types::Query) {
+              field :feed, [Types::Activity], null: false
+
+              define_method(:feed, -> { ::Post.all + ::User.all })
+            }
+          )
+        end
+      end
+
+      let(:query) do
+        <<~GQL
+          query getFeed {
+            feed {
+              ...on PostType {
+                id
+                cachedAvatarUrl
+              }
+              ...on UserType {
+                id
+                cachedAvatarUrl
+              }
+            }
+          }
+        GQL
+      end
+
+      it "returns cached data" do
+        expect(execute_query.dig("data")).to eq(
+          "feed" => [
+            {"cachedAvatarUrl" => "http://example.com/img/posts/#{post.id}", "id" => post.id.to_s},
+            {"cachedAvatarUrl" => "http://example.com/img/users/#{user.id}", "id" => user.id.to_s}
+          ]
+        )
+      end
+    end
+  end
 end
