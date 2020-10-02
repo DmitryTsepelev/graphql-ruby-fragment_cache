@@ -277,7 +277,15 @@ end
 
 ## Limitations
 
-Caching does not work for Union types, because of the [bug](https://github.com/rmosolgo/graphql-ruby/pull/3007) in the `lookahead` implementation.
+Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
+
+```ruby
+field :cached_avatar_url, String, null: false
+
+def cached_avatar_url
+  cache_fragment(query_cache_key: "post_avatar_url(#{object.id})") { object.avatar_url }
+end
+```
 
 ## Credits
 
