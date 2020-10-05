@@ -5,13 +5,13 @@ module GraphQL
     module Connections
       # Patches GraphQL::Pagination::Connections to support raw values
       module Patch
-        if Gem::Dependency.new("graphql", ">= 1.11.0").match?("graphql", GraphQL::VERSION)
-          def wrap(field, parent, items, arguments, context, *options)
-            raw_value?(items) ? items : super
-          end
-        else
+        if Gem::Dependency.new("graphql", "< 1.11.0").match?("graphql", GraphQL::VERSION)
           def wrap(field, object, arguments, context, *options)
             raw_value?(object) ? object : super
+          end
+        elsif Gem::Dependency.new("graphql", "< 1.11.5").match?("graphql", GraphQL::VERSION)
+          def wrap(field, parent, items, arguments, context, *options)
+            raw_value?(items) ? items : super
           end
         end
 
