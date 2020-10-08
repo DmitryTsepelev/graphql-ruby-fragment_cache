@@ -275,6 +275,35 @@ class QueryType < BaseObject
 end
 ```
 
+## How to use `#cache_fragment` in extensions (and other not usual places)
+
+If you want to call `#cache_fragment` from places other that fields or resolvers, you'll need to pass `context` explicitly and turn on `raw_value` support. For instance, let's take a look at this extension:
+
+```ruby
+class Types::QueryType < Types::BaseObject
+  class CurrentMomentExtension < GraphQL::Schema::FieldExtension
+    # turning on cache_fragment support
+    include GraphQL::FragmentCache::ObjectHelpers
+
+    def resolve(object:, arguments:, context:)
+      # context is passed explicitly
+      cache_fragment(context: context) do
+        result = yield(object, arguments)
+        "#{result} (at #{Time.now})"
+      end
+    end
+  end
+
+  field :event, String, null: false, extensions: [CurrentMomentExtension]
+
+  def event
+    "something happened"
+  end
+end
+```
+
+With this approach you can use `#cache_fragment` in any place you have an access to the `context`.
+
 ## Limitations
 
 Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:

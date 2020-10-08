@@ -2,6 +2,7 @@
 
 ## master
 
+- [PR#32](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/32) Support caching from other places than field or resolver  ([@DmitryTsepelev][])
 - [PR#31](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/31) Do not patch Connection#wrap in graphql >= 1.10.5 ([@DmitryTsepelev][])
 
 ## 1.0.3 (2020-08-31)
