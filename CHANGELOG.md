@@ -2,6 +2,9 @@
 
 ## master
 
+## 1.0.4 (2020-10-12)
+
+- [PR#34](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/34) Avoid unneded default calculation in CacheKeyBuilder ([@DmitryTsepelev][])
 - [PR#31](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/31) Do not patch Connection#wrap in graphql >= 1.10.5 ([@DmitryTsepelev][])
 
 ## 1.0.3 (2020-08-31)
