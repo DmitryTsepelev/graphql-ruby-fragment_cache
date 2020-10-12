@@ -12,8 +12,6 @@ module GraphQL
 
       NO_OBJECT = Object.new
 
-      def_delegator :field, :connection?
-
       def cache_fragment(object_to_cache = NO_OBJECT, **options, &block)
         raise ArgumentError, "Block or argument must be provided" unless block_given? || object_to_cache != NO_OBJECT
 
@@ -28,16 +26,6 @@ module GraphQL
         (block_given? ? block.call : object_to_cache).tap do |resolved_value|
           context.fragments << fragment
         end
-      end
-
-      private
-
-      def field
-        interpreter_context[:current_field]
-      end
-
-      def interpreter_context
-        @interpreter_context ||= context.namespace(:interpreter)
       end
     end
   end
