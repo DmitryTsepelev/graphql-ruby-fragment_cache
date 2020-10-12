@@ -22,16 +22,15 @@ module GraphQL
         end
       end
 
-      def persist
-        value = final_value.dig(*path)
-        FragmentCache.cache_store.write(cache_key, value, **options)
-      end
-
-      private
-
       def cache_key
         @cache_key ||= CacheKeyBuilder.call(path: path, query: context.query, **options)
       end
+
+      def value
+        final_value.dig(*path)
+      end
+
+      private
 
       def interpreter_context
         context.namespace(:interpreter)
