@@ -121,11 +121,11 @@ module GraphQL
       private
 
       def schema_cache_key
-        @options.fetch(:schema_cache_key, schema.schema_cache_key)
+        @options.fetch(:schema_cache_key) { schema.schema_cache_key }
       end
 
       def query_cache_key
-        @options.fetch(:query_cache_key, "#{path_cache_key}[#{selections_cache_key}]")
+        @options.fetch(:query_cache_key) { "#{path_cache_key}[#{selections_cache_key}]" }
       end
 
       def selections_cache_key
