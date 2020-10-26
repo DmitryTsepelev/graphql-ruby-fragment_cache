@@ -38,6 +38,14 @@ class BaseType < GraphQL::Schema::Object
 end
 ```
 
+If you're using [resolvers](https://graphql-ruby.org/fields/resolvers.html) — include the module into the base resolver as well:
+
+```ruby
+class Resolvers::BaseResolver < GraphQL::Schema::Resolver
+  include GraphQL::FragmentCache::ObjectHelpers
+end
+```
+
 Now you can add `cache_fragment:` option to your fields to turn caching on:
 
 ```ruby
@@ -47,7 +55,7 @@ class PostType < BaseObject
 end
 ```
 
-Alternatively, you can use `cache_fragment` method inside resolvers:
+Alternatively, you can use `cache_fragment` method inside resolver methods:
 
 ```ruby
 class QueryType < BaseObject
@@ -274,6 +282,35 @@ class QueryType < BaseObject
   end
 end
 ```
+
+## How to use `#cache_fragment` in extensions (and other places where context is not available)
+
+If you want to call `#cache_fragment` from places other that fields or resolvers, you'll need to pass `context` explicitly and turn on `raw_value` support. For instance, let's take a look at this extension:
+
+```ruby
+class Types::QueryType < Types::BaseObject
+  class CurrentMomentExtension < GraphQL::Schema::FieldExtension
+    # turning on cache_fragment support
+    include GraphQL::FragmentCache::ObjectHelpers
+
+    def resolve(object:, arguments:, context:)
+      # context is passed explicitly
+      cache_fragment(context: context) do
+        result = yield(object, arguments)
+        "#{result} (at #{Time.now})"
+      end
+    end
+  end
+
+  field :event, String, null: false, extensions: [CurrentMomentExtension]
+
+  def event
+    "something happened"
+  end
+end
+```
+
+With this approach you can use `#cache_fragment` in any place you have an access to the `context`. When context is not available, the error `cannot find context, please pass it explicitly` will be thrown.
 
 ## Limitations
 
