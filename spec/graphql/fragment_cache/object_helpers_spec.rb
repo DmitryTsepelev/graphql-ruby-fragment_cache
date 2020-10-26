@@ -327,6 +327,42 @@ describe "#cache_fragment" do
         end
       end
     end
+
+    context "when resolver is used" do
+      let(:resolver_class) do
+        Class.new(GraphQL::Schema::Resolver) do
+          include GraphQL::FragmentCache::ObjectHelpers
+
+          type Types::Post, null: true
+
+          argument :id, GraphQL::Types::ID, required: true
+          argument :expires_in, GraphQL::Types::Int, required: false
+
+          def resolve(id:, expires_in: nil)
+            cache_fragment { Post.find(id) }
+          end
+        end
+      end
+
+      let(:schema) do
+        klass = resolver_class
+
+        build_schema do
+          query(
+            Class.new(Types::Query) {
+              field :post, resolver: klass
+            }
+          )
+        end
+      end
+
+      it "returns cached fragment" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "object test"
+        })
+      end
+    end
   end
 
   describe "connection caching" do
