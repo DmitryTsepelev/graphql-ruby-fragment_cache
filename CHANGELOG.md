@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.1.0 (2020-10-26)
+
 - [PR#38](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/38) Support caching from other places than field or resolver  ([@DmitryTsepelev][])
 
 ## 1.0.5 (2020-10-13)
