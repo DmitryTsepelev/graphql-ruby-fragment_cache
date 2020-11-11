@@ -39,6 +39,30 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   it "uses Cache.expand_cache_key" do
     allow(ActiveSupport::Cache).to receive(:expand_cache_key).with(object) { "as:cache:key" }
 
-    is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]/as:cache:key"
+    is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]/Post#42"
+  end
+
+  context "when object is passed and responds to #graphql_cache_key" do
+    before do
+      object.singleton_class.define_method(:graphql_cache_key) { "{graphql_cache_key}" }
+    end
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]/{graphql_cache_key}" }
+  end
+
+  context "when object is passed and responds to #cache_key_with_version" do
+    before do
+      object.singleton_class.define_method(:cache_key_with_version) { "{cache_key_with_version}" }
+    end
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]/{cache_key_with_version}" }
+  end
+
+  context "when object is passed and responds to #cache_key" do
+    before do
+      object.singleton_class.define_method(:cache_key) { "{cache-key}" }
+    end
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]/{cache-key}" }
   end
 end
