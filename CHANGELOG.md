@@ -2,6 +2,10 @@
 
 ## master
 
+## [Unreleased]
+
+- [PR#37](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/37) Try to use `cache_key_with_version` or `cache_key` with Rails CacheKeyBuilder
+
 ## 1.0.5 (2020-10-13)
 
 - [PR#35](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/35) Prefer using `#write_multi` on cache store when possible ([@DmitryTsepelev][])
