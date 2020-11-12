@@ -2,9 +2,9 @@
 
 ## master
 
-## [Unreleased]
+## 1.2.0 (2020-10-26)
 
-- [PR#37](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/37) Try to use `cache_key_with_version` or `cache_key` with Rails CacheKeyBuilder
+- [PR#37](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/37) Try to use `cache_key_with_version` or `cache_key` with Rails CacheKeyBuilder ([@bbugh][])
 
 ## 1.1.0 (2020-10-26)
 
@@ -73,3 +73,4 @@
 [@palkan]: https://github.com/palkan
 [@ssnickolay]: https://github.com/ssnickolay
 [@reabiliti]: https://github.com/reabiliti
+[@bbugh]: https://github.com/bbugh
