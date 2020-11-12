@@ -2,6 +2,10 @@
 
 ## master
 
+## [Unreleased]
+
+- [PR#37](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/37) Try to use `cache_key_with_version` or `cache_key` with Rails CacheKeyBuilder
+
 ## 1.1.0 (2020-10-26)
 
 - [PR#38](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/38) Support caching from other places than field or resolver  ([@DmitryTsepelev][])
