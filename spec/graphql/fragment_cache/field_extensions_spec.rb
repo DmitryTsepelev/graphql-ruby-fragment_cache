@@ -59,8 +59,21 @@ describe "cache_fragment: option" do
     end
   end
 
-  context "when cache_fragment option contains key settings" do
+  context "when cache_fragment option contains query_cache_key" do
     let(:cache_fragment) { {query_cache_key: "custom"} }
+
+    it "returns the same cache fragment for a different query when query_cache_key is constant" do
+      variables[:id] = 2
+
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "option test"
+      })
+    end
+  end
+
+  context "when cache_fragment option contains path_cache_key" do
+    let(:cache_fragment) { {path_cache_key: "custom"} }
 
     it "returns the same cache fragment for a different query when query_cache_key is constant" do
       variables[:id] = 2
