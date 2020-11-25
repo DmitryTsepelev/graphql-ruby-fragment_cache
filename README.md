@@ -115,7 +115,7 @@ query_cache_key = Digest::SHA1.hexdigest("#{path_cache_key}#{selections_cache_ke
 cache_key = "#{schema_cache_key}/#{query_cache_key}"
 ```
 
-You can override `schema_cache_key` or `query_cache_key` by passing parameters to the `cache_fragment` calls:
+You can override `schema_cache_key`, `query_cache_key` or `path_cache_key` by passing parameters to the `cache_fragment` calls:
 
 ```ruby
 class QueryType < BaseObject
@@ -128,6 +128,8 @@ class QueryType < BaseObject
   end
 end
 ```
+
+Overriding `path_cache_key` might be helpful when you resolve the same object nested in multiple places (e.g., `Post` and `Comment` both have `author`), but want to make sure cache will be invalidated when selection set is different.
 
 Same for the option:
 

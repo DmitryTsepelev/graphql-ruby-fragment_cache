@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#39](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/39) Implement `path_cache_key` option ([@DmitryTsepelev][])
+
 ## 1.2.0 (2020-10-26)
 
 - [PR#37](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/37) Try to use `cache_key_with_version` or `cache_key` with Rails CacheKeyBuilder ([@bbugh][])

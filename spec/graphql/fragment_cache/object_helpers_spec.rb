@@ -96,10 +96,27 @@ describe "#cache_fragment" do
       end
     end
 
-    context "when key part option is passed" do
+    context "when query_cache_key option is passed" do
       let(:resolver) do
         ->(id:, expires_in:) do
           cache_fragment(query_cache_key: "my_key") { Post.find(id) }
+        end
+      end
+
+      it "returns the same cache fragment for a different query when query_cache_key is constant" do
+        variables[:id] = 2
+
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "object test"
+        })
+      end
+    end
+
+    context "when path_cache_key option is passed" do
+      let(:resolver) do
+        ->(id:, expires_in:) do
+          cache_fragment(path_cache_key: "my_key") { Post.find(id) }
         end
       end
 
