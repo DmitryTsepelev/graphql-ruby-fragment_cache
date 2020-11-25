@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.3.0 (2020-11-25)
+
 - [PR#39](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/39) Implement `path_cache_key` option ([@DmitryTsepelev][])
 
 ## 1.2.0 (2020-10-26)
