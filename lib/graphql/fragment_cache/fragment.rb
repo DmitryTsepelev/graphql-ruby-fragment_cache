@@ -4,6 +4,8 @@ require "graphql/fragment_cache/cache_key_builder"
 
 module GraphQL
   module FragmentCache
+    using Ext
+
     # Represents a single fragment to cache
     class Fragment
       attr_reader :options, :path, :context
@@ -16,10 +18,10 @@ module GraphQL
 
       NIL_IN_CACHE = Object.new
 
-      def read
-        FragmentCache.cache_store.read(cache_key).tap do |cached|
-          return NIL_IN_CACHE if cached.nil? && FragmentCache.cache_store.exist?(cache_key)
-        end
+      def read(keep_in_context = false)
+        return read_from_context { value_from_cache } if keep_in_context
+
+        value_from_cache
       end
 
       def cache_key
@@ -31,6 +33,20 @@ module GraphQL
       end
 
       private
+
+      def read_from_context
+        if (loaded_value = context.loaded_fragments[cache_key])
+          return loaded_value
+        end
+
+        yield.tap { |value| context.loaded_fragments[cache_key] = value }
+      end
+
+      def value_from_cache
+        FragmentCache.cache_store.read(cache_key).tap do |cached|
+          return NIL_IN_CACHE if cached.nil? && FragmentCache.cache_store.exist?(cache_key)
+        end
+      end
 
       def interpreter_context
         context.namespace(:interpreter)

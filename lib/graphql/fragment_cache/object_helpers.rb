@@ -27,9 +27,10 @@ module GraphQL
         context_to_use = context if context_to_use.nil? && respond_to?(:context)
         raise ArgumentError, "cannot find context, please pass it explicitly" unless context_to_use
 
-        fragment = Fragment.new(context_to_use, options)
+        fragment = Fragment.new(context_to_use, **options)
 
-        if (cached = fragment.read)
+        keep_in_context = options.delete(:keep_in_context)
+        if (cached = fragment.read(keep_in_context))
           return cached == Fragment::NIL_IN_CACHE ? nil : raw_value(cached)
         end
 

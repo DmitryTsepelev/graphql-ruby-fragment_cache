@@ -314,6 +314,24 @@ end
 
 With this approach you can use `#cache_fragment` in any place you have an access to the `context`. When context is not available, the error `cannot find context, please pass it explicitly` will be thrown.
 
+## In–memory fragments
+
+If you have a fragment that accessed from multiple times (e.g., if you have a list of items that belong to the same owner, and owner is cached), you can avoid multiple cache reads by using `:keep_in_context` option:
+
+```ruby
+class QueryType < BaseObject
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    cache_fragment(keep_in_context: true, expires_in: 5.minutes) { Post.find(id) }
+  end
+end
+```
+
+This can reduce a number of cache calls but _increase_ memory usage, because the value returned from cache will be kept in the GraphQL context until the query is fully resolved.
+
 ## Limitations
 
 Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:

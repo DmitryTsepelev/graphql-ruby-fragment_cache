@@ -630,4 +630,91 @@ describe "#cache_fragment" do
       expect(::Post).not_to have_received(:all)
     end
   end
+
+  context "context caching" do
+    let(:resolver) do
+      ->(id:) do
+        cache_fragment(path_cache_key: "same_post") { Post.find(id) }
+      end
+    end
+
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+
+            define_method(:post, &field_resolver)
+          }
+        )
+      end
+    end
+
+    let(:id) { 1 }
+    let(:variables) { {id: id} }
+
+    let(:query) do
+      <<~GQL
+        query getPostManyTimes($id: ID!) {
+          post1: post(id: $id) {
+            id
+            title
+          }
+
+          post2: post(id: $id) {
+            id
+            title
+          }
+
+          post3: post(id: $id) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let!(:post) { Post.create(id: 1, title: "object test") }
+
+    before do
+      allow(GraphQL::FragmentCache.cache_store).to receive(:read)
+    end
+
+    before do
+      # warmup cache
+      execute_query
+    end
+
+    it "calls #read for each entry" do
+      # warmup calls
+      expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(3)
+
+      execute_query
+
+      # read key once
+      expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(6)
+    end
+
+    context "when keep_in_context is true" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(path_cache_key: "same_post", keep_in_context: true) { Post.find(id) }
+        end
+      end
+
+      it "calls #read once" do
+        # warmup calls
+        expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(3)
+
+        execute_query
+
+        # read key once
+        expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(4)
+      end
+    end
+  end
 end
