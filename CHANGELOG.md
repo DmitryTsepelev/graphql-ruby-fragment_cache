@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.4.0 (2020-12-03)
+
 - [PR#41](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/41) Add `keep_in_context` option ([@DmitryTsepelev][])
 
 ## 1.3.0 (2020-11-25)
