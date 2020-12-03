@@ -29,7 +29,8 @@ module GraphQL
 
         fragment = Fragment.new(context_to_use, options)
 
-        if (cached = fragment.read)
+        keep_in_context = options.delete(:keep_in_context)
+        if (cached = fragment.read(keep_in_context))
           return cached == Fragment::NIL_IN_CACHE ? nil : raw_value(cached)
         end
 

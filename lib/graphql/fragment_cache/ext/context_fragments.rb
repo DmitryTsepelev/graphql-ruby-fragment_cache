@@ -13,6 +13,10 @@ module GraphQL
         def fragments
           namespace(:fragment_cache)[:fragments] ||= []
         end
+
+        def loaded_fragments
+          namespace(:fragment_cache)[:loaded] ||= {}
+        end
       end
     end
   end
