@@ -70,7 +70,9 @@ describe GraphQL::FragmentCache::Cacher do
       it "raises error" do
         expect { execute_query }.to raise_error do |error|
           expect(error).to be_a(GraphQL::FragmentCache::WriteMultiError)
+          expect(error.message).to eq("something went wrong")
           expect(error.values).not_to be_nil
+          expect(error.original_error).not_to be_nil
         end
       end
     end
@@ -142,8 +144,10 @@ describe GraphQL::FragmentCache::Cacher do
     it "raises error" do
       expect { execute_query }.to raise_error do |error|
         expect(error).to be_a(GraphQL::FragmentCache::WriteError)
+        expect(error.message).to eq("something went wrong")
         expect(error.key).not_to be_nil
         expect(error.value).not_to be_nil
+        expect(error.original_error).not_to be_nil
       end
     end
   end

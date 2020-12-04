@@ -5,23 +5,25 @@ module GraphQL
     using Ext
 
     class WriteError < StandardError
-      attr_reader :key, :value
+      attr_reader :key, :value, :original_error
 
-      def initialize(message, key, value)
+      def initialize(original_error, key, value)
+        @original_error = original_error
         @key = key
         @value = value
 
-        super(message)
+        super(original_error.message)
       end
     end
 
     class WriteMultiError < StandardError
-      attr_reader :values
+      attr_reader :values, :original_error
 
-      def initialize(message, values)
+      def initialize(original_error, values)
+        @original_error = original_error
         @values = values
 
-        super(message)
+        super(original_error.message)
       end
     end
 
@@ -47,7 +49,7 @@ module GraphQL
             begin
               FragmentCache.cache_store.write_multi(hash, **options)
             rescue => e
-              raise WriteMultiError.new(e.message, hash)
+              raise WriteMultiError.new(e, hash)
             end
           end
         end
@@ -56,7 +58,7 @@ module GraphQL
           query.context.fragments.each do |fragment|
             FragmentCache.cache_store.write(fragment.cache_key, fragment.value, **fragment.options)
           rescue => e
-            raise WriteError.new(e.message, fragment.cache_key, fragment.value)
+            raise WriteError.new(e, fragment.cache_key, fragment.value)
           end
         end
       end
