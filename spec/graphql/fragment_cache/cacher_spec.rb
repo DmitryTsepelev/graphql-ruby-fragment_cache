@@ -21,10 +21,10 @@ describe GraphQL::FragmentCache::Cacher do
   end
 
   before do
-    allow(GraphQL::FragmentCache.cache_store).to receive(:write)
+    allow(GraphQL::FragmentCache.cache_store).to receive(:write).and_call_original
 
     if GraphQL::FragmentCache.cache_store.respond_to?(:write_multi)
-      allow(GraphQL::FragmentCache.cache_store).to receive(:write_multi)
+      allow(GraphQL::FragmentCache.cache_store).to receive(:write_multi).and_call_original
     end
   end
 
@@ -37,7 +37,7 @@ describe GraphQL::FragmentCache::Cacher do
     let(:write_multi_store_class) do
       Class.new(GraphQL::FragmentCache::MemoryStore) {
         def write_multi(hash, **options)
-          hash.each { |key, value| write(key, value, options) }
+          hash.each { |key, value| write(key, value, **options) }
         end
       }
     end
@@ -54,6 +54,25 @@ describe GraphQL::FragmentCache::Cacher do
     it "uses #write_multi" do
       execute_query
       expect(GraphQL::FragmentCache.cache_store).to have_received(:write_multi)
+    end
+
+    context "when store raises error" do
+      let(:write_with_error_store_class) do
+        Class.new(GraphQL::FragmentCache::MemoryStore) {
+          def write_multi(hash, **options)
+            raise StandardError, "something went wrong"
+          end
+        }
+      end
+
+      let(:store) { write_with_error_store_class.new }
+
+      it "raises error" do
+        expect { execute_query }.to raise_error do |error|
+          expect(error).to be_a(GraphQL::FragmentCache::WriteMultiError)
+          expect(error.values).not_to be_nil
+        end
+      end
     end
 
     context "when cached fields have different options" do
@@ -98,6 +117,33 @@ describe GraphQL::FragmentCache::Cacher do
           end
 
         expect(args).to eq([{query_cache_key: "1"}, {query_cache_key: "2"}])
+      end
+    end
+  end
+
+  context "when store raises error" do
+    let(:write_with_error_store_class) do
+      Class.new(GraphQL::FragmentCache::MemoryStore) {
+        def write(key, value, **options)
+          raise StandardError, "something went wrong"
+        end
+      }
+    end
+
+    let(:store) { write_with_error_store_class.new }
+
+    around do |ex|
+      old_store = GraphQL::FragmentCache.cache_store
+      GraphQL::FragmentCache.cache_store = store
+      ex.run
+      GraphQL::FragmentCache.cache_store = old_store
+    end
+
+    it "raises error" do
+      expect { execute_query }.to raise_error do |error|
+        expect(error).to be_a(GraphQL::FragmentCache::WriteError)
+        expect(error.key).not_to be_nil
+        expect(error.value).not_to be_nil
       end
     end
   end
