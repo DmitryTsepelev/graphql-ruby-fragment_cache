@@ -75,7 +75,7 @@ module GraphQL
         end
 
         def lookup_alias_node(nodes, name)
-          return if nodes.empty?
+          return if nodes.nil? || nodes.empty?
 
           nodes.find do |node|
             if node.is_a?(GraphQL::Language::Nodes::FragmentSpread)
