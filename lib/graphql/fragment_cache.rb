@@ -23,7 +23,7 @@ module GraphQL
       attr_reader :cache_store
 
       def use(schema_defn, options = {})
-        verify_interpreter!(schema_defn)
+        verify_interpreter_and_analysis!(schema_defn)
 
         schema_defn.tracer(Schema::Tracer)
         schema_defn.instrument(:query, Schema::Instrumentation)
@@ -44,17 +44,33 @@ module GraphQL
         @cache_store = store
       end
 
+      def graphql_ruby_1_12_or_later?
+        Gem::Dependency.new("graphql", ">= 1.12.0").match?("graphql", GraphQL::VERSION)
+      end
+
       private
 
-      def verify_interpreter!(schema_defn)
-        unless schema_defn.interpreter?
-          raise StandardError,
-            "GraphQL::Execution::Interpreter should be enabled for fragment caching"
-        end
+      def verify_interpreter_and_analysis!(schema_defn)
+        if graphql_ruby_1_12_or_later?
+          unless schema_defn.interpreter?
+            raise StandardError,
+              "GraphQL::Execution::Execute should not be enabled for fragment caching"
+          end
 
-        unless schema_defn.analysis_engine == GraphQL::Analysis::AST
-          raise StandardError,
-            "GraphQL::Analysis::AST should be enabled for fragment caching"
+          unless schema_defn.analysis_engine == GraphQL::Analysis::AST
+            raise StandardError,
+              "GraphQL::Analysis should not be enabled for fragment caching"
+          end
+        else
+          unless schema_defn.interpreter?
+            raise StandardError,
+              "GraphQL::Execution::Interpreter should be enabled for fragment caching"
+          end
+
+          unless schema_defn.analysis_engine == GraphQL::Analysis::AST
+            raise StandardError,
+              "GraphQL::Analysis::AST should be enabled for fragment caching"
+          end
         end
       end
     end
