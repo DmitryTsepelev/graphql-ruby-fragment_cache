@@ -11,9 +11,13 @@ module GraphQL
       extend Forwardable
 
       def self.included(base)
-        return if base < GraphQL::Execution::Interpreter::HandlesRawValue
+        return if base.method_defined?(:raw_value)
 
-        base.include(GraphQL::Execution::Interpreter::HandlesRawValue)
+        base.include(Module.new {
+          def raw_value(obj)
+            GraphQL::Execution::Interpreter::RawValue.new(obj)
+          end
+        })
       end
 
       NO_OBJECT = Object.new

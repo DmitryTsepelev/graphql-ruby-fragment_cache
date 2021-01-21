@@ -23,7 +23,7 @@ module GraphQL
           end
 
           def verify_connections!(context)
-            return if context.schema.new_connections?
+            return if GraphQL::FragmentCache.graphql_ruby_1_12_or_later? || context.schema.new_connections?
 
             raise StandardError,
               "GraphQL::Pagination::Connections should be enabled for connection caching"

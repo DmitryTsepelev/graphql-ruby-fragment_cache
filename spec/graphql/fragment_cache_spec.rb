@@ -4,23 +4,47 @@ require "spec_helper"
 
 describe GraphQL::FragmentCache do
   describe ".use" do
-    it "raises if interpreter is not used" do
-      expect {
-        Class.new(GraphQL::Schema) { use GraphQL::FragmentCache }
-      }.to raise_error(
-        StandardError, "GraphQL::Execution::Interpreter should be enabled for fragment caching"
-      )
-    end
+    if GraphQL::FragmentCache.graphql_ruby_1_12_or_later?
+      it "raises if GraphQL::Execution::Execute is included" do
+        expect {
+          Class.new(GraphQL::Schema) do
+            use GraphQL::Execution::Execute
+            use GraphQL::FragmentCache
+          end
+        }.to raise_error(
+          StandardError, "GraphQL::Execution::Execute should not be enabled for fragment caching"
+        )
+      end
 
-    it "raise if interpreter is used without AST" do
-      expect {
-        Class.new(GraphQL::Schema) do
-          use GraphQL::Execution::Interpreter
-          use GraphQL::FragmentCache
-        end
-      }.to raise_error(
-        StandardError, "GraphQL::Analysis::AST should be enabled for fragment caching"
-      )
+      it "raises if GraphQL::Analysis is included" do
+        expect {
+          Class.new(GraphQL::Schema) do
+            use GraphQL::Analysis
+            use GraphQL::FragmentCache
+          end
+        }.to raise_error(
+          StandardError, "GraphQL::Analysis should not be enabled for fragment caching"
+        )
+      end
+    else
+      it "raises if interpreter is not used" do
+        expect {
+          Class.new(GraphQL::Schema) { use GraphQL::FragmentCache }
+        }.to raise_error(
+          StandardError, "GraphQL::Execution::Interpreter should be enabled for fragment caching"
+        )
+      end
+
+      it "raise if interpreter is used without AST" do
+        expect {
+          Class.new(GraphQL::Schema) do
+            use GraphQL::Execution::Interpreter
+            use GraphQL::FragmentCache
+          end
+        }.to raise_error(
+          StandardError, "GraphQL::Analysis::AST should be enabled for fragment caching"
+        )
+      end
     end
 
     it "doesn't raise if interpreter is used with AST" do
