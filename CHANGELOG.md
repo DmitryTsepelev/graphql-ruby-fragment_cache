@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.4.1 (2021-01-21)
+
 - [PR#48](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/48) Support graphql-ruby 1.12 ([@DmitryTsepelev][])
 
 ## 1.4.0 (2020-12-03)
