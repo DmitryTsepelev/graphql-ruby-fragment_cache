@@ -5,8 +5,16 @@ module Types
     include GraphQL::FragmentCache::Object
   end
 
+  module Votable
+    include GraphQL::Schema::Interface
+
+    field :rating, Integer, null: false, cache_fragment: true
+  end
+
   class User < Base
     graphql_name "UserType"
+
+    implements Votable
 
     field :id, ID, null: false
     field :name, String, null: false
@@ -14,6 +22,8 @@ module Types
 
   class Post < Base
     graphql_name "PostType"
+
+    implements Votable
 
     field :id, ID, null: false
     field :title, String, null: false
@@ -59,11 +69,17 @@ module Types
       argument :complex_post_input, ComplexPostInput, required: true
     end
 
+    field :leaderboard, [Votable], null: false
+
     def post(id:)
       ::Post.find(id)
     end
 
     def posts
+      ::Post.all
+    end
+
+    def leaderboard
       ::Post.all
     end
 

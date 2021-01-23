@@ -265,4 +265,20 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     specify { is_expected.to eq "schema_key/post(id:1)/cachedAuthor[name]" }
   end
+
+  context "when query has interface type" do
+    let(:path) { ["leaderboard", "rating"] }
+
+    let(:query) do
+      <<~GQL
+        query getLeaderboard {
+          leaderboard {
+            rating
+          }
+        }
+      GQL
+    end
+
+    specify { is_expected.to eq "schema_key/leaderboard/rating[]" }
+  end
 end
