@@ -29,8 +29,9 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   let(:object) { nil }
   let(:context) { {} }
   let(:query_obj) { GraphQL::Query.new(schema, query, variables: variables, context: context) }
+  let(:options) { {} }
 
-  subject { described_class.call(object: object, query: query_obj, path: path) }
+  subject { described_class.call(object: object, query: query_obj, path: path, **options) }
 
   # Make cache keys raw for easier debugging
   let(:schema_cache_key) { "schema_key" }
@@ -196,6 +197,15 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     it "fallbacks to #to_s" do
       is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{post.author}"
+    end
+  end
+
+  context "when object_cache_key is passed" do
+    let(:options) { { object_cache_key: "test_cache_key/1-230834092834098" } }
+    let(:object) { post.author }
+
+    it "uses the option instead of the object's cache_key" do
+      is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]/#{options[:object_cache_key]}"
     end
   end
 
