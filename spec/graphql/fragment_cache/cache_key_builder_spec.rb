@@ -201,7 +201,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   end
 
   context "when object_cache_key is passed" do
-    let(:options) { { object_cache_key: "test_cache_key/1-230834092834098" } }
+    let(:options) { {object_cache_key: "test_cache_key/1-230834092834098"} }
     let(:object) { post.author }
 
     it "uses the option instead of the object's cache_key" do
