@@ -113,8 +113,13 @@ module GraphQL
 
       def build
         Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}").then do |base_key|
-          next base_key unless object
-          "#{base_key}/#{object_key(object)}"
+          if @options[:object_cache_key]
+            "#{base_key}/#{@options[:object_cache_key]}"
+          elsif object
+            "#{base_key}/#{object_key(object)}"
+          else
+            base_key
+          end
         end
       end
 

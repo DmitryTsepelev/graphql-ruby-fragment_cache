@@ -112,10 +112,10 @@ selections_cache_key = "[#{%w[id name].join(".")}]"
 
 query_cache_key = Digest::SHA1.hexdigest("#{path_cache_key}#{selections_cache_key}")
 
-cache_key = "#{schema_cache_key}/#{query_cache_key}"
+cache_key = "#{schema_cache_key}/#{query_cache_key}/#{object_cache_key}"
 ```
 
-You can override `schema_cache_key`, `query_cache_key` or `path_cache_key` by passing parameters to the `cache_fragment` calls:
+You can override `schema_cache_key`, `query_cache_key`, `path_cache_key` or `object_cache_key` by passing parameters to the `cache_fragment` calls:
 
 ```ruby
 class QueryType < BaseObject
@@ -137,6 +137,21 @@ Same for the option:
 class PostType < BaseObject
   field :id, ID, null: false
   field :title, String, null: false, cache_fragment: {query_cache_key: "post_title"}
+end
+```
+
+Overriding `object_cache_key` is helpful in the case where the value that is cached is different than the one used as a key, like a database query that is pre-processed before caching.
+
+```ruby
+class QueryType < BaseObject
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    query = Post.where("updated_at < ?", Time.now - 1.day)
+    cache_fragment(object_cache_key: query.cache_key) { query.some_process }
+  end
 end
 ```
 
@@ -198,6 +213,7 @@ end
 
 The way cache key part is generated for the passed argument is the following:
 
+- Use `object_cache_key: "some_cache_key"` if passed to `cache_fragment`
 - Use `#graphql_cache_key` if implemented.
 - Use `#cache_key` (or `#cache_key_with_version` for modern Rails) if implemented.
 - Use `self.to_s` for _primitive_ types (strings, symbols, numbers, booleans).
