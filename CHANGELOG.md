@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#51](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/51) Do not cache fragments without final value ([@DmitryTsepelev][])
+
 ## 1.5.0 (2021-02-20)
 
 - [PR#50](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/50) Add object_cache_key to CacheKeyBuilder ([@bbugh][])
