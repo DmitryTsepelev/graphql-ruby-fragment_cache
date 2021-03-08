@@ -348,6 +348,16 @@ end
 
 This can reduce a number of cache calls but _increase_ memory usage, because the value returned from cache will be kept in the GraphQL context until the query is fully resolved.
 
+## Execution errors and caching
+
+Sometimes errors happen during query resolving and it might make sense to skip caching for such queries (for instance, imagine a situation when client has no access to the requested field and the backend returns `{ data: {}, errors: ["you need a permission to fetch orders"] }`). This is how this behavior can be turned on (_it's off by default!_):
+
+```ruby
+GraphQL::FragmentCache.skip_cache_when_query_has_errors = true
+```
+
+As a result, caching will be skipped when `errors` array is not empty.
+
 ## Limitations
 
 Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:

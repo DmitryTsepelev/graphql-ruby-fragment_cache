@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#43](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/43) Implement `skip_cache_when_query_has_errors` option to skip caching when query was resolved with errors ([@DmitryTsepelev][])
+
 ## 1.5.0 (2021-02-20)
 
 - [PR#50](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/50) Add object_cache_key to CacheKeyBuilder ([@bbugh][])
