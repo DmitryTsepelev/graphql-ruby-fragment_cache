@@ -11,10 +11,24 @@ module GraphQL
 
     using(Module.new {
       refine Array do
+        def traverse_argument(argument)
+          return argument unless argument.is_a?(GraphQL::Schema::InputObject)
+
+          "{#{argument.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")}}"
+        end
+
         def to_selections_key
           map { |val|
             children = val.selections.empty? ? "" : "[#{val.selections.to_selections_key}]"
-            "#{val.field.name}#{children}"
+
+            field_name = val.field.name
+
+            unless val.arguments.empty?
+              args = val.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
+              field_name += "(#{args})"
+            end
+
+            "#{field_name}#{children}"
           }.join(".")
         end
       end
