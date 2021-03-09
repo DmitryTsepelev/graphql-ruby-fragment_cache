@@ -28,6 +28,10 @@ module GraphQL
         @cache_key ||= CacheKeyBuilder.call(path: path, query: context.query, **options)
       end
 
+      def with_final_value?
+        !final_value.nil?
+      end
+
       def value
         final_value.dig(*path)
       end
