@@ -40,4 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "timecop"
   spec.add_development_dependency "ruby-next", ">= 0.10"
   spec.add_development_dependency "unparser", "0.4.9"
+  spec.add_development_dependency "graphql-batch"
 end

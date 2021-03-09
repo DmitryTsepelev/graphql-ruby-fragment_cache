@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+class AuthorLoader < GraphQL::Batch::Loader
+  def perform(posts)
+    posts.each { |post| fulfill(post, post.author) }
+    posts.each { |post| fulfill(post, nil) unless fulfilled?(id) }
+  end
+end
+
 module Types
   class Base < GraphQL::Schema::Object
     include GraphQL::FragmentCache::Object
@@ -20,11 +27,16 @@ module Types
     field :cached_title, String, null: false, cache_fragment: true, method: :title
     field :author, User, null: false
     field :cached_author, User, null: false
+    field :batched_cached_author, User, null: false
 
     field :meta, String, null: true
 
     def cached_author
       cache_fragment { object.author }
+    end
+
+    def batched_cached_author
+      cache_fragment { AuthorLoader.load(object) }
     end
   end
 

@@ -719,4 +719,53 @@ describe "#cache_fragment" do
       end
     end
   end
+
+  describe "caching fields with batch loader" do
+    let(:query) do
+      <<~GQL
+        query GetPosts {
+          posts {
+            id
+            batchedCachedAuthor {
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:schema) do
+      build_schema do
+        use GraphQL::Batch
+        query(Types::Query)
+      end
+    end
+
+    let(:user1) { User.new(id: 1, name: "User #1") }
+    let(:user2) { User.new(id: 2, name: "User #2") }
+
+    let!(:post1) { Post.create(id: 1, title: "object test 1", author: user1) }
+    let!(:post2) { Post.create(id: 2, title: "object test 2", author: user2) }
+
+    before do
+      # warmup cache
+      execute_query
+      # make objects dirty
+      user1.name = "User #1 new"
+      user2.name = "User #2 new"
+    end
+
+    it "returns cached results" do
+      expect(execute_query.dig("data", "posts")).to eq([
+        {
+          "id" => "1",
+          "batchedCachedAuthor" => {"name" => "User #1"}
+        },
+        {
+          "id" => "2",
+          "batchedCachedAuthor" => {"name" => "User #2"}
+        }
+      ])
+    end
+  end
 end
