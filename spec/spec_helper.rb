@@ -8,8 +8,8 @@ end
 ENV["RUBY_NEXT_TRANSPILE_MODE"] = "rewrite"
 require "ruby-next/language/runtime" unless ENV["CI"]
 
+require "graphql/batch"
 require "graphql-fragment_cache"
-
 require "timecop"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
