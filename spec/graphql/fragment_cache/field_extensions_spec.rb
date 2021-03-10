@@ -271,4 +271,15 @@ describe "cache_fragment: option" do
       expect(::Post).to have_received(:find).once
     end
   end
+
+  context "when :disabled is true" do
+    let(:cache_fragment) { {disabled: true} }
+
+    it "do not use cache" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option test"
+      })
+    end
+  end
 end

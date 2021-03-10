@@ -260,6 +260,13 @@ class QueryType < BaseObject
 end
 ```
 
+
+## Conditionally skip fragment_cache by disabling it
+
+```ruby
+cache_fragment(disabled: id < 5) { Post.find(id) }
+```
+
 ## Cache storage and options
 
 It's up to your to decide which caching engine to use, all you need is to configure the cache store:
