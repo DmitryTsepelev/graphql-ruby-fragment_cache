@@ -2,6 +2,9 @@
 
 ## master
 
+## 1.5.1 (2021-03-10)
+
+- [PR#53](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/53) Use thread-safe query result for final_value ([@bbugh][])
 - [PR#51](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/51) Do not cache fragments without final value ([@DmitryTsepelev][])
 
 ## 1.5.0 (2021-02-20)
