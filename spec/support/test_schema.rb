@@ -25,7 +25,11 @@ module Types
     field :id, ID, null: false
     field :title, String, null: false
     field :cached_title, String, null: false, cache_fragment: true, method: :title
-    field :author, User, null: false
+    field :author, User, null: false do
+      argument :version, Integer, required: false
+      argument :cached, Boolean, required: false
+    end
+
     field :cached_author, User, null: false
     field :batched_cached_author, User, null: false
 
@@ -94,9 +98,12 @@ module Types
 end
 
 class TestSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-  use GraphQL::Pagination::Connections
+  if Gem::Dependency.new("graphql", "< 1.12.0").match?("graphql", GraphQL::VERSION)
+    use GraphQL::Execution::Interpreter
+    use GraphQL::Analysis::AST
+    use GraphQL::Pagination::Connections
+  end
+
   use GraphQL::FragmentCache
 
   query Types::Query

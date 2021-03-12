@@ -176,6 +176,25 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     end
   end
 
+  context "when nested field specifies constant arguments" do
+    let(:query) do
+      <<~GQL
+        query GetPost($id: ID!) {
+          cachedPost(id: $id) {
+            id
+            title
+            author(cached: false, version: 5) {
+              id
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author(cached:false,version:5)[id.name]]" }
+  end
+
   context "when object is passed and responds to #cache_key" do
     let(:object) { post }
 
