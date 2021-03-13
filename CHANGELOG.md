@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#54](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/54) Include arguments in selections_cache_key ([@bbugh][])
+
 ## 1.5.1 (2021-03-10)
 
 - [PR#53](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/53) Use thread-safe query result for final_value ([@bbugh][])
