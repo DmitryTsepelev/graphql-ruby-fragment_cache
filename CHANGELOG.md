@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.6.0 (2021-03-13)
+
 - [PR#54](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/54) Include arguments in selections_cache_key ([@bbugh][])
 
 ## 1.5.1 (2021-03-10)
