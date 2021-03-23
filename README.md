@@ -350,7 +350,9 @@ This can reduce a number of cache calls but _increase_ memory usage, because the
 
 ## Limitations
 
-Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
+1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together.
+
+2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
 
 ```ruby
 field :cached_avatar_url, String, null: false
