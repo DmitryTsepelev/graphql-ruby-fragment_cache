@@ -32,6 +32,7 @@ module Types
 
     field :cached_author, User, null: false
     field :batched_cached_author, User, null: false
+    field :cached_author_inside_batch, User, null: false
 
     field :meta, String, null: true
 
@@ -41,6 +42,15 @@ module Types
 
     def batched_cached_author
       cache_fragment { AuthorLoader.load(object) }
+    end
+
+    def cached_author_inside_batch
+      outer_path = context.namespace(:interpreter)[:current_path]
+
+      AuthorLoader.load(object).then do |author|
+        context.namespace(:interpreter)[:current_path] = outer_path
+        cache_fragment(author, context: context)
+      end
     end
   end
 
@@ -104,6 +114,7 @@ class TestSchema < GraphQL::Schema
     use GraphQL::Pagination::Connections
   end
 
+  use GraphQL::Batch
   use GraphQL::FragmentCache
 
   query Types::Query

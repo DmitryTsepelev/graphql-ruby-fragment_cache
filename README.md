@@ -350,7 +350,28 @@ This can reduce a number of cache calls but _increase_ memory usage, because the
 
 ## Limitations
 
-1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together.
+1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together. The problem appears when `cache_fragment` is _inside_ the `.then` block:
+
+```ruby
+def cached_author_inside_batch
+  AuthorLoader.load(object).then do |author|
+    cache_fragment(author, context: context)
+  end
+end
+```
+
+The problem is that context is not [properly populated](https://github.com/rmosolgo/graphql-ruby/issues/3397) inside the block (the gem uses `:current_path` to build the cache key). There are two possible workarounds: use [dataloaders](https://graphql-ruby.org/dataloader/overview.html) or manage `:current_path` manually:
+
+```ruby
+def cached_author_inside_batch
+  outer_path = context.namespace(:interpreter)[:current_path]
+
+  AuthorLoader.load(object).then do |author|
+    context.namespace(:interpreter)[:current_path] = outer_path
+    cache_fragment(author, context: context)
+  end
+end
+```
 
 2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
 

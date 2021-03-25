@@ -9,8 +9,11 @@ describe GraphQL::Schema do
     let(:id1) { 1 }
     let(:id2) { 2 }
 
-    let!(:post1) { Post.create(id: id1, title: "object test") }
-    let!(:post2) { Post.create(id: id2, title: "object test") }
+    let(:author1) { User.new(id: 1, name: "John") }
+    let(:author2) { User.new(id: 2, name: "Max") }
+
+    let!(:post1) { Post.create(id: id1, title: "object test", author: author1) }
+    let!(:post2) { Post.create(id: id2, title: "object test", author: author2) }
 
     let(:query1) do
       <<~GQL
@@ -50,6 +53,82 @@ describe GraphQL::Schema do
           {"data" => {"cachedPost" => {"id" => post2.id.to_s, "title" => post2.title}}}
         ]
       )
+    end
+
+    context "when field is cached inside batch" do
+      let(:query1) do
+        <<~GQL
+          query getPost1($id: ID!) {
+            post(id: $id) {
+              id
+              title
+              cachedAuthorInsideBatch {
+                name
+              }
+            }
+          }
+        GQL
+      end
+
+      let(:query2) do
+        <<~GQL
+          query getPost2($id: ID!) {
+            post(id: $id) {
+              id
+              title
+              cachedAuthorInsideBatch {
+                name
+              }
+            }
+          }
+        GQL
+      end
+
+      it "executes query using passed context" do
+        expect(subject).to eq(
+          [
+            {"data" => {"post" => {"id" => post1.id.to_s, "title" => post1.title, "cachedAuthorInsideBatch" => {"name" => "John"}}}},
+            {"data" => {"post" => {"id" => post2.id.to_s, "title" => post2.title, "cachedAuthorInsideBatch" => {"name" => "Max"}}}}
+          ]
+        )
+      end
+    end
+  end
+
+  describe "#execute" do
+    let(:schema) { TestSchema }
+
+    let(:id) { 1 }
+
+    let(:author) { User.new(id: 1, name: "John") }
+    let!(:post) { Post.create(id: id, title: "object test", author: author) }
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!) {
+          post(id: $id) {
+            id
+            title
+            cachedAuthorInsideBatch {
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    subject { schema.execute(query, variables: {id: id}).to_h }
+
+    context "when field is cached inside batch" do
+      it "executes query" do
+        expect(subject).to eq(
+          {"data" => {
+            "post" => {
+              "id" => post.id.to_s, "title" => post.title, "cachedAuthorInsideBatch" => {"name" => author.name}
+            }
+          }}
+        )
+      end
     end
   end
 end
