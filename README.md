@@ -155,7 +155,7 @@ class QueryType < BaseObject
 end
 ```
 
-### User-provided cache key
+### User-provided cache key (custom key)
 
 In most cases you want your cache key to depend on the resolved object (say, `ActiveRecord` model). You can do that by passing an argument to the `#cache_fragment` method in a similar way to Rails views [`#cache` method](https://guides.rubyonrails.org/caching_with_rails.html#fragment-caching):
 
@@ -183,6 +183,36 @@ cache_fragment(post)
 # is the same as
 cache_fragment(post) { post }
 ```
+
+Using literals: Even when using a same string for all queries, the cache changes per argument and per selection set (because of the query_key).
+
+```ruby
+def post(id:)
+  cache_fragment("find_post") { Post.find(id) }
+end
+```
+
+Combining with options:
+
+```ruby
+def post(id:)
+  cache_fragment("find_post", expires_in: 5.minutes) { Post.find(id) }
+end
+```
+
+Dynamic cache key:
+
+```ruby
+def post(id:)
+  last_updated_at = Post.select(:updated_at).find_by(id: id)&.updated_at
+  cache_fragment(last_updated_at, expires_in: 5.minutes) { Post.find(id) }
+end
+```
+
+Note the usage of `.select(:updated_at)` at the cache key field to make this verifying query as fastest and light as possible.
+
+You can also add touch options for the belongs_to association e.g author's `belongs_to: :post` to have a `touch: true`.
+So that it invalidates the Post when the author is updated.
 
 When using `cache_fragment:` option, it's only possible to use the resolved value as a cache key by setting:
 
