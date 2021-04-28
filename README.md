@@ -295,7 +295,7 @@ end
 You can force a cache miss by adding `force_cache: true` to the query context:
 
 ```ruby
-MyAppSchema.execute('query { posts { title } }', context: {force_cache: true})
+MyAppSchema.execute("query { posts { title } }", context: {force_cache: true})
 ```
 
 This will treat the cache value as missing even if it's present, which can be
