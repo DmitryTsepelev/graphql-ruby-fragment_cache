@@ -21,6 +21,7 @@ module GraphQL
   module FragmentCache
     class << self
       attr_reader :cache_store
+      attr_accessor :namespace
 
       def use(schema_defn, options = {})
         verify_interpreter_and_analysis!(schema_defn)
