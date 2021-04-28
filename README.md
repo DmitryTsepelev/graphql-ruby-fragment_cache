@@ -295,7 +295,9 @@ end
 It's up to your to decide which caching engine to use, all you need is to configure the cache store:
 
 ```ruby
-GraphQL::FragmentCache.cache_store = MyCacheStore.new
+GraphQL::FragmentCache.configure do |config|
+  config.cache_store = MyCacheStore.new
+end
 ```
 
 Or, in Rails:
