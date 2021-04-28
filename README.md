@@ -87,7 +87,7 @@ Cache keys consist of the following parts: namespace, implicit key, and explicit
 You can optionally define a namespace that will be prefixed to every cache key:
 
 ```ruby
-GraphQL::FragmentCache.namespace = 'my-prefix'
+GraphQL::FragmentCache.namespace = "my-prefix"
 ```
 
 ### Implicit cache key
