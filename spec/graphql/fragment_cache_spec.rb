@@ -86,4 +86,16 @@ describe GraphQL::FragmentCache do
       expect { described_class.cache_store = obj }.not_to raise_error
     end
   end
+
+  describe ".configure" do
+    it "accepts options with a block notation" do
+      obj = GraphQL::FragmentCache::MemoryStore.new
+
+      described_class.configure do |config|
+        config.cache_store = obj
+      end
+
+      expect(described_class.cache_store).to eq obj
+    end
+  end
 end

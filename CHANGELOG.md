@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#63](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/63) Add a configure block notation ([@jeromedalbert][])
+
 ## 1.6.0 (2021-03-13)
 
 - [PR#54](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/54) Include arguments in selections_cache_key ([@bbugh][])
@@ -99,3 +101,4 @@
 [@ssnickolay]: https://github.com/ssnickolay
 [@reabiliti]: https://github.com/reabiliti
 [@bbugh]: https://github.com/bbugh
+[@jeromedalbert]: https://github.com/jeromedalbert

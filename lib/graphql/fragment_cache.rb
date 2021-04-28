@@ -33,6 +33,10 @@ module GraphQL
         GraphQL::Pagination::Connections.prepend(Connections::Patch)
       end
 
+      def configure
+        yield self
+      end
+
       def cache_store=(store)
         unless store.respond_to?(:read)
           raise ArgumentError, "Store must implement #read(key) method"
