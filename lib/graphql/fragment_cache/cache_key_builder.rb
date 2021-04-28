@@ -185,7 +185,11 @@ module GraphQL
       end
 
       def object_cache_key
-        @options[:object_cache_key] || object&._graphql_cache_key
+        @options[:object_cache_key] || object_key(object)
+      end
+
+      def object_key(obj)
+        obj&._graphql_cache_key
       end
     end
   end
