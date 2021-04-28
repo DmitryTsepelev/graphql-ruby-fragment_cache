@@ -271,4 +271,24 @@ describe "cache_fragment: option" do
       expect(::Post).to have_received(:find).once
     end
   end
+
+  context "when :force_cache is in the context" do
+    let(:context) { {force_cache: true} }
+
+    it "forces a cache miss and stores the computed value in the cache" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option test"
+      })
+
+      # make object dirty
+      post.title = "new option test 2"
+
+      context[:force_cache] = false
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new option test"
+      })
+    end
+  end
 end
