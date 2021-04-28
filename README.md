@@ -301,7 +301,7 @@ end
 
 # or
 
-field :post, PostType, cache_fragment: { if: -> { current_user.nil? } } do
+field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
   argument :id, ID, required: true
 end
 ```

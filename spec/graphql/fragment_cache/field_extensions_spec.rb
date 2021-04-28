@@ -285,7 +285,7 @@ describe "cache_fragment: option" do
   end
 
   context "when :if is evaluating to false" do
-    let(:context) { {current_user: User.new(id: '1', name: 'some-user')} }
+    let(:context) { {current_user: User.new(id: "1", name: "some-user")} }
     let(:cache_fragment) { {if: -> { context[:current_user].nil? }} }
 
     it "does not use the cache" do
@@ -309,7 +309,7 @@ describe "cache_fragment: option" do
   end
 
   context "when :unless is evaluating to false" do
-    let(:context) { {current_user: User.new(id: '1', name: 'some-user')} }
+    let(:context) { {current_user: User.new(id: "1", name: "some-user")} }
     let(:cache_fragment) { {unless: -> { context[:current_user].nil? }} }
 
     it "uses the cache" do
