@@ -298,6 +298,22 @@ class QueryType < BaseObject
 end
 ```
 
+## Conditional caching
+
+Use the `if:` (or `unless:`) option:
+
+```ruby
+def post(id:)
+  cache_fragment(if: current_user.nil?) { Post.find(id) }
+end
+
+# or
+
+field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
+  argument :id, ID, required: true
+end
+```
+
 ## Cache storage and options
 
 It's up to your to decide which caching engine to use, all you need is to configure the cache store:

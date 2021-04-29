@@ -39,6 +39,13 @@ module GraphQL
       def resolve(object:, arguments:, **_options)
         resolved_value = NOT_RESOLVED
 
+        if @cache_options[:if].is_a?(Proc)
+          @cache_options[:if] = object.instance_exec(&@cache_options[:if])
+        end
+        if @cache_options[:unless].is_a?(Proc)
+          @cache_options[:unless] = object.instance_exec(&@cache_options[:unless])
+        end
+
         object_for_key = if @context_key
           Array(@context_key).map { |key| object.context[key] }
         elsif @cache_key == :object
@@ -46,7 +53,6 @@ module GraphQL
         elsif @cache_key == :value
           resolved_value = yield(object, arguments)
         end
-
         cache_fragment_options = @cache_options.merge(object: object_for_key)
 
         object.cache_fragment(**cache_fragment_options) do

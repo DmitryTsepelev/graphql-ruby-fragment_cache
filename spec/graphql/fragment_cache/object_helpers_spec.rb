@@ -768,4 +768,105 @@ describe "#cache_fragment" do
       ])
     end
   end
+
+  describe "conditional caching" do
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+
+            define_method(:post, &field_resolver)
+          }
+        )
+      end
+    end
+
+    let(:id) { 1 }
+    let(:variables) { {id: id} }
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!) {
+          post(id: $id) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let!(:post) { Post.create(id: 1, title: "object test") }
+
+    before do
+      # warmup cache
+      execute_query
+      # make object dirty
+      post.title = "new object test"
+    end
+
+    context "when :if is true" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(if: true) { Post.find(id) }
+        end
+      end
+
+      it "uses the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "object test"
+        })
+      end
+    end
+
+    context "when :if is false" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(if: false) { Post.find(id) }
+        end
+      end
+
+      it "does not use the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new object test"
+        })
+      end
+    end
+
+    context "when :unless is true" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(unless: true) { Post.find(id) }
+        end
+      end
+
+      it "does not use the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new object test"
+        })
+      end
+    end
+
+    context "when :unless is false" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(unless: false) { Post.find(id) }
+        end
+      end
+
+      it "uses the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "object test"
+        })
+      end
+    end
+  end
 end
