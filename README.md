@@ -323,8 +323,8 @@ You can force the cache to renew during query execution by adding
 MyAppSchema.execute("query { posts { title } }", context: {renew_cache: true})
 ```
 
-This will treat the cache value as missing even if it's present, and store a
-fresh new computed value in the cache. This can be useful for cache warmers.
+This will treat any cached value as missing even if it's present, and store
+fresh new computed values in the cache. This can be useful for cache warmers.
 
 ## Cache storage and options
 
