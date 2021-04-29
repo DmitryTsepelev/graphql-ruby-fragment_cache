@@ -80,11 +80,19 @@ end
 
 ## Cache key generation
 
-Cache keys consist of implicit and explicit (provided by user) parts.
+Cache keys consist of the following parts: namespace, implicit key, and explicit key.
+
+### Cache namespace
+
+You can optionally define a namespace that will be prefixed to every cache key:
+
+```ruby
+GraphQL::FragmentCache.namespace = "my-prefix"
+```
 
 ### Implicit cache key
 
-Implicit part of a cache key (its prefix) contains the information about the schema and the current query. It includes:
+Implicit part of a cache key contains the information about the schema and the current query. It includes:
 
 - Hex gsdigest of the schema definition (to make sure cache is cleared when the schema changes).
 - The current query fingerprint consisting of a _path_ to the field, arguments information and the selections set.
@@ -290,23 +298,42 @@ class QueryType < BaseObject
 end
 ```
 
-## Forcing the cache
+## Conditional caching
 
-You can force a cache miss by adding `force_cache: true` to the query context:
+Use the `if:` (or `unless:`) option:
 
 ```ruby
-MyAppSchema.execute("query { posts { title } }", context: {force_cache: true})
+def post(id:)
+  cache_fragment(if: current_user.nil?) { Post.find(id) }
+end
+
+# or
+
+field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
+  argument :id, ID, required: true
+end
 ```
 
-This will treat the cache value as missing even if it's present, which can be
-useful for cache warmers.
+## Renewing the cache
+
+You can force the cache to renew during query execution by adding
+`renew_cache: true` to the query context:
+
+```ruby
+MyAppSchema.execute("query { posts { title } }", context: {renew_cache: true})
+```
+
+This will treat the cache value as missing even if it's present, and store a
+fresh new computed value in the cache. This can be useful for cache warmers.
 
 ## Cache storage and options
 
 It's up to your to decide which caching engine to use, all you need is to configure the cache store:
 
 ```ruby
-GraphQL::FragmentCache.cache_store = MyCacheStore.new
+GraphQL::FragmentCache.configure do |config|
+  config.cache_store = MyCacheStore.new
+end
 ```
 
 Or, in Rails:
