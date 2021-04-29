@@ -80,11 +80,19 @@ end
 
 ## Cache key generation
 
-Cache keys consist of implicit and explicit (provided by user) parts.
+Cache keys consist of the following parts: namespace, implicit key, and explicit key.
+
+### Cache namespace
+
+You can optionally define a namespace that will be prefixed to every cache key:
+
+```ruby
+GraphQL::FragmentCache.namespace = "my-prefix"
+```
 
 ### Implicit cache key
 
-Implicit part of a cache key (its prefix) contains the information about the schema and the current query. It includes:
+Implicit part of a cache key contains the information about the schema and the current query. It includes:
 
 - Hex gsdigest of the schema definition (to make sure cache is cleared when the schema changes).
 - The current query fingerprint consisting of a _path_ to the field, arguments information and the selections set.

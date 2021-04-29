@@ -42,6 +42,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
   specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title]" }
 
+  context "when a namespace is configured" do
+    before { GraphQL::FragmentCache.namespace = "my-prefix" }
+    after { GraphQL::FragmentCache.namespace = nil }
+
+    specify { is_expected.to eq "my-prefix/schema_key/cachedPost(id:#{id})[id.title]" }
+  end
+
   context "when cached field has nested selections" do
     let(:query) do
       <<~GQL

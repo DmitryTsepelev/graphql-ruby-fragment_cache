@@ -126,18 +126,18 @@ module GraphQL
       end
 
       def build
-        Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}").then do |base_key|
-          if @options[:object_cache_key]
-            "#{base_key}/#{@options[:object_cache_key]}"
-          elsif object
-            "#{base_key}/#{object_key(object)}"
-          else
-            base_key
-          end
-        end
+        [
+          GraphQL::FragmentCache.namespace,
+          implicit_cache_key,
+          object_cache_key
+        ].compact.join("/")
       end
 
       private
+
+      def implicit_cache_key
+        Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}")
+      end
 
       def schema_cache_key
         @options.fetch(:schema_cache_key) { schema.schema_cache_key }
@@ -184,8 +184,12 @@ module GraphQL
         "{#{argument.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")}}"
       end
 
+      def object_cache_key
+        @options[:object_cache_key] || object_key(object)
+      end
+
       def object_key(obj)
-        obj._graphql_cache_key
+        obj&._graphql_cache_key
       end
     end
   end

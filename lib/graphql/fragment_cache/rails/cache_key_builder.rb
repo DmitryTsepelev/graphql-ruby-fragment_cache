@@ -5,6 +5,7 @@ module GraphQL
     # Extends key builder to use .expand_cache_key in Rails
     class CacheKeyBuilder
       def object_key(obj)
+        return nil if obj.nil?
         return obj.graphql_cache_key if obj.respond_to?(:graphql_cache_key)
         return obj.cache_key_with_version if obj.respond_to?(:cache_key_with_version)
         return obj.cache_key if obj.respond_to?(:cache_key)
