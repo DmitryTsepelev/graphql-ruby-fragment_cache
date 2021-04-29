@@ -2,6 +2,7 @@
 
 ## master
 
+- [PR#64](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/64) Add a cache namespace ([@jeromedalbert][])
 - [PR#63](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/63) Add a configure block notation ([@jeromedalbert][])
 
 ## 1.6.0 (2021-03-13)
