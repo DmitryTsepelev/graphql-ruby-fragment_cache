@@ -19,6 +19,7 @@ module GraphQL
       NIL_IN_CACHE = Object.new
 
       def read(keep_in_context = false)
+        return nil if context[:renew_cache] == true
         return read_from_context { value_from_cache } if keep_in_context
 
         value_from_cache

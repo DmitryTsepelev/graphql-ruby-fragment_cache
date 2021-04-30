@@ -314,6 +314,18 @@ field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
 end
 ```
 
+## Renewing the cache
+
+You can force the cache to renew during query execution by adding
+`renew_cache: true` to the query context:
+
+```ruby
+MyAppSchema.execute("query { posts { title } }", context: {renew_cache: true})
+```
+
+This will treat any cached value as missing even if it's present, and store
+fresh new computed values in the cache. This can be useful for cache warmers.
+
 ## Cache storage and options
 
 It's up to your to decide which caching engine to use, all you need is to configure the cache store:
