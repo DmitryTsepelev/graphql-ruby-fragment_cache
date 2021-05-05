@@ -869,4 +869,75 @@ describe "#cache_fragment" do
       end
     end
   end
+
+  describe "when a default option is configured" do
+    let(:query) do
+      <<~GQL
+        query getPosts {
+          posts {
+            nodes {
+              id
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :posts, Types::Post.connection_type, null: false
+
+            define_method(:posts, &field_resolver)
+          }
+        )
+      end
+    end
+
+    before do
+      Post.create(id: 1, title: "first post")
+
+      GraphQL::FragmentCache.default_options = {expires_in: 60}
+      allow(GraphQL::FragmentCache.cache_store).to receive(:write).and_call_original
+    end
+
+    after { GraphQL::FragmentCache.default_options = {} }
+
+    context "when default option is not overriden" do
+      let(:resolver) do
+        -> do
+          posts = Post.all
+          cache_fragment(posts)
+        end
+      end
+
+      it "uses the default option" do
+        execute_query
+
+        expect(GraphQL::FragmentCache.cache_store)
+          .to have_received(:write)
+          .with(anything, anything, hash_including(expires_in: 60))
+      end
+    end
+
+    context "when default option is overriden" do
+      let(:resolver) do
+        -> do
+          posts = Post.all
+          cache_fragment(posts, expires_in: 10)
+        end
+      end
+
+      it "does not use the default option" do
+        execute_query
+
+        expect(GraphQL::FragmentCache.cache_store)
+          .to have_received(:write)
+          .with(anything, anything, hash_including(expires_in: 10))
+      end
+    end
+  end
 end
