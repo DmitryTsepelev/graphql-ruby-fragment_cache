@@ -22,6 +22,7 @@ module GraphQL
     class << self
       attr_reader :cache_store
       attr_accessor :namespace
+      attr_accessor :default_options
 
       def use(schema_defn, options = {})
         verify_interpreter_and_analysis!(schema_defn)
@@ -81,6 +82,7 @@ module GraphQL
     end
 
     self.cache_store = MemoryStore.new
+    self.default_options = {}
   end
 end
 

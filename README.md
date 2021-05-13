@@ -314,6 +314,20 @@ field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
 end
 ```
 
+## Default options
+
+You can configure default options that will be passed to all `cache_fragment`
+calls and `cache_fragment:` configurations. For example:
+
+```ruby
+GraphQL::FragmentCache.configure do |config|
+  config.default_options = {
+    expires_in: 1.hour, # Expire cache keys after 1 hour
+    schema_cache_key: nil # Do not clear the cache on each schema change
+  }
+end
+```
+
 ## Renewing the cache
 
 You can force the cache to renew during query execution by adding

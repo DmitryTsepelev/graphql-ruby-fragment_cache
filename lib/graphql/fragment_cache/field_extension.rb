@@ -28,7 +28,8 @@ module GraphQL
       end
 
       def initialize(options:, **_rest)
-        @cache_options = options || {}
+        @cache_options = GraphQL::FragmentCache.default_options.merge(options || {})
+        @cache_options[:default_options_merged] = true
 
         @context_key = @cache_options.delete(:context_key)
         @cache_key = @cache_options.delete(:cache_key)
