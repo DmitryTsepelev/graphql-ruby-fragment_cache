@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.8.0 (2021-05-13)
+
+- [PR#65](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/65) Add default options ([@jeromedalbert][])
+
 ## 1.7.0 (2021-04-30)
 
 - [PR#62](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/62) Add a way to force a cache miss ([@jeromedalbert][])
