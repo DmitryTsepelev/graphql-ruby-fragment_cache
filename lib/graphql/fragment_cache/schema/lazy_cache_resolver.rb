@@ -2,7 +2,7 @@ module GraphQL
   module FragmentCache
     module Schema
       class LazyCacheResolver
-        def initialize(&block)
+        def initialize(query_ctx, &block)
           @block = block
         end
 
