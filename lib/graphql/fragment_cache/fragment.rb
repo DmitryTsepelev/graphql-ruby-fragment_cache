@@ -8,6 +8,12 @@ module GraphQL
 
     # Represents a single fragment to cache
     class Fragment
+      class << self
+        def read_multi(keys)
+          keys.map { |_| "resolved value" }
+        end
+      end
+
       attr_reader :options, :path, :context
 
       def initialize(context, **options)

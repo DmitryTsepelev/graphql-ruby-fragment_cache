@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 require "graphql/fragment_cache/schema/lazy_cache_resolver"
-require "graphql/fragment_cache/ext/graphql_cache_key"
 
 module GraphQL
   module FragmentCache
-    using Ext
     # Wraps resolver with cache method
     class FieldExtension < GraphQL::Schema::FieldExtension
       module Patch
@@ -60,11 +58,7 @@ module GraphQL
         end
         cache_fragment_options = @cache_options.merge(object: object_for_key)
 
-        Schema::LazyCacheResolver.new(_options[:context]) do
-          object.cache_fragment(**cache_fragment_options) do
-            resolved_value == NOT_RESOLVED ? yield(object, arguments) : resolved_value
-          end
-        end
+        Schema::LazyCacheResolver.new(_options[:context], object)
       end
     end
   end
