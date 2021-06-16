@@ -13,7 +13,7 @@ module GraphQL
         end
 
         def resolve
-          resolved_key = @lazy_state[:pending_keys][@cache_key]
+          resolved_key = @lazy_state[:resolved_keys][@cache_key]
           if resolved_key
             resolved_key
           else
