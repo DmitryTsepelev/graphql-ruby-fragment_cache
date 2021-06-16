@@ -10,7 +10,7 @@ module GraphQL
     class Fragment
       class << self
         def read_multi(keys)
-          keys.map { |_| "resolved value" }
+          keys.map { |key| [key, "resolved value"] }.to_h
         end
       end
 
