@@ -5,6 +5,7 @@ require "graphql/fragment_cache/ext/graphql_cache_key"
 
 module GraphQL
   module FragmentCache
+    using Ext
     # Wraps resolver with cache method
     class FieldExtension < GraphQL::Schema::FieldExtension
       module Patch
