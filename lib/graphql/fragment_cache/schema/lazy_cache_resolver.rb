@@ -1,3 +1,5 @@
+require "graphql/fragment_cache/fragment"
+
 module GraphQL
   module FragmentCache
     module Schema
@@ -17,7 +19,7 @@ module GraphQL
           if resolved_key
             resolved_key
           else
-            resolved_key_vals = fragment.read_multi(@lazy_state[:pending_keys].to_a)
+            resolved_key_vals = Fragment.read_multi(@lazy_state[:pending_keys].to_a)
             @lazy_state[:pending_keys].clear
             resolved_key_vals.each { |key, value| @lazy_state[:resolved_keys][key] = value }
 
