@@ -14,6 +14,7 @@ jobs:
 
     env:
       CI: true
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
 
     strategy:
       fail-fast: false
@@ -32,6 +33,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
         bundler: 2.2.0
+        cache-version: 1
     - name: Run Ruby Next
       run: bundle exec rake nextify
     - name: Run RSpec
