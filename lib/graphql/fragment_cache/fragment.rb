@@ -12,11 +12,35 @@ module GraphQL
 
       class << self
         def read_multi(fragments)
-          fragments.map { |key| [key, "resolved value"] }.to_h
+          unless FragmentCache.cache_store.respond_to?(:read_multi)
+            return fragments.map { |f| [f, f.read] }.to_h
+          end
+
+          fragments_available_in_context = fragments
+            .select { |f| f.keep_in_context }
+            .map { |f|
+              [f, f.context.loaded_fragments[f.cache_key]]
+            }.select { |_, val| val.present? }.to_h
+
+          fragments_to_fetch = fragments
+            .select { |f| !fragments_available_in_context.key?(f) }
+
+          fragments_to_cache_keys = fragments_to_fetch
+            .map { |f| [f, f.cache_key] }.to_h
+
+          cache_keys = fragments_to_cache_keys.values
+
+          cache_keys_to_values = FragmentCache.cache_store.read_multi(cache_keys)
+
+          fetched_fragments_to_values = cache_keys_to_values
+            .map { |key, val| [fragments_to_cache_keys.key(key), val] }
+            .to_h
+
+          fragments_available_in_context.merge(fetched_fragments_to_values)
         end
       end
 
-      attr_reader :options, :path, :context
+      attr_reader :options, :path, :context, :keep_in_context
 
       def initialize(context, keep_in_context = false, **options)
         @context = context
