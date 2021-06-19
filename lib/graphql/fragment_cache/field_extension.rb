@@ -58,7 +58,9 @@ module GraphQL
         end
         cache_fragment_options = @cache_options.merge(object: object_for_key)
 
-        Schema::LazyCacheResolver.new(_options[:context], object)
+        object.cache_fragment(**cache_fragment_options) do
+          resolved_value == NOT_RESOLVED ? yield(object, arguments) : resolved_value
+        end
       end
     end
   end

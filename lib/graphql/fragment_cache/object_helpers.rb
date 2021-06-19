@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "graphql/fragment_cache/fragment"
+require "graphql/fragment_cache/schema/lazy_cache_resolver"
 
 module GraphQL
   module FragmentCache
@@ -42,16 +43,11 @@ module GraphQL
         context_to_use = context if context_to_use.nil? && respond_to?(:context)
         raise ArgumentError, "cannot find context, please pass it explicitly" unless context_to_use
 
-        fragment = Fragment.new(context_to_use, **options)
-
         keep_in_context = options.delete(:keep_in_context)
-        if (cached = fragment.read(keep_in_context))
-          return cached == Fragment::NIL_IN_CACHE ? nil : raw_value(cached)
-        end
 
-        (block_given? ? block.call : object_to_cache).tap do |resolved_value|
-          context_to_use.fragments << fragment
-        end
+        fragment = Fragment.new(context_to_use, keep_in_context, **options)
+
+        GraphQL::FragmentCache::Schema::LazyCacheResolver.new(fragment, context_to_use, object_to_cache, &block)
       end
     end
   end

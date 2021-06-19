@@ -5,25 +5,34 @@ module GraphQL
     module Schema
       using Ext
       class LazyCacheResolver
-        def initialize(query_ctx, object)
-          @cache_key = object._graphql_cache_key
-          @lazy_state = query_ctx[:lazy_cache_resolver_keys] ||= {
-            pending_keys: Set.new,
-            resolved_keys: {}
+        def initialize(fragment, query_ctx, object_to_cache, &block)
+          @fragment = fragment
+          @query_ctx = query_ctx
+          @object_to_cache = object_to_cache
+          @lazy_state = query_ctx[:lazy_cache_resolver_state] ||= {
+            pending_fragments: Set.new,
+            resolved_fragments: {}
           }
-          @lazy_state[:pending_keys] << @cache_key
+          @block = block
         end
 
         def resolve
-          resolved_key = @lazy_state[:resolved_keys][@cache_key]
-          if resolved_key
-            resolved_key
-          else
-            resolved_key_vals = Fragment.read_multi(@lazy_state[:pending_keys].to_a)
-            @lazy_state[:pending_keys].clear
-            resolved_key_vals.each { |key, value| @lazy_state[:resolved_keys][key] = value }
+          if @lazy_state[:resolved_fragments].key?(@fragment)
+            cached = @lazy_state[:resolved_fragments][@fragment]
 
-            @lazy_state[:resolved_keys][@cache_key]
+            if cached
+              return cached == Fragment::NIL_IN_CACHE ? nil : raw_value(cached)
+            end
+          else
+            resolved_fragments = Fragment.read_multi(@lazy_state[:pending_fragments].to_a)
+            @lazy_state[:pending_fragments].clear
+            resolved_fragments.each { |key, value| @lazy_state[:resolved_fragments][key] = value }
+
+            @lazy_state[:resolved_fragments]
+          end
+
+          (block_given? ? block.call : @object_to_cache).tap do |resolved_value|
+            @query_ctx.fragments << @fragment
           end
         end
       end

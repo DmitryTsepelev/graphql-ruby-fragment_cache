@@ -8,25 +8,26 @@ module GraphQL
 
     # Represents a single fragment to cache
     class Fragment
+      NIL_IN_CACHE = Object.new
+
       class << self
-        def read_multi(keys)
-          keys.map { |key| [key, "resolved value"] }.to_h
+        def read_multi(fragments)
+          fragments.map { |key| [key, "resolved value"] }.to_h
         end
       end
 
       attr_reader :options, :path, :context
 
-      def initialize(context, **options)
+      def initialize(context, keep_in_context = false, **options)
         @context = context
+        @keep_in_context = keep_in_context
         @options = options
         @path = interpreter_context[:current_path]
       end
 
-      NIL_IN_CACHE = Object.new
-
-      def read(keep_in_context = false)
+      def read
         return nil if context[:renew_cache] == true
-        return read_from_context { value_from_cache } if keep_in_context
+        return read_from_context { value_from_cache } if @keep_in_context
 
         value_from_cache
       end
