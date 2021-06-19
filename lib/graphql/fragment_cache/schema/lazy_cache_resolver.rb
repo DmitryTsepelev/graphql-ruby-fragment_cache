@@ -19,18 +19,16 @@ module GraphQL
         end
 
         def resolve
-          if @lazy_state[:resolved_fragments].key?(@fragment)
-            cached = @lazy_state[:resolved_fragments][@fragment]
-
-            if cached
-              return cached == Fragment::NIL_IN_CACHE ? nil : GraphQL::Execution::Interpreter::RawValue.new(obj)
-            end
-          else
+          unless @lazy_state[:resolved_fragments].key?(@fragment)
             resolved_fragments = Fragment.read_multi(@lazy_state[:pending_fragments].to_a)
             @lazy_state[:pending_fragments].clear
             resolved_fragments.each { |key, value| @lazy_state[:resolved_fragments][key] = value }
+          end
 
-            @lazy_state[:resolved_fragments]
+          cached = @lazy_state[:resolved_fragments][@fragment]
+
+          if cached
+            return cached == Fragment::NIL_IN_CACHE ? nil : GraphQL::Execution::Interpreter::RawValue.new(cached)
           end
 
           (block_given? ? block.call : @object_to_cache).tap do |resolved_value|
