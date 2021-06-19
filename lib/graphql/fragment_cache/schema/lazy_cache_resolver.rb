@@ -9,11 +9,13 @@ module GraphQL
           @fragment = fragment
           @query_ctx = query_ctx
           @object_to_cache = object_to_cache
-          @lazy_state = query_ctx[:lazy_cache_resolver_state] ||= {
+          @lazy_state = query_ctx[:lazy_cache_resolver_statez] ||= {
             pending_fragments: Set.new,
             resolved_fragments: {}
           }
           @block = block
+
+          @lazy_state[:pending_fragments] << @fragment
         end
 
         def resolve
