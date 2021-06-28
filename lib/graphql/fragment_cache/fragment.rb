@@ -30,7 +30,7 @@ module GraphQL
 
           cache_keys = fragments_to_cache_keys.values
 
-          cache_keys_to_values = FragmentCache.cache_store.read_multi(cache_keys)
+          cache_keys_to_values = FragmentCache.cache_store.read_multi(*cache_keys)
 
           fetched_fragments_to_values = cache_keys_to_values
             .map { |key, val| [fragments_to_cache_keys.key(key), val] }
