@@ -16,16 +16,7 @@ module GraphQL
             return fragments.map { |f| [f, f.read] }.to_h
           end
 
-          fragments_available_in_context = fragments
-            .select { |f| f.keep_in_context }
-            .map { |f|
-              [f, f.context.loaded_fragments[f.cache_key]]
-            }.select { |_, val| val.present? }.to_h
-
-          fragments_to_fetch = fragments
-            .select { |f| !fragments_available_in_context.key?(f) }
-
-          fragments_to_cache_keys = fragments_to_fetch
+          fragments_to_cache_keys = fragments
             .map { |f| [f, f.cache_key] }.to_h
 
           cache_keys = fragments_to_cache_keys.values
@@ -36,22 +27,21 @@ module GraphQL
             .map { |key, val| [fragments_to_cache_keys.key(key), val] }
             .to_h
 
-          fragments_available_in_context.merge(fetched_fragments_to_values)
+          fetched_fragments_to_values
         end
       end
 
-      attr_reader :options, :path, :context, :keep_in_context
+      attr_reader :options, :path, :context
 
-      def initialize(context, keep_in_context = false, **options)
+      def initialize(context, **options)
         @context = context
-        @keep_in_context = keep_in_context
         @options = options
         @path = interpreter_context[:current_path]
       end
 
-      def read
+      def read(keep_in_context = false)
         return nil if context[:renew_cache] == true
-        return read_from_context { value_from_cache } if @keep_in_context
+        return read_from_context { value_from_cache } if keep_in_context
 
         value_from_cache
       end
