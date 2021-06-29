@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "graphql/fragment_cache/schema/lazy_cache_resolver"
+
 module GraphQL
   module FragmentCache
     # Wraps resolver with cache method
