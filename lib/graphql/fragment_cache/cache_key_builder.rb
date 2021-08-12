@@ -22,6 +22,8 @@ module GraphQL
             children = val.selections.empty? ? "" : "[#{val.selections.to_selections_key}]"
 
             field_name = val.field.name
+            field_alias = val.ast_nodes.map(&:alias).join
+            field_name = "#{field_alias}:#{field_name}" unless field_alias.empty?
 
             unless val.arguments.empty?
               args = val.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")

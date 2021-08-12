@@ -68,6 +68,25 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
   end
 
+  context "when cached field has aliased selections" do
+    let(:query) do
+      <<~GQL
+        query GetPost($id: ID!) {
+          cachedPost(id: $id) {
+            postId: id
+            title
+            author {
+              authorId: id
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    specify { is_expected.to eq "schema_key/cachedPost(id:#{id})[postId:id.title.author[authorId:id.name]]" }
+  end
+
   context "when argument is input" do
     let(:query) do
       <<~GQL
