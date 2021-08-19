@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.9.0 (2021-08-19)
+
+- [PR#71](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/71) Add selection alias to cache keys ([@mretzak][])
+
 ## 1.8.0 (2021-05-13)
 
 - [PR#65](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/65) Add default options ([@jeromedalbert][])
@@ -111,3 +115,4 @@
 [@reabiliti]: https://github.com/reabiliti
 [@bbugh]: https://github.com/bbugh
 [@jeromedalbert]: https://github.com/jeromedalbert
+[@mretzak]: https://github.com/mretzak
