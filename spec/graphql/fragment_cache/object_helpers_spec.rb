@@ -345,6 +345,44 @@ describe "#cache_fragment" do
       end
     end
 
+    context "when selection aliases are used" do
+      let(:query) do
+        <<~GQL
+          query getPost($id: ID!) {
+            post(id: $id) {
+              id
+            }
+          }
+        GQL
+      end
+
+      let(:query_with_aliased_selection) do
+        <<~GQL
+          query getPost($id: ID!) {
+            post(id: $id) {
+              postId: id
+            }
+          }
+        GQL
+      end
+
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(Post.find(id))
+        end
+      end
+
+      it "returns cached fragment for different selection aliases independently" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1"
+        })
+
+        expect(execute_query(query_with_aliased_selection).dig("data", "post")).to eq({
+          "postId" => "1"
+        })
+      end
+    end
+
     context "when resolver is used" do
       let(:resolver_class) do
         Class.new(GraphQL::Schema::Resolver) do
