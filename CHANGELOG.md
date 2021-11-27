@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#76](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/76) Freeze parser version ([@DmitryTsepelev][])
+
 ## 1.9.0 (2021-08-19)
 
 - [PR#71](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/71) Add selection alias to cache keys ([@mretzak][])
