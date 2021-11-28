@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.9.1 (2021-11-28)
+
 - [PR#76](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/76) Freeze parser version ([@DmitryTsepelev][])
 
 ## 1.9.0 (2021-08-19)
