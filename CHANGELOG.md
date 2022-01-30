@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#77](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/77) Drop Ruby 2.5 support, add Ruby 3.0 ([@DmitryTsepelev][])
+
 ## 1.9.1 (2021-11-28)
 
 - [PR#76](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/76) Freeze parser version ([@DmitryTsepelev][])
