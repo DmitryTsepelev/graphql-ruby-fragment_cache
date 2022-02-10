@@ -21,8 +21,9 @@ jobs:
       matrix:
         ruby: [2.6, 2.7, 3.0]
         gemfile: [
-          "gemfiles/graphql_1_11_5.gemfile",
+          "gemfiles/graphql_1_12_0.gemfile",
           "gemfiles/graphql_1_13_7.gemfile",
+          "gemfiles/graphql_2_0_0.gemfile",
           "gemfiles/graphql_master.gemfile"
         ]
 

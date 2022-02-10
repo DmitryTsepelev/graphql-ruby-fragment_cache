@@ -537,36 +537,6 @@ describe "#cache_fragment" do
         end
       end
     end
-
-    unless GraphQL::FragmentCache.graphql_ruby_1_12_or_later?
-      context "when new_connections are not configured" do
-        let(:schema) do
-          Class.new(GraphQL::Schema) do
-            use GraphQL::Execution::Interpreter
-            use GraphQL::Analysis::AST
-            use GraphQL::FragmentCache
-
-            query(
-              Class.new(Types::Query) {
-                field :posts, Types::Post.connection_type, null: false, cache_fragment: true
-
-                def posts
-                  Post.all
-                end
-              }
-            )
-          end
-        end
-
-        it "raises error" do
-          expect {
-            execute_query
-          }.to raise_error(
-            StandardError, "GraphQL::Pagination::Connections should be enabled for connection caching"
-          )
-        end
-      end
-    end
   end
 
   describe "caching fields inside collection elements" do

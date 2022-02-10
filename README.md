@@ -17,13 +17,10 @@ end
 
 ## Getting started
 
-Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class (make sure to turn interpreter mode on with AST analysis!):
+Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class:
 
 ```ruby
 class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-
   use GraphQL::FragmentCache
 
   query QueryType
@@ -66,15 +63,6 @@ class QueryType < BaseObject
   def post(id:)
     cache_fragment { Post.find(id) }
   end
-end
-```
-
-If you use [connections](https://graphql-ruby.org/pagination/connection_concepts.html) and plan to cache them—please turn on [brand new](https://github.com/rmosolgo/graphql-ruby/blob/master/lib/graphql/pagination/connections.rb#L5) connections hierarchy in your schema:
-
-```ruby
-class GraphqSchema < GraphQL::Schema
-  # ...
-  use GraphQL::Pagination::Connections
 end
 ```
 
