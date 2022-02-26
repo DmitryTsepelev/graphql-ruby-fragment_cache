@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#79](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/79) Support graphql-ruby 2.0.0 ([@DmitryTsepelev][])
+
 ## 1.10.0 (2022-01-30)
 
 - [PR#77](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/77) Drop Ruby 2.5 support, add Ruby 3.0 ([@DmitryTsepelev][])
