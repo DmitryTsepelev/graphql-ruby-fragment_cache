@@ -2,6 +2,22 @@
 
 ## master
 
+## 1.11.0 (2022-02-26)
+
+- [PR#79](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/79) Support graphql-ruby 2.0.0 ([@DmitryTsepelev][])
+
+## 1.10.0 (2022-01-30)
+
+- [PR#77](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/77) Drop Ruby 2.5 support, add Ruby 3.0 ([@DmitryTsepelev][])
+
+## 1.9.1 (2021-11-28)
+
+- [PR#76](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/76) Freeze parser version ([@DmitryTsepelev][])
+
+## 1.9.0 (2021-08-19)
+
+- [PR#71](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/71) Add selection alias to cache keys ([@mretzak][])
+
 ## 1.8.0 (2021-05-13)
 
 - [PR#65](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/65) Add default options ([@jeromedalbert][])
@@ -111,3 +127,4 @@
 [@reabiliti]: https://github.com/reabiliti
 [@bbugh]: https://github.com/bbugh
 [@jeromedalbert]: https://github.com/jeromedalbert
+[@mretzak]: https://github.com/mretzak

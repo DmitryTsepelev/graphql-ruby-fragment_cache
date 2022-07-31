@@ -22,6 +22,8 @@ module GraphQL
             children = val.selections.empty? ? "" : "[#{val.selections.to_selections_key}]"
 
             field_name = val.field.name
+            field_alias = val.ast_nodes.map(&:alias).join
+            field_name = "#{field_alias}:#{field_name}" unless field_alias.empty?
 
             unless val.arguments.empty?
               args = val.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
@@ -60,7 +62,12 @@ module GraphQL
           next_field_name = alias_node.name
 
           # From https://github.com/rmosolgo/graphql-ruby/blob/1a9a20f3da629e63ea8e5ee8400be82218f9edc3/lib/graphql/execution/lookahead.rb#L91
-          next_field_defn = get_class_based_field(selected_type, next_field_name)
+          next_field_defn =
+            if GraphQL::FragmentCache.graphql_ruby_before_2_0?
+              get_class_based_field(selected_type, next_field_name)
+            else
+              @query.get_field(selected_type, next_field_name)
+            end
 
           alias_selections[name] =
             if next_field_defn

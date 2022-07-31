@@ -345,6 +345,44 @@ describe "#cache_fragment" do
       end
     end
 
+    context "when selection aliases are used" do
+      let(:query) do
+        <<~GQL
+          query getPost($id: ID!) {
+            post(id: $id) {
+              id
+            }
+          }
+        GQL
+      end
+
+      let(:query_with_aliased_selection) do
+        <<~GQL
+          query getPost($id: ID!) {
+            post(id: $id) {
+              postId: id
+            }
+          }
+        GQL
+      end
+
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(Post.find(id))
+        end
+      end
+
+      it "returns cached fragment for different selection aliases independently" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1"
+        })
+
+        expect(execute_query(query_with_aliased_selection).dig("data", "post")).to eq({
+          "postId" => "1"
+        })
+      end
+    end
+
     context "when resolver is used" do
       let(:resolver_class) do
         Class.new(GraphQL::Schema::Resolver) do
@@ -496,36 +534,6 @@ describe "#cache_fragment" do
           allow(::Post).to receive(:all).and_call_original
           execute_query
           expect(::Post).not_to have_received(:all)
-        end
-      end
-    end
-
-    unless GraphQL::FragmentCache.graphql_ruby_1_12_or_later?
-      context "when new_connections are not configured" do
-        let(:schema) do
-          Class.new(GraphQL::Schema) do
-            use GraphQL::Execution::Interpreter
-            use GraphQL::Analysis::AST
-            use GraphQL::FragmentCache
-
-            query(
-              Class.new(Types::Query) {
-                field :posts, Types::Post.connection_type, null: false, cache_fragment: true
-
-                def posts
-                  Post.all
-                end
-              }
-            )
-          end
-        end
-
-        it "raises error" do
-          expect {
-            execute_query
-          }.to raise_error(
-            StandardError, "GraphQL::Pagination::Connections should be enabled for connection caching"
-          )
         end
       end
     end

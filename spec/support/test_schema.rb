@@ -108,9 +108,10 @@ module Types
 end
 
 class TestSchema < GraphQL::Schema
-  if Gem::Dependency.new("graphql", "< 1.12.0").match?("graphql", GraphQL::VERSION)
+  if GraphQL::FragmentCache.graphql_ruby_before_2_0?
     use GraphQL::Execution::Interpreter
     use GraphQL::Analysis::AST
+
     use GraphQL::Pagination::Connections
   end
 

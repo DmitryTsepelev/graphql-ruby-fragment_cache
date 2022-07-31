@@ -1,7 +1,0 @@
-source "https://rubygems.org"
-
-gem "graphql", "1.11.4"
-
-eval_gemfile "rubocop.gemfile"
-
-gemspec path: "../"

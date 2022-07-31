@@ -14,14 +14,16 @@ jobs:
 
     env:
       CI: true
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
 
     strategy:
       fail-fast: false
       matrix:
-        ruby: [2.5, 2.6, 2.7]
+        ruby: [2.6, 2.7, 3.0]
         gemfile: [
-          "gemfiles/graphql_1_11_4.gemfile",
-          "gemfiles/graphql_1_11_5.gemfile",
+          "gemfiles/graphql_1_12_0.gemfile",
+          "gemfiles/graphql_1_13_7.gemfile",
+          "gemfiles/graphql_2_0_0.gemfile",
           "gemfiles/graphql_master.gemfile"
         ]
 
@@ -32,6 +34,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
         bundler: 2.2.0
+        cache-version: 1
     - name: Run Ruby Next
       run: bundle exec rake nextify
     - name: Run RSpec
