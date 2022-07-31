@@ -31,7 +31,7 @@ module GraphQL
             return cached == Fragment::NIL_IN_CACHE ? nil : GraphQL::Execution::Interpreter::RawValue.new(cached)
           end
 
-          (@block.present? ? @block.call : @object_to_cache).tap do |resolved_value|
+          (@block ? @block.call : @object_to_cache).tap do |resolved_value|
             @query_ctx.fragments << @fragment
           end
         end
