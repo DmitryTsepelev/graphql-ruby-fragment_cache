@@ -35,13 +35,14 @@ module GraphQL
 
       def initialize(context, **options)
         @context = context
+        @keep_in_context = options.delete(:keep_in_context)
         @options = options
         @path = interpreter_context[:current_path]
       end
 
-      def read(keep_in_context = false)
+      def read
         return nil if context[:renew_cache] == true
-        return read_from_context { value_from_cache } if keep_in_context
+        return read_from_context { value_from_cache } if @keep_in_context
 
         value_from_cache
       end
