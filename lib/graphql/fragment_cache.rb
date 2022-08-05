@@ -11,6 +11,7 @@ require "graphql/fragment_cache/connections/patch"
 require "graphql/fragment_cache/schema/patch"
 require "graphql/fragment_cache/schema/tracer"
 require "graphql/fragment_cache/schema/instrumentation"
+require "graphql/fragment_cache/schema/lazy_cache_resolver"
 
 require "graphql/fragment_cache/memory_store"
 
@@ -30,6 +31,7 @@ module GraphQL
         schema_defn.tracer(Schema::Tracer)
         schema_defn.instrument(:query, Schema::Instrumentation)
         schema_defn.extend(Schema::Patch)
+        schema_defn.lazy_resolve(Schema::LazyCacheResolver, :resolve)
 
         GraphQL::Pagination::Connections.prepend(Connections::Patch)
       end
