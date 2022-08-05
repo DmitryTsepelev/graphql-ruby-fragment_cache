@@ -4,6 +4,7 @@
 
 ## 1.11.0 (2022-02-26)
 
+- [PR#70](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/70), [PR#82](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/82) Add #read_multi for fragments ([@daukadolt][], [@frostmark][])
 - [PR#79](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/79) Support graphql-ruby 2.0.0 ([@DmitryTsepelev][])
 
 ## 1.10.0 (2022-01-30)
@@ -128,3 +129,5 @@
 [@bbugh]: https://github.com/bbugh
 [@jeromedalbert]: https://github.com/jeromedalbert
 [@mretzak]: https://github.com/mretzak
+[@daukadolt]: https://github.com/daukadolt
+[@frostmark]: https://github.com/frostmark
