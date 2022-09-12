@@ -76,7 +76,11 @@ module GraphQL
               arguments = arguments.is_a?(::GraphQL::Execution::Interpreter::Arguments) ? arguments.keyword_arguments : arguments
               @ast_nodes.each do |ast_node|
                 ast_node.selections.each do |selection|
-                  find_selected_nodes(selection, next_field_name, next_field_defn, arguments: arguments, matches: next_nodes)
+                  if GraphQL::FragmentCache.graphql_ruby_after_2_0_13?
+                    find_selected_nodes(selection, next_field_defn, arguments: arguments, matches: next_nodes)
+                  else
+                    find_selected_nodes(selection, next_field_name, next_field_defn, arguments: arguments, matches: next_nodes)
+                  end
                 end
               end
 
