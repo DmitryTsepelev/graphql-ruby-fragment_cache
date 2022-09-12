@@ -53,10 +53,18 @@ module GraphQL
       end
 
       def graphql_ruby_before_2_0?
-        Gem::Dependency.new("graphql", "< 2.0.0").match?("graphql", GraphQL::VERSION)
+        check_graphql_version "< 2.0.0"
+      end
+
+      def graphql_ruby_after_2_0_13?
+        check_graphql_version "> 2.0.13"
       end
 
       private
+
+      def check_graphql_version(predicate)
+        Gem::Dependency.new("graphql", predicate).match?("graphql", GraphQL::VERSION)
+      end
 
       def verify_interpreter_and_analysis!(schema_defn)
         if graphql_ruby_before_2_0?

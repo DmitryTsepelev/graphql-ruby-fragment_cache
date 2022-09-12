@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#83](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/83) Update Lookahead usage to support graphql-2.0.14 ([@DmitryTsepelev][])
+
 ## 1.11.0 (2022-02-26)
 
 - [PR#70](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/70), [PR#82](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/82) Add #read_multi for fragments ([@daukadolt][], [@frostmark][])
