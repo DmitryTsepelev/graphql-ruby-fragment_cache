@@ -12,22 +12,22 @@ module GraphQL
 
       class << self
         def read_multi(fragments)
-          unless FragmentCache.cache_store.respond_to?(:read_multi)
-            return fragments.map { |f| [f, f.read] }.to_h
-          end
+          return fragments.map { |f| [f, f.read] }.to_h unless FragmentCache.cache_store.respond_to?(:read_multi)
 
-          fragments_to_cache_keys = fragments
-            .map { |f| [f, f.cache_key] }.to_h
+          fragments_to_cache_keys = fragments.map { |f| [f, f.cache_key] }.to_h
 
-          cache_keys = fragments_to_cache_keys.values
+          # Filter out all the cache_keys for fragments with renew_cache: true in their context
+          cache_keys = fragments_to_cache_keys.reject { |k, _v| k.context[:renew_cache] == true}.values
 
-          cache_keys_to_values = FragmentCache.cache_store.read_multi(*cache_keys)
+          # If there are cache_keys look up values with read_multi otherwise return an empty hash
+          cache_keys_to_values = unless cache_keys.empty?
+                                   FragmentCache.cache_store.read_multi(*cache_keys)
+                                 else
+                                   {}
+                                 end
 
-          fetched_fragments_to_values = cache_keys_to_values
-            .map { |key, val| [fragments_to_cache_keys.key(key), val] }
-            .to_h
-
-          fetched_fragments_to_values
+          # Fragmenst without values or with renew_cache: true in their context will have nil values like the read method
+          fragments_to_cache_keys.map { |fragment, cache_key| [fragment, cache_keys_to_values[cache_key]] }.to_h
         end
       end
 
