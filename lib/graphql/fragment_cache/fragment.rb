@@ -12,7 +12,9 @@ module GraphQL
 
       class << self
         def read_multi(fragments)
-          return fragments.map { |f| [f, f.read] }.to_h unless FragmentCache.cache_store.respond_to?(:read_multi)
+          unless FragmentCache.cache_store.respond_to?(:read_multi)
+            return fragments.map { |f| [f, f.read] }.to_h
+          end
 
           fragments_to_cache_keys = fragments.map { |f| [f, f.cache_key] }.to_h
 
