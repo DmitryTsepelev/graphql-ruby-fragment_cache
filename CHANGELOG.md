@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.13.1 (2022-10-12)
+
+- [PR#84](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/84) Fix Renew Cache Read Multi Bug ([@KTSCode][])
+
 ## 1.13.0 (2022-09-12)
 
 - [PR#83](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/83) Update Lookahead usage to support graphql-2.0.14 ([@DmitryTsepelev][])
@@ -138,3 +142,4 @@
 [@mretzak]: https://github.com/mretzak
 [@daukadolt]: https://github.com/daukadolt
 [@frostmark]: https://github.com/frostmark
+[@KTSCode]: https://github.com/KTSCode
