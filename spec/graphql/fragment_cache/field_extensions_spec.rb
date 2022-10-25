@@ -272,51 +272,65 @@ describe "cache_fragment: option" do
     end
   end
 
-  context "when :if is evaluating to true" do
-    let(:context) { {current_user: nil} }
-    let(:cache_fragment) { {if: -> { context[:current_user].nil? }} }
+  context "when :if is provided" do
+    let(:context) { {current_user: User.new(id: "1", name: "some-user")} }
+    let(:cache_fragment) { {if: -> { context[:current_user] }} }
 
-    it "uses the cache" do
+    specify do
+      # returns cached result when if evaluates to true
       expect(execute_query.dig("data", "post")).to eq({
         "id" => "1",
         "title" => "option test"
       })
-    end
-  end
 
-  context "when :if is evaluating to false" do
-    let(:context) { {current_user: User.new(id: "1", name: "some-user")} }
-    let(:cache_fragment) { {if: -> { context[:current_user].nil? }} }
+      context[:current_user] = nil
 
-    it "does not use the cache" do
+      # now should skip cache
       expect(execute_query.dig("data", "post")).to eq({
         "id" => "1",
         "title" => "new option test"
       })
     end
+
+    context "when :if is a Symbol" do
+      let(:cache_fragment) { {if: :no_current_user?} }
+
+      specify do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new option test"
+        })
+      end
+    end
   end
 
-  context "when :unless is evaluating to true" do
-    let(:context) { {current_user: nil} }
+  context "when :unless is provided" do
+    let(:context) { {current_user: User.new(id: "1", name: "some-user")} }
     let(:cache_fragment) { {unless: -> { context[:current_user].nil? }} }
 
-    it "does not use the cache" do
+    specify do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "option test"
+      })
+
+      context[:current_user] = nil
+
       expect(execute_query.dig("data", "post")).to eq({
         "id" => "1",
         "title" => "new option test"
       })
     end
-  end
 
-  context "when :unless is evaluating to false" do
-    let(:context) { {current_user: User.new(id: "1", name: "some-user")} }
-    let(:cache_fragment) { {unless: -> { context[:current_user].nil? }} }
+    context "when :unless is a Symbol" do
+      let(:cache_fragment) { {unless: :current_user?} }
 
-    it "uses the cache" do
-      expect(execute_query.dig("data", "post")).to eq({
-        "id" => "1",
-        "title" => "option test"
-      })
+      specify do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new option test"
+        })
+      end
     end
   end
 
