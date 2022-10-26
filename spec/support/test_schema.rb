@@ -10,6 +10,14 @@ end
 module Types
   class Base < GraphQL::Schema::Object
     include GraphQL::FragmentCache::Object
+
+    def current_user?
+      context[:current_user]
+    end
+
+    def no_current_user?
+      context[:current_user].nil?
+    end
   end
 
   class User < Base

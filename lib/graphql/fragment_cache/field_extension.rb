@@ -35,6 +35,12 @@ module GraphQL
 
         @context_key = @cache_options.delete(:context_key)
         @cache_key = @cache_options.delete(:cache_key)
+
+        @if = @cache_options.delete(:if)
+        @unless = @cache_options.delete(:unless)
+
+        # Make sure we do not modify options, since they're global
+        @cache_options.freeze
       end
 
       NOT_RESOLVED = Object.new
@@ -42,11 +48,20 @@ module GraphQL
       def resolve(object:, arguments:, **_options)
         resolved_value = NOT_RESOLVED
 
-        if @cache_options[:if].is_a?(Proc)
-          @cache_options[:if] = object.instance_exec(&@cache_options[:if])
+        if @if.is_a?(Proc) && !object.instance_exec(&@if)
+          return yield(object, arguments)
         end
-        if @cache_options[:unless].is_a?(Proc)
-          @cache_options[:unless] = object.instance_exec(&@cache_options[:unless])
+
+        if @if.is_a?(Symbol) && !object.send(@if)
+          return yield(object, arguments)
+        end
+
+        if @unless.is_a?(Proc) && object.instance_exec(&@unless)
+          return yield(object, arguments)
+        end
+
+        if @unless.is_a?(Symbol) && object.send(@unless)
+          return yield(object, arguments)
         end
 
         object_for_key = if @context_key
@@ -56,6 +71,7 @@ module GraphQL
         elsif @cache_key == :value
           resolved_value = yield(object, arguments)
         end
+
         cache_fragment_options = @cache_options.merge(object: object_for_key)
 
         object.cache_fragment(**cache_fragment_options) do
