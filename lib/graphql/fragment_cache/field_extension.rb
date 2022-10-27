@@ -51,15 +51,12 @@ module GraphQL
         if @if.is_a?(Proc) && !object.instance_exec(&@if)
           return yield(object, arguments)
         end
-
         if @if.is_a?(Symbol) && !object.send(@if)
           return yield(object, arguments)
         end
-
         if @unless.is_a?(Proc) && object.instance_exec(&@unless)
           return yield(object, arguments)
         end
-
         if @unless.is_a?(Symbol) && object.send(@unless)
           return yield(object, arguments)
         end
