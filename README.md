@@ -300,6 +300,12 @@ end
 field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
   argument :id, ID, required: true
 end
+
+# or
+
+field :post, PostType, cache_fragment: {if: :current_user?} do
+  argument :id, ID, required: true
+end
 ```
 
 ## Default options

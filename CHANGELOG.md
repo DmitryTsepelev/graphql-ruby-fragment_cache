@@ -2,6 +2,12 @@
 
 ## master
 
+## 1.14.0 (2022-10-26)
+
+- [PR#85](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/85) Support passing Symbols to `if:` and `unless:` ([@palkan][])
+
+- [PR#85](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/85) Fix conditional caching ([@palkan][])
+
 ## 1.13.1 (2022-10-12)
 
 - [PR#84](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/84) Fix Renew Cache Read Multi Bug ([@KTSCode][])
