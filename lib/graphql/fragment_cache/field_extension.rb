@@ -51,22 +51,25 @@ module GraphQL
         if @if.is_a?(Proc) && !object.instance_exec(&@if)
           return yield(object, arguments)
         end
+
         if @if.is_a?(Symbol) && !object.send(@if)
           return yield(object, arguments)
         end
+
         if @unless.is_a?(Proc) && object.instance_exec(&@unless)
           return yield(object, arguments)
         end
+
         if @unless.is_a?(Symbol) && object.send(@unless)
           return yield(object, arguments)
         end
 
         object_for_key = if @context_key
           Array(@context_key).map { |key| object.context[key] }
+        elsif @cache_key == :object
+          object.object
         elsif @cache_key == :value
           resolved_value = yield(object, arguments)
-        elsif @cache_key.is_a?(Symbol)
-          object.send(@cache_key)
         elsif @cache_key.is_a?(Proc)
           object.instance_exec(&@cache_key)
         end

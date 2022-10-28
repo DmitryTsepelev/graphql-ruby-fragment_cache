@@ -2,7 +2,7 @@
 
 ## master
 
-- [PR#86](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/86) Support passing Procs and any Symbol to `cache_key:` ([@jeromedalbert][])
+- [PR#86](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/86) Support passing Procs to `cache_key:` ([@jeromedalbert][])
 - [PR#89](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/89) Use a "graphql" cache namespace by default ([@jeromedalbert][])
 
 ## 1.15.0 (2022-10-27)
