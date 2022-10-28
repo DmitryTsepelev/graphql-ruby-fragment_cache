@@ -87,6 +87,7 @@ module GraphQL
     end
 
     self.cache_store = MemoryStore.new
+    self.namespace = "graphql"
     self.default_options = {}
     self.skip_cache_when_query_has_errors = false
   end
