@@ -25,6 +25,8 @@ module GraphQL
       attr_accessor :namespace
       attr_accessor :default_options
 
+      attr_accessor :skip_cache_when_query_has_errors
+
       def use(schema_defn, options = {})
         verify_interpreter_and_analysis!(schema_defn)
 
@@ -51,6 +53,8 @@ module GraphQL
 
         @cache_store = store
       end
+
+      alias skip_cache_when_query_has_errors? skip_cache_when_query_has_errors
 
       def graphql_ruby_before_2_0?
         check_graphql_version "< 2.0.0"
@@ -85,6 +89,7 @@ module GraphQL
     self.cache_store = MemoryStore.new
     self.namespace = "graphql"
     self.default_options = {}
+    self.skip_cache_when_query_has_errors = false
   end
 end
 

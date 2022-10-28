@@ -424,6 +424,16 @@ end
 
 This can reduce a number of cache calls but _increase_ memory usage, because the value returned from cache will be kept in the GraphQL context until the query is fully resolved.
 
+## Execution errors and caching
+
+Sometimes errors happen during query resolving and it might make sense to skip caching for such queries (for instance, imagine a situation when client has no access to the requested field and the backend returns `{ data: {}, errors: ["you need a permission to fetch orders"] }`). This is how this behavior can be turned on (_it's off by default!_):
+
+```ruby
+GraphQL::FragmentCache.skip_cache_when_query_has_errors = true
+```
+
+As a result, caching will be skipped when `errors` array is not empty.
+
 ## Limitations
 
 1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together. The problem appears when `cache_fragment` is _inside_ the `.then` block:
