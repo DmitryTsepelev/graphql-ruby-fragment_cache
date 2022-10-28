@@ -237,26 +237,16 @@ def post(id:)
 end
 ```
 
-Passing any other symbol to `cache_key:` will send it to the current object:
-
-```ruby
-field :post, PostType, null: true, cache_fragment: {cache_key: :title} do
-  argument :id, ID, required: true
-end
-
-# this is equal to
-def post(id:)
-  post = Post.find(id)
-  cache_fragment(object.title) { post }
-end
-```
-
-Finally, passing a proc to `cache_key:` allows you to use any arbitrary value:
+Finally, passing a proc or any other symbol to `cache_key:` will evaluate it:
 
 ```ruby
 field :posts,
   Types::Objects::PostType.connection_type,
   cache_fragment: {cache_key: -> { object.posts.maximum(:created_at) }}
+
+field :post, PostType, null: true, cache_fragment: {cache_key: :my_method} do
+  argument :id, ID, required: true
+end
 ```
 
 The way cache key part is generated for the passed argument is the following:
