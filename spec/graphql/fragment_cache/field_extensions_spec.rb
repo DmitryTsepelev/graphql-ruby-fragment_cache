@@ -272,6 +272,70 @@ describe "cache_fragment: option" do
         expect(::Post).to have_received(:find).once
       end
     end
+
+    context "when :cache_key is a Proc" do
+      let(:schema) do
+        post_type = Class.new(Types::Post) {
+          graphql_name "PostWithCachedAuthor"
+
+          field :cached_author, Types::User, null: true, cache_fragment: {cache_key: -> { object }}
+
+          def cached_author
+            object.author
+          end
+        }
+
+        build_schema do
+          query(
+            Class.new(Types::Query) {
+              field :post, post_type, null: true do
+                argument :id, GraphQL::Types::ID, required: true
+              end
+            }
+          )
+        end
+      end
+
+      let(:query) do
+        <<~GQL
+          query getPost($id: ID!){
+            post(id: $id) {
+              id
+              title
+              cachedAuthor {
+                id
+                name
+              }
+            }
+          }
+        GQL
+      end
+
+      let(:post) { Post.create(id: id, title: "option test", author: User.new(id: 22, name: "Jack")) }
+
+      it "returns a new version of author when post.cache_key has changed" do
+        # re-warmup cache
+        execute_query
+
+        post.author.name = "John"
+        expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
+          "id" => "22",
+          "name" => "Jack"
+        })
+
+        post.title = "new option"
+        expect(execute_query.dig("data", "post", "cachedAuthor")).to eq({
+          "id" => "22",
+          "name" => "John"
+        })
+      end
+
+      it "calls resolver method" do
+        allow(::Post).to receive(:find).and_call_original
+        execute_query
+        expect(::Post).to have_received(:find).once
+      end
+    end
   end
 
   context "when :if is provided" do
