@@ -223,7 +223,7 @@ def post(id:)
 end
 ```
 
-Also, you can pass `:value` to the `cache_key:` argument to use the returned value to build a key:
+You can pass the special `:value` symbol to the `cache_key:` argument to use the returned value to build a key:
 
 ```ruby
 field :post, PostType, null: true, cache_fragment: {cache_key: :value} do
@@ -235,6 +235,28 @@ def post(id:)
   post = Post.find(id)
   cache_fragment(post) { post }
 end
+```
+
+Passing any other symbol to `cache_key:` will send it to the current object:
+
+```ruby
+field :post, PostType, null: true, cache_fragment: {cache_key: :title} do
+  argument :id, ID, required: true
+end
+
+# this is equal to
+def post(id:)
+  post = Post.find(id)
+  cache_fragment(object.title) { post }
+end
+```
+
+Finally, passing a proc to `cache_key:` allows you to use any arbitrary value:
+
+```ruby
+field :posts,
+  Types::Objects::PostType.connection_type,
+  cache_fragment: {cache_key: -> { object.posts.maximum(:created_at) }}
 ```
 
 The way cache key part is generated for the passed argument is the following:
