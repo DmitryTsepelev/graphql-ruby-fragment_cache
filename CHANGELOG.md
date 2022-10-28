@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#87](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/87) Use a "graphql" cache namespace by default ([@jeromedalbert][])
+
 ## 1.14.0 (2022-10-26)
 
 - [PR#85](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/85) Support passing Symbols to `if:` and `unless:` ([@palkan][])

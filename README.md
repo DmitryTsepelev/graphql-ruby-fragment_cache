@@ -72,10 +72,10 @@ Cache keys consist of the following parts: namespace, implicit key, and explicit
 
 ### Cache namespace
 
-You can optionally define a namespace that will be prefixed to every cache key:
+The namespace is prefixed to every cached key. The default namespace is `graphql`, which is configurable:
 
 ```ruby
-GraphQL::FragmentCache.namespace = "my-prefix"
+GraphQL::FragmentCache.namespace = "graphql"
 ```
 
 ### Implicit cache key
