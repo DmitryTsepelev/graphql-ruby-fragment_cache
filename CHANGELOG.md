@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#86](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/86) Support passing Procs and any Symbol to `cache_key:` ([@jeromedalbert][])
+
 ## 1.15.0 (2022-10-27)
 
 - [PR#43](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/43) Implement `skip_cache_when_query_has_errors` option to skip caching when query was resolved with errors ([@DmitryTsepelev][])
