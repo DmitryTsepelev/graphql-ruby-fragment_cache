@@ -25,6 +25,9 @@ module GraphQL
 
       def cache_fragment(object_to_cache = NO_OBJECT, **options, &block)
         raise ArgumentError, "Block or argument must be provided" unless block_given? || object_to_cache != NO_OBJECT
+        unless GraphQL::FragmentCache.enabled
+          return block_given? ? block.call : object_to_cache
+        end
 
         unless options.delete(:default_options_merged)
           options = GraphQL::FragmentCache.default_options.merge(options)

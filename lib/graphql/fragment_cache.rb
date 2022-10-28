@@ -22,6 +22,7 @@ module GraphQL
   module FragmentCache
     class << self
       attr_reader :cache_store
+      attr_accessor :enabled
       attr_accessor :namespace
       attr_accessor :default_options
 
@@ -87,6 +88,7 @@ module GraphQL
     end
 
     self.cache_store = MemoryStore.new
+    self.enabled = true
     self.default_options = {}
     self.skip_cache_when_query_has_errors = false
   end

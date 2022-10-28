@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#90](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/90) Add option to disable the cache ([@jeromedalbert][])
+
 ## 1.15.0 (2022-10-27)
 
 - [PR#43](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/43) Implement `skip_cache_when_query_has_errors` option to skip caching when query was resolved with errors ([@DmitryTsepelev][])
