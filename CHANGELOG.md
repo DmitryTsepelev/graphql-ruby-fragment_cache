@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#89](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/89) Use a "graphql" cache namespace by default ([@jeromedalbert][])
+
 ## 1.15.0 (2022-10-27)
 
 - [PR#43](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/43) Implement `skip_cache_when_query_has_errors` option to skip caching when query was resolved with errors ([@DmitryTsepelev][])
