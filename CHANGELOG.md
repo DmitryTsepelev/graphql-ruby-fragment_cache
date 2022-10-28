@@ -2,7 +2,7 @@
 
 ## master
 
-- [PR#87](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/87) Use a "graphql" cache namespace by default ([@jeromedalbert][])
+- [PR#89](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/89) Use a "graphql" cache namespace by default ([@jeromedalbert][])
 
 ## 1.15.0 (2022-10-27)
 
