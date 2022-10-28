@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.15.0 (2022-10-27)
+
+- [PR#43](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/43) Implement `skip_cache_when_query_has_errors` option to skip caching when query was resolved with errors ([@DmitryTsepelev][])
+
 ## 1.14.0 (2022-10-26)
 
 - [PR#85](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/85) Support passing Symbols to `if:` and `unless:` ([@palkan][])
