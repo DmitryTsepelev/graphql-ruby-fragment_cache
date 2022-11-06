@@ -948,4 +948,62 @@ describe "#cache_fragment" do
       end
     end
   end
+
+  describe "when caching is disabled" do
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+
+            define_method(:post, &field_resolver)
+          }
+        )
+      end
+    end
+
+    let(:id) { 1 }
+    let(:variables) { {id: id} }
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!) {
+          post(id: $id) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let!(:post) { Post.create(id: 1, title: "object test") }
+
+    before do
+      # warmup cache
+      execute_query
+      # make object dirty
+      post.title = "new object test"
+
+      GraphQL::FragmentCache.enabled = false
+    end
+
+    after { GraphQL::FragmentCache.enabled = true }
+
+    let(:resolver) do
+      ->(id:) do
+        cache_fragment { Post.find(id) }
+      end
+    end
+
+    it "does not use the cache" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new object test"
+      })
+    end
+  end
 end

@@ -434,6 +434,14 @@ GraphQL::FragmentCache.skip_cache_when_query_has_errors = true
 
 As a result, caching will be skipped when `errors` array is not empty.
 
+## Disabling the cache
+
+Cache processing can be disabled if needed. For example:
+
+```ruby
+GraphQL::FragmentCache.enabled = false if Rails.env.test?
+```
+
 ## Limitations
 
 1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together. The problem appears when `cache_fragment` is _inside_ the `.then` block:
