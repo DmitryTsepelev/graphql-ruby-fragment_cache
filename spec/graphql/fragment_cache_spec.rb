@@ -4,33 +4,36 @@ require "spec_helper"
 
 describe GraphQL::FragmentCache do
   describe ".use" do
-    it "raises if interpreter is not used" do
-      expect {
-        Class.new(GraphQL::Schema) { use GraphQL::FragmentCache }
-      }.to raise_error(
-        StandardError, "GraphQL::Execution::Interpreter should be enabled for fragment caching"
-      )
-    end
+    if GraphQL::FragmentCache.graphql_ruby_before_2_0?
+      it "raises if interpreter is not used" do
+        expect {
+          Class.new(GraphQL::Schema) {
+            use GraphQL::Execution::Execute
+            use GraphQL::FragmentCache
+          }
+        }.to raise_error(
+          StandardError, "GraphQL::Execution::Interpreter should be enabled for fragment caching"
+        )
+      end
 
-    it "raise if interpreter is used without AST" do
-      expect {
-        Class.new(GraphQL::Schema) do
-          use GraphQL::Execution::Interpreter
-          use GraphQL::FragmentCache
-        end
-      }.to raise_error(
-        StandardError, "GraphQL::Analysis::AST should be enabled for fragment caching"
-      )
-    end
+      it "raise if interpreter is used without AST" do
+        expect {
+          Class.new(GraphQL::Schema) do
+            use GraphQL::Analysis
+            use GraphQL::FragmentCache
+          end
+        }.to raise_error(
+          StandardError, "GraphQL::Analysis::AST should be enabled for fragment caching"
+        )
+      end
 
-    it "doesn't raise if interpreter is used with AST" do
-      expect {
-        Class.new(GraphQL::Schema) do
-          use GraphQL::Execution::Interpreter
-          use GraphQL::Analysis::AST
-          use GraphQL::FragmentCache
-        end
-      }.not_to raise_error
+      it "doesn't raise if interpreter is used with AST" do
+        expect {
+          Class.new(GraphQL::Schema) do
+            use GraphQL::FragmentCache
+          end
+        }.not_to raise_error
+      end
     end
   end
 
@@ -60,6 +63,18 @@ describe GraphQL::FragmentCache do
       obj.singleton_class.define_method(:write) {}
 
       expect { described_class.cache_store = obj }.not_to raise_error
+    end
+  end
+
+  describe ".configure" do
+    it "accepts options with a block notation" do
+      obj = GraphQL::FragmentCache::MemoryStore.new
+
+      described_class.configure do |config|
+        config.cache_store = obj
+      end
+
+      expect(described_class.cache_store).to eq obj
     end
   end
 end

@@ -17,13 +17,10 @@ end
 
 ## Getting started
 
-Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class (make sure to turn interpreter mode on with AST analysis!):
+Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class:
 
 ```ruby
 class GraphqSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-
   use GraphQL::FragmentCache
 
   query QueryType
@@ -69,22 +66,21 @@ class QueryType < BaseObject
 end
 ```
 
-If you use [connections](https://graphql-ruby.org/pagination/connection_concepts.html) and plan to cache them—please turn on [brand new](https://github.com/rmosolgo/graphql-ruby/blob/master/lib/graphql/pagination/connections.rb#L5) connections hierarchy in your schema:
-
-```ruby
-class GraphqSchema < GraphQL::Schema
-  # ...
-  use GraphQL::Pagination::Connections
-end
-```
-
 ## Cache key generation
 
-Cache keys consist of implicit and explicit (provided by user) parts.
+Cache keys consist of the following parts: namespace, implicit key, and explicit key.
+
+### Cache namespace
+
+The namespace is prefixed to every cached key. The default namespace is `graphql`, which is configurable:
+
+```ruby
+GraphQL::FragmentCache.namespace = "graphql"
+```
 
 ### Implicit cache key
 
-Implicit part of a cache key (its prefix) contains the information about the schema and the current query. It includes:
+Implicit part of a cache key contains the information about the schema and the current query. It includes:
 
 - Hex gsdigest of the schema definition (to make sure cache is cleared when the schema changes).
 - The current query fingerprint consisting of a _path_ to the field, arguments information and the selections set.
@@ -112,10 +108,10 @@ selections_cache_key = "[#{%w[id name].join(".")}]"
 
 query_cache_key = Digest::SHA1.hexdigest("#{path_cache_key}#{selections_cache_key}")
 
-cache_key = "#{schema_cache_key}/#{query_cache_key}"
+cache_key = "#{schema_cache_key}/#{query_cache_key}/#{object_cache_key}"
 ```
 
-You can override `schema_cache_key`, `query_cache_key` or `path_cache_key` by passing parameters to the `cache_fragment` calls:
+You can override `schema_cache_key`, `query_cache_key`, `path_cache_key` or `object_cache_key` by passing parameters to the `cache_fragment` calls:
 
 ```ruby
 class QueryType < BaseObject
@@ -140,7 +136,22 @@ class PostType < BaseObject
 end
 ```
 
-### User-provided cache key
+Overriding `object_cache_key` is helpful in the case where the value that is cached is different than the one used as a key, like a database query that is pre-processed before caching.
+
+```ruby
+class QueryType < BaseObject
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+  end
+
+  def post(id:)
+    query = Post.where("updated_at < ?", Time.now - 1.day)
+    cache_fragment(object_cache_key: query.cache_key) { query.some_process }
+  end
+end
+```
+
+### User-provided cache key (custom key)
 
 In most cases you want your cache key to depend on the resolved object (say, `ActiveRecord` model). You can do that by passing an argument to the `#cache_fragment` method in a similar way to Rails views [`#cache` method](https://guides.rubyonrails.org/caching_with_rails.html#fragment-caching):
 
@@ -169,6 +180,36 @@ cache_fragment(post)
 cache_fragment(post) { post }
 ```
 
+Using literals: Even when using a same string for all queries, the cache changes per argument and per selection set (because of the query_key).
+
+```ruby
+def post(id:)
+  cache_fragment("find_post") { Post.find(id) }
+end
+```
+
+Combining with options:
+
+```ruby
+def post(id:)
+  cache_fragment("find_post", expires_in: 5.minutes) { Post.find(id) }
+end
+```
+
+Dynamic cache key:
+
+```ruby
+def post(id:)
+  last_updated_at = Post.select(:updated_at).find_by(id: id)&.updated_at
+  cache_fragment(last_updated_at, expires_in: 5.minutes) { Post.find(id) }
+end
+```
+
+Note the usage of `.select(:updated_at)` at the cache key field to make this verifying query as fastest and light as possible.
+
+You can also add touch options for the belongs_to association e.g author's `belongs_to: :post` to have a `touch: true`.
+So that it invalidates the Post when the author is updated.
+
 When using `cache_fragment:` option, it's only possible to use the resolved value as a cache key by setting:
 
 ```ruby
@@ -196,8 +237,17 @@ def post(id:)
 end
 ```
 
+If you need more control, you can set `cache_key:` to any custom code:
+
+```ruby
+field :posts,
+  Types::Objects::PostType.connection_type,
+  cache_fragment: {cache_key: -> { object.posts.maximum(:created_at) }}
+```
+
 The way cache key part is generated for the passed argument is the following:
 
+- Use `object_cache_key: "some_cache_key"` if passed to `cache_fragment`
 - Use `#graphql_cache_key` if implemented.
 - Use `#cache_key` (or `#cache_key_with_version` for modern Rails) if implemented.
 - Use `self.to_s` for _primitive_ types (strings, symbols, numbers, booleans).
@@ -244,12 +294,62 @@ class QueryType < BaseObject
 end
 ```
 
+## Conditional caching
+
+Use the `if:` (or `unless:`) option:
+
+```ruby
+def post(id:)
+  cache_fragment(if: current_user.nil?) { Post.find(id) }
+end
+
+# or
+
+field :post, PostType, cache_fragment: {if: -> { current_user.nil? }} do
+  argument :id, ID, required: true
+end
+
+# or
+
+field :post, PostType, cache_fragment: {if: :current_user?} do
+  argument :id, ID, required: true
+end
+```
+
+## Default options
+
+You can configure default options that will be passed to all `cache_fragment`
+calls and `cache_fragment:` configurations. For example:
+
+```ruby
+GraphQL::FragmentCache.configure do |config|
+  config.default_options = {
+    expires_in: 1.hour, # Expire cache keys after 1 hour
+    schema_cache_key: nil # Do not clear the cache on each schema change
+  }
+end
+```
+
+## Renewing the cache
+
+You can force the cache to renew during query execution by adding
+`renew_cache: true` to the query context:
+
+```ruby
+MyAppSchema.execute("query { posts { title } }", context: {renew_cache: true})
+```
+
+This will treat any cached value as missing even if it's present, and store
+fresh new computed values in the cache. This can be useful for cache warmers.
+
 ## Cache storage and options
 
 It's up to your to decide which caching engine to use, all you need is to configure the cache store:
 
 ```ruby
-GraphQL::FragmentCache.cache_store = MyCacheStore.new
+GraphQL::FragmentCache.configure do |config|
+  config.cache_store = MyCacheStore.new
+end
 ```
 
 Or, in Rails:
@@ -332,9 +432,50 @@ end
 
 This can reduce a number of cache calls but _increase_ memory usage, because the value returned from cache will be kept in the GraphQL context until the query is fully resolved.
 
+## Execution errors and caching
+
+Sometimes errors happen during query resolving and it might make sense to skip caching for such queries (for instance, imagine a situation when client has no access to the requested field and the backend returns `{ data: {}, errors: ["you need a permission to fetch orders"] }`). This is how this behavior can be turned on (_it's off by default!_):
+
+```ruby
+GraphQL::FragmentCache.skip_cache_when_query_has_errors = true
+```
+
+As a result, caching will be skipped when `errors` array is not empty.
+
+## Disabling the cache
+
+Cache processing can be disabled if needed. For example:
+
+```ruby
+GraphQL::FragmentCache.enabled = false if Rails.env.test?
+```
+
 ## Limitations
 
-Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
+1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together. The problem appears when `cache_fragment` is _inside_ the `.then` block:
+
+```ruby
+def cached_author_inside_batch
+  AuthorLoader.load(object).then do |author|
+    cache_fragment(author, context: context)
+  end
+end
+```
+
+The problem is that context is not [properly populated](https://github.com/rmosolgo/graphql-ruby/issues/3397) inside the block (the gem uses `:current_path` to build the cache key). There are two possible workarounds: use [dataloaders](https://graphql-ruby.org/dataloader/overview.html) or manage `:current_path` manually:
+
+```ruby
+def cached_author_inside_batch
+  outer_path = context.namespace(:interpreter)[:current_path]
+
+  AuthorLoader.load(object).then do |author|
+    context.namespace(:interpreter)[:current_path] = outer_path
+    cache_fragment(author, context: context)
+  end
+end
+```
+
+2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
 
 ```ruby
 field :cached_avatar_url, String, null: false

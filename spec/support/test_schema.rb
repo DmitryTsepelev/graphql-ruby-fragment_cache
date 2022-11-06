@@ -1,8 +1,23 @@
 # frozen_string_literal: true
 
+class AuthorLoader < GraphQL::Batch::Loader
+  def perform(posts)
+    posts.each { |post| fulfill(post, post.author) }
+    posts.each { |post| fulfill(post, nil) unless fulfilled?(id) }
+  end
+end
+
 module Types
   class Base < GraphQL::Schema::Object
     include GraphQL::FragmentCache::Object
+
+    def current_user?
+      context[:current_user]
+    end
+
+    def no_current_user?
+      context[:current_user].nil?
+    end
   end
 
   class User < Base
@@ -18,13 +33,32 @@ module Types
     field :id, ID, null: false
     field :title, String, null: false
     field :cached_title, String, null: false, cache_fragment: true, method: :title
-    field :author, User, null: false
+    field :author, User, null: false do
+      argument :version, Integer, required: false
+      argument :cached, Boolean, required: false
+    end
+
     field :cached_author, User, null: false
+    field :batched_cached_author, User, null: false
+    field :cached_author_inside_batch, User, null: false
 
     field :meta, String, null: true
 
     def cached_author
       cache_fragment { object.author }
+    end
+
+    def batched_cached_author
+      cache_fragment { AuthorLoader.load(object) }
+    end
+
+    def cached_author_inside_batch
+      outer_path = context.namespace(:interpreter)[:current_path]
+
+      AuthorLoader.load(object).then do |author|
+        context.namespace(:interpreter)[:current_path] = outer_path
+        cache_fragment(author, context: context)
+      end
     end
   end
 
@@ -82,9 +116,14 @@ module Types
 end
 
 class TestSchema < GraphQL::Schema
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-  use GraphQL::Pagination::Connections
+  if GraphQL::FragmentCache.graphql_ruby_before_2_0?
+    use GraphQL::Execution::Interpreter
+    use GraphQL::Analysis::AST
+
+    use GraphQL::Pagination::Connections
+  end
+
+  use GraphQL::Batch
   use GraphQL::FragmentCache
 
   query Types::Query

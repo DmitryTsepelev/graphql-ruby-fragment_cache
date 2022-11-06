@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "graphql/fragment_cache/fragment"
+require "graphql/fragment_cache/schema/lazy_cache_resolver"
 
 module GraphQL
   module FragmentCache
@@ -11,15 +12,33 @@ module GraphQL
       extend Forwardable
 
       def self.included(base)
-        return if base < GraphQL::Execution::Interpreter::HandlesRawValue
+        return if base.method_defined?(:raw_value)
 
-        base.include(GraphQL::Execution::Interpreter::HandlesRawValue)
+        base.include(Module.new {
+          def raw_value(obj)
+            GraphQL::Execution::Interpreter::RawValue.new(obj)
+          end
+        })
       end
 
       NO_OBJECT = Object.new
 
       def cache_fragment(object_to_cache = NO_OBJECT, **options, &block)
         raise ArgumentError, "Block or argument must be provided" unless block_given? || object_to_cache != NO_OBJECT
+        unless GraphQL::FragmentCache.enabled
+          return block_given? ? block.call : object_to_cache
+        end
+
+        unless options.delete(:default_options_merged)
+          options = GraphQL::FragmentCache.default_options.merge(options)
+        end
+
+        if options.key?(:if) || options.key?(:unless)
+          disabled = options.key?(:if) ? !options.delete(:if) : options.delete(:unless)
+          if disabled
+            return block_given? ? block.call : object_to_cache
+          end
+        end
 
         options[:object] = object_to_cache if object_to_cache != NO_OBJECT
 
@@ -29,14 +48,7 @@ module GraphQL
 
         fragment = Fragment.new(context_to_use, **options)
 
-        keep_in_context = options.delete(:keep_in_context)
-        if (cached = fragment.read(keep_in_context))
-          return cached == Fragment::NIL_IN_CACHE ? nil : raw_value(cached)
-        end
-
-        (block_given? ? block.call : object_to_cache).tap do |resolved_value|
-          context_to_use.fragments << fragment
-        end
+        GraphQL::FragmentCache::Schema::LazyCacheResolver.new(fragment, context_to_use, object_to_cache, &block)
       end
     end
   end

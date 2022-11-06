@@ -13,9 +13,14 @@ module GraphQL
         end
 
         def after_query(query)
-          return unless query.valid?
+          return if skip_caching?(query)
 
           Cacher.call(query)
+        end
+
+        def skip_caching?(query)
+          !query.valid? ||
+            GraphQL::FragmentCache.skip_cache_when_query_has_errors? && query.context.errors.any?
         end
       end
     end

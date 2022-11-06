@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "graphql/fragment_cache/schema/lazy_cache_resolver"
+
 module GraphQL
   module FragmentCache
     # Wraps resolver with cache method
@@ -28,10 +30,17 @@ module GraphQL
       end
 
       def initialize(options:, **_rest)
-        @cache_options = options || {}
+        @cache_options = GraphQL::FragmentCache.default_options.merge(options || {})
+        @cache_options[:default_options_merged] = true
 
         @context_key = @cache_options.delete(:context_key)
         @cache_key = @cache_options.delete(:cache_key)
+
+        @if = @cache_options.delete(:if)
+        @unless = @cache_options.delete(:unless)
+
+        # Make sure we do not modify options, since they're global
+        @cache_options.freeze
       end
 
       NOT_RESOLVED = Object.new
@@ -39,12 +48,30 @@ module GraphQL
       def resolve(object:, arguments:, **_options)
         resolved_value = NOT_RESOLVED
 
+        if @if.is_a?(Proc) && !object.instance_exec(&@if)
+          return yield(object, arguments)
+        end
+
+        if @if.is_a?(Symbol) && !object.send(@if)
+          return yield(object, arguments)
+        end
+
+        if @unless.is_a?(Proc) && object.instance_exec(&@unless)
+          return yield(object, arguments)
+        end
+
+        if @unless.is_a?(Symbol) && object.send(@unless)
+          return yield(object, arguments)
+        end
+
         object_for_key = if @context_key
           Array(@context_key).map { |key| object.context[key] }
         elsif @cache_key == :object
           object.object
         elsif @cache_key == :value
           resolved_value = yield(object, arguments)
+        elsif @cache_key.is_a?(Proc)
+          object.instance_exec(&@cache_key)
         end
 
         cache_fragment_options = @cache_options.merge(object: object_for_key)

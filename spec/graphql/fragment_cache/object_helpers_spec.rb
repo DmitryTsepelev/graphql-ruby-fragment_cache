@@ -345,6 +345,44 @@ describe "#cache_fragment" do
       end
     end
 
+    context "when selection aliases are used" do
+      let(:query) do
+        <<~GQL
+          query getPost($id: ID!) {
+            post(id: $id) {
+              id
+            }
+          }
+        GQL
+      end
+
+      let(:query_with_aliased_selection) do
+        <<~GQL
+          query getPost($id: ID!) {
+            post(id: $id) {
+              postId: id
+            }
+          }
+        GQL
+      end
+
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(Post.find(id))
+        end
+      end
+
+      it "returns cached fragment for different selection aliases independently" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1"
+        })
+
+        expect(execute_query(query_with_aliased_selection).dig("data", "post")).to eq({
+          "postId" => "1"
+        })
+      end
+    end
+
     context "when resolver is used" do
       let(:resolver_class) do
         Class.new(GraphQL::Schema::Resolver) do
@@ -497,34 +535,6 @@ describe "#cache_fragment" do
           execute_query
           expect(::Post).not_to have_received(:all)
         end
-      end
-    end
-
-    context "when new_connections are not configured" do
-      let(:schema) do
-        Class.new(GraphQL::Schema) do
-          use GraphQL::Execution::Interpreter
-          use GraphQL::Analysis::AST
-          use GraphQL::FragmentCache
-
-          query(
-            Class.new(Types::Query) {
-              field :posts, Types::Post.connection_type, null: false, cache_fragment: true
-
-              def posts
-                Post.all
-              end
-            }
-          )
-        end
-      end
-
-      it "raises error" do
-        expect {
-          execute_query
-        }.to raise_error(
-          StandardError, "GraphQL::Pagination::Connections should be enabled for connection caching"
-        )
       end
     end
   end
@@ -715,6 +725,285 @@ describe "#cache_fragment" do
         # read key once
         expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(4)
       end
+    end
+  end
+
+  describe "caching fields with batch loader" do
+    let(:query) do
+      <<~GQL
+        query GetPosts {
+          posts {
+            id
+            batchedCachedAuthor {
+              name
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:schema) do
+      build_schema do
+        use GraphQL::Batch
+        query(Types::Query)
+      end
+    end
+
+    let(:user1) { User.new(id: 1, name: "User #1") }
+    let(:user2) { User.new(id: 2, name: "User #2") }
+
+    let!(:post1) { Post.create(id: 1, title: "object test 1", author: user1) }
+    let!(:post2) { Post.create(id: 2, title: "object test 2", author: user2) }
+
+    before do
+      # warmup cache
+      execute_query
+      # make objects dirty
+      user1.name = "User #1 new"
+      user2.name = "User #2 new"
+    end
+
+    it "returns cached results" do
+      expect(execute_query.dig("data", "posts")).to eq([
+        {
+          "id" => "1",
+          "batchedCachedAuthor" => {"name" => "User #1"}
+        },
+        {
+          "id" => "2",
+          "batchedCachedAuthor" => {"name" => "User #2"}
+        }
+      ])
+    end
+  end
+
+  describe "conditional caching" do
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+
+            define_method(:post, &field_resolver)
+          }
+        )
+      end
+    end
+
+    let(:id) { 1 }
+    let(:variables) { {id: id} }
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!) {
+          post(id: $id) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let!(:post) { Post.create(id: 1, title: "object test") }
+
+    before do
+      # warmup cache
+      execute_query
+      # make object dirty
+      post.title = "new object test"
+    end
+
+    context "when :if is true" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(if: true) { Post.find(id) }
+        end
+      end
+
+      it "uses the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "object test"
+        })
+      end
+    end
+
+    context "when :if is false" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(if: false) { Post.find(id) }
+        end
+      end
+
+      it "does not use the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new object test"
+        })
+      end
+    end
+
+    context "when :unless is true" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(unless: true) { Post.find(id) }
+        end
+      end
+
+      it "does not use the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "new object test"
+        })
+      end
+    end
+
+    context "when :unless is false" do
+      let(:resolver) do
+        ->(id:) do
+          cache_fragment(unless: false) { Post.find(id) }
+        end
+      end
+
+      it "uses the cache" do
+        expect(execute_query.dig("data", "post")).to eq({
+          "id" => "1",
+          "title" => "object test"
+        })
+      end
+    end
+  end
+
+  describe "when a default option is configured" do
+    let(:query) do
+      <<~GQL
+        query getPosts {
+          posts {
+            nodes {
+              id
+            }
+          }
+        }
+      GQL
+    end
+
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :posts, Types::Post.connection_type, null: false
+
+            define_method(:posts, &field_resolver)
+          }
+        )
+      end
+    end
+
+    before do
+      Post.create(id: 1, title: "first post")
+
+      GraphQL::FragmentCache.default_options = {expires_in: 60}
+      allow(GraphQL::FragmentCache.cache_store).to receive(:write).and_call_original
+    end
+
+    after { GraphQL::FragmentCache.default_options = {} }
+
+    context "when default option is not overriden" do
+      let(:resolver) do
+        -> do
+          posts = Post.all
+          cache_fragment(posts)
+        end
+      end
+
+      it "uses the default option" do
+        execute_query
+
+        expect(GraphQL::FragmentCache.cache_store)
+          .to have_received(:write)
+          .with(anything, anything, hash_including(expires_in: 60))
+      end
+    end
+
+    context "when default option is overriden" do
+      let(:resolver) do
+        -> do
+          posts = Post.all
+          cache_fragment(posts, expires_in: 10)
+        end
+      end
+
+      it "does not use the default option" do
+        execute_query
+
+        expect(GraphQL::FragmentCache.cache_store)
+          .to have_received(:write)
+          .with(anything, anything, hash_including(expires_in: 10))
+      end
+    end
+  end
+
+  describe "when caching is disabled" do
+    let(:schema) do
+      field_resolver = resolver
+
+      build_schema do
+        query(
+          Class.new(Types::Query) {
+            field :post, Types::Post, null: true do
+              argument :id, GraphQL::Types::ID, required: true
+            end
+
+            define_method(:post, &field_resolver)
+          }
+        )
+      end
+    end
+
+    let(:id) { 1 }
+    let(:variables) { {id: id} }
+
+    let(:query) do
+      <<~GQL
+        query getPost($id: ID!) {
+          post(id: $id) {
+            id
+            title
+          }
+        }
+      GQL
+    end
+
+    let!(:post) { Post.create(id: 1, title: "object test") }
+
+    before do
+      # warmup cache
+      execute_query
+      # make object dirty
+      post.title = "new object test"
+
+      GraphQL::FragmentCache.enabled = false
+    end
+
+    after { GraphQL::FragmentCache.enabled = true }
+
+    let(:resolver) do
+      ->(id:) do
+        cache_fragment { Post.find(id) }
+      end
+    end
+
+    it "does not use the cache" do
+      expect(execute_query.dig("data", "post")).to eq({
+        "id" => "1",
+        "title" => "new object test"
+      })
     end
   end
 end

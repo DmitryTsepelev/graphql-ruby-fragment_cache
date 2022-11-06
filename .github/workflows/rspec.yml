@@ -14,38 +14,28 @@ jobs:
 
     env:
       CI: true
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
 
     strategy:
       fail-fast: false
       matrix:
-        ruby: [2.5, 2.6, 2.7]
+        ruby: [2.6, 2.7, 3.0]
         gemfile: [
-          "gemfiles/graphql_1_11_4.gemfile",
-          "gemfiles/graphql_1_11_5.gemfile",
+          "gemfiles/graphql_1_12_0.gemfile",
+          "gemfiles/graphql_1_13_7.gemfile",
+          "gemfiles/graphql_2_0_0.gemfile",
+          "gemfiles/graphql_2_0_14.gemfile",
           "gemfiles/graphql_master.gemfile"
         ]
 
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v1
-      with:
-        path: /home/runner/bundle
-        key: bundle-${{ matrix.ruby }}-${{ matrix.gemfile }}-${{ hashFiles(matrix.gemfile) }}-${{ hashFiles('**/*.gemspec') }}
-        restore-keys: |
-          bundle-${{ matrix.ruby }}-${{ matrix.gemfile }}-
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Install system deps
-      run: |
-        sudo apt-get update
-        sudo apt-get install libsqlite3-dev
-    - name: Bundle install
-      run: |
-        bundle config path /home/runner/bundle
-        bundle config --global gemfile ${{ matrix.gemfile }}
-        bundle install
-        bundle update
+        bundler-cache: true
+        bundler: 2.2.0
+        cache-version: 1
     - name: Run Ruby Next
       run: bundle exec rake nextify
     - name: Run RSpec

@@ -11,10 +11,26 @@ module GraphQL
 
     using(Module.new {
       refine Array do
+        def traverse_argument(argument)
+          return argument unless argument.is_a?(GraphQL::Schema::InputObject)
+
+          "{#{argument.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")}}"
+        end
+
         def to_selections_key
           map { |val|
             children = val.selections.empty? ? "" : "[#{val.selections.to_selections_key}]"
-            "#{val.field.name}#{children}"
+
+            field_name = val.field.name
+            field_alias = val.ast_nodes.map(&:alias).join
+            field_name = "#{field_alias}:#{field_name}" unless field_alias.empty?
+
+            unless val.arguments.empty?
+              args = val.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
+              field_name += "(#{args})"
+            end
+
+            "#{field_name}#{children}"
           }.join(".")
         end
       end
@@ -46,7 +62,12 @@ module GraphQL
           next_field_name = alias_node.name
 
           # From https://github.com/rmosolgo/graphql-ruby/blob/1a9a20f3da629e63ea8e5ee8400be82218f9edc3/lib/graphql/execution/lookahead.rb#L91
-          next_field_defn = get_class_based_field(selected_type, next_field_name)
+          next_field_defn =
+            if GraphQL::FragmentCache.graphql_ruby_before_2_0?
+              get_class_based_field(selected_type, next_field_name)
+            else
+              @query.get_field(selected_type, next_field_name)
+            end
 
           alias_selections[name] =
             if next_field_defn
@@ -55,7 +76,11 @@ module GraphQL
               arguments = arguments.is_a?(::GraphQL::Execution::Interpreter::Arguments) ? arguments.keyword_arguments : arguments
               @ast_nodes.each do |ast_node|
                 ast_node.selections.each do |selection|
-                  find_selected_nodes(selection, next_field_name, next_field_defn, arguments: arguments, matches: next_nodes)
+                  if GraphQL::FragmentCache.graphql_ruby_after_2_0_13?
+                    find_selected_nodes(selection, next_field_defn, arguments: arguments, matches: next_nodes)
+                  else
+                    find_selected_nodes(selection, next_field_name, next_field_defn, arguments: arguments, matches: next_nodes)
+                  end
                 end
               end
 
@@ -112,13 +137,18 @@ module GraphQL
       end
 
       def build
-        Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}").then do |base_key|
-          next base_key unless object
-          "#{base_key}/#{object_key(object)}"
-        end
+        [
+          GraphQL::FragmentCache.namespace,
+          implicit_cache_key,
+          object_cache_key
+        ].compact.join("/")
       end
 
       private
+
+      def implicit_cache_key
+        Digest::SHA1.hexdigest("#{schema_cache_key}/#{query_cache_key}")
+      end
 
       def schema_cache_key
         @options.fetch(:schema_cache_key) { schema.schema_cache_key }
@@ -165,8 +195,12 @@ module GraphQL
         "{#{argument.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")}}"
       end
 
+      def object_cache_key
+        @options[:object_cache_key] || object_key(object)
+      end
+
       def object_key(obj)
-        obj._graphql_cache_key
+        obj&._graphql_cache_key
       end
     end
   end
