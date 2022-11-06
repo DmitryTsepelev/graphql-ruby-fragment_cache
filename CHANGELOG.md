@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.16.0 (2022-11-06)
+
 - [PR#42](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/42) Raise helpful errors when write or write_multi fails  ([@DmitryTsepelev][])
 - [PR#86](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/86) Support passing Procs to `cache_key:` ([@jeromedalbert][])
 - [PR#90](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/90) Add option to disable the cache ([@jeromedalbert][])
