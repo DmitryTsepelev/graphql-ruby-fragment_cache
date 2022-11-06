@@ -70,6 +70,8 @@ module GraphQL
           object.object
         elsif @cache_key == :value
           resolved_value = yield(object, arguments)
+        elsif @cache_key.is_a?(Proc)
+          object.instance_exec(&@cache_key)
         end
 
         cache_fragment_options = @cache_options.merge(object: object_for_key)

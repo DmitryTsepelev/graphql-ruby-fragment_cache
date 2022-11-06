@@ -237,6 +237,14 @@ def post(id:)
 end
 ```
 
+If you need more control, you can set `cache_key:` to any custom code:
+
+```ruby
+field :posts,
+  Types::Objects::PostType.connection_type,
+  cache_fragment: {cache_key: -> { object.posts.maximum(:created_at) }}
+```
+
 The way cache key part is generated for the passed argument is the following:
 
 - Use `object_cache_key: "some_cache_key"` if passed to `cache_fragment`
