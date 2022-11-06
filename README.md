@@ -1,4 +1,4 @@
-# GraphQL::FragmentCache ![CI](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/workflows/CI/badge.svg?branch=master)
+# GraphQL::FragmentCache ![CI](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/actions/workflows/rspec.yml/badge.svg?branch=master) ![](https://ruby-gem-downloads-badge.herokuapp.com/graphql-fragment_cache?type=total)
 
 `GraphQL::FragmentCache` powers up [graphql-ruby](https://graphql-ruby.org) with the ability to cache response _fragments_: you can mark any field as cached and it will never be resolved again (at least, while cache is valid). For instance, the following code caches `title` for each post:
 
@@ -8,12 +8,6 @@ class PostType < BaseObject
   field :title, String, null: false, cache_fragment: true
 end
 ```
-
-<p align="center">
-  <a href="https://evilmartians.com/?utm_source=graphql-ruby-fragment_cache">
-    <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" alt="Sponsored by Evil Martians" width="236" height="54">
-  </a>
-</p>
 
 ## Getting started
 
@@ -488,6 +482,8 @@ end
 ## Credits
 
 Based on the original [gist](https://gist.github.com/palkan/faad9f6ff1db16fcdb1c071ec50e4190) by [@palkan](https://github.com/palkan) and [@ssnickolay](https://github.com/ssnickolay).
+
+Initially sponsored by [Evil Martians](http://evilmartians.com).
 
 ## Contributing
 
