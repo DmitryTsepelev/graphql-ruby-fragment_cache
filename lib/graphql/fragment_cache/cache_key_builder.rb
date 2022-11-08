@@ -139,7 +139,7 @@ module GraphQL
       def build
         key_parts = [
           GraphQL::FragmentCache.namespace,
-          path_cache_key_without_args,
+          simple_path_cache_key,
           implicit_cache_key,
           object_cache_key
         ]
@@ -176,7 +176,7 @@ module GraphQL
         current_root.selections.to_selections_key
       end
 
-      def path_cache_key_without_args
+      def simple_path_cache_key
         path_cache_key.split("(").first
       end
 
