@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#92](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/92) Make cache keys human-readable ([@jeromedalbert][])
+
 ## 1.16.0 (2022-11-06)
 
 - [PR#42](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/42) Raise helpful errors when write or write_multi fails  ([@DmitryTsepelev][])
