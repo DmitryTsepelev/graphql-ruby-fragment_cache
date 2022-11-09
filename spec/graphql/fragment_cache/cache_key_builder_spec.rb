@@ -40,13 +40,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     allow(Digest::SHA1).to receive(:hexdigest) { |val| val }
   end
 
-  specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title]" }
+  specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title]" }
 
   context "when a different namespace is configured" do
     before { GraphQL::FragmentCache.namespace = "my-prefix" }
     after { GraphQL::FragmentCache.namespace = "graphql" }
 
-    specify { is_expected.to eq "my-prefix/schema_key/cachedPost(id:#{id})[id.title]" }
+    specify { is_expected.to eq "my-prefix/cachedPost/schema_key-cachedPost(id:#{id})[id.title]" }
   end
 
   context "when cached field has nested selections" do
@@ -65,7 +65,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author[id.name]]" }
   end
 
   context "when cached field has aliased selections" do
@@ -84,7 +84,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[postId:id.title.author[authorId:id.name]]" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[postId:id.title.author[authorId:id.name]]" }
   end
 
   context "when argument is input" do
@@ -107,7 +107,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     let(:variables) { {inputWithId: {id: id, intArg: 42}} }
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPostByInput(input_with_id:{id:#{id},int_arg:42})[id.title.author[id.name]]" }
+    specify { is_expected.to eq "graphql/cachedPostByInput/schema_key-cachedPostByInput(input_with_id:{id:#{id},int_arg:42})[id.title.author[id.name]]" }
 
     context "when argument is complext input" do
       let(:query) do
@@ -129,7 +129,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
       let(:variables) { {complexPostInput: {stringArg: "woo", inputWithId: {id: id, intArg: 42}}} }
 
-      specify { is_expected.to eq "graphql/schema_key/cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id},int_arg:42},string_arg:woo})[id.title.author[id.name]]" }
+      specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id},int_arg:42},string_arg:woo})[id.title.author[id.name]]" }
     end
   end
 
@@ -151,7 +151,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    specify { is_expected.to eq "graphql/schema_key/post(id:#{id})/cachedAuthor[id.name]" }
+    specify { is_expected.to eq "graphql/post/schema_key-post(id:#{id})-cachedAuthor[id.name]" }
   end
 
   context "when fragment is used" do
@@ -174,7 +174,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title.author[id.name]]" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author[id.name]]" }
 
     context "when nested fragment is used" do
       let(:path) { ["post", "cachedAuthor"] }
@@ -198,7 +198,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
         GQL
       end
 
-      specify { is_expected.to eq "graphql/schema_key/post(id:#{id})/cachedAuthor[id.name]" }
+      specify { is_expected.to eq "graphql/post/schema_key-post(id:#{id})-cachedAuthor[id.name]" }
     end
   end
 
@@ -218,13 +218,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       GQL
     end
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title.author(cached:false,version:5)[id.name]]" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author(cached:false,version:5)[id.name]]" }
   end
 
   context "when object is passed and responds to #cache_key" do
     let(:object) { post }
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title]/#{post.cache_key}" }
   end
 
   context "when object is passed and responds to #graphql_cache_key" do
@@ -234,14 +234,14 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     let(:object) { post }
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title]/super-cache" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title]/super-cache" }
   end
 
   context "when object is passed deosn't respond to #cache_key neither #graphql_cache_key" do
     let(:object) { post.author }
 
     it "fallbacks to #to_s" do
-      is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title]/#{post.author}"
+      is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title]/#{post.author}"
     end
   end
 
@@ -250,14 +250,14 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     let(:object) { post.author }
 
     it "uses the option instead of the object's cache_key" do
-      is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title]/#{options[:object_cache_key]}"
+      is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title]/test_cache_key-1-230834092834098"
     end
   end
 
   context "when array is passed as object" do
     let(:object) { [post, :custom, 99] }
 
-    specify { is_expected.to eq "graphql/schema_key/cachedPost(id:#{id})[id.title]/#{post.cache_key}/custom/99" }
+    specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title]/#{post.cache_key}-custom-99" }
   end
 
   context "when scalar field is cached inside the collection" do
@@ -274,7 +274,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     let(:path) { ["posts", 0, "cachedTitle"] }
 
-    specify { is_expected.to eq "graphql/schema_key/posts/0/cachedTitle[]" }
+    specify { is_expected.to eq "graphql/posts-0-cachedTitle/schema_key-posts-0-cachedTitle[]" }
   end
 
   context "when query has fragment" do
@@ -297,7 +297,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     let(:path) { ["post", "author"] }
 
-    specify { is_expected.to eq "graphql/schema_key/post(id:1)/cachedAuthor[name]" }
+    specify { is_expected.to eq "graphql/post/schema_key-post(id:1)-cachedAuthor[name]" }
   end
 
   context "when query has inline fragment" do
@@ -318,6 +318,6 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     let(:path) { ["post", "author"] }
 
-    specify { is_expected.to eq "graphql/schema_key/post(id:1)/cachedAuthor[name]" }
+    specify { is_expected.to eq "graphql/post/schema_key-post(id:1)-cachedAuthor[name]" }
   end
 end
