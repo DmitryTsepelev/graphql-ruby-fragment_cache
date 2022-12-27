@@ -55,7 +55,7 @@ module GraphQL
         @cache_store = store
       end
 
-      alias skip_cache_when_query_has_errors? skip_cache_when_query_has_errors
+      alias_method :skip_cache_when_query_has_errors?, :skip_cache_when_query_has_errors
 
       def graphql_ruby_before_2_0?
         check_graphql_version "< 2.0.0"

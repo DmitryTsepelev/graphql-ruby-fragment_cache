@@ -77,7 +77,7 @@ module GraphQL
         cache_fragment_options = @cache_options.merge(object: object_for_key)
 
         object.cache_fragment(**cache_fragment_options) do
-          resolved_value == NOT_RESOLVED ? yield(object, arguments) : resolved_value
+          (resolved_value == NOT_RESOLVED) ? yield(object, arguments) : resolved_value
         end
       end
     end

@@ -28,7 +28,7 @@ module GraphQL
           cached = @lazy_state[:resolved_fragments][@fragment]
 
           if cached
-            return cached == Fragment::NIL_IN_CACHE ? nil : GraphQL::Execution::Interpreter::RawValue.new(cached)
+            return (cached == Fragment::NIL_IN_CACHE) ? nil : GraphQL::Execution::Interpreter::RawValue.new(cached)
           end
 
           (@block ? @block.call : @object_to_cache).tap do |resolved_value|

@@ -1,5 +1,5 @@
 require:
-  - standard/cop/semantic_blocks
+  - standard
   - rubocop-md
   - ruby-next/rubocop
 
@@ -7,7 +7,7 @@ inherit_gem:
   standard: config/base.yml
 
 AllCops:
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.2
   Include:
     - 'lib/**/*.rb'
     - 'spec/**/*.rb'

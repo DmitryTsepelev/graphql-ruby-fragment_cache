@@ -3,20 +3,23 @@
 require "rails_helper"
 
 describe GraphQL::FragmentCache::ObjectHelpers do
-  class TweetType < GraphQL::Schema::Object
-    include GraphQL::FragmentCache::Object
+  let(:tweet_type_class) do
+    Class.new(GraphQL::Schema::Object) do
+      include GraphQL::FragmentCache::Object
 
-    graphql_name "TweetType"
+      graphql_name "TweetType"
 
-    field :id, ID, null: false
-    field :content, String, null: false
+      field :id, GraphQL::Types::ID, null: false
+      field :content, GraphQL::Types::String, null: false
+    end
   end
 
   let(:schema) do
+    tweet_type = tweet_type_class
     build_schema do
       query(
         Class.new(Types::Query) {
-          field :tweets, TweetType.connection_type, null: false, cache_fragment: true
+          field :tweets, tweet_type.connection_type, null: false, cache_fragment: true
 
           def tweets(after: nil)
             Tweet.all

@@ -128,7 +128,7 @@ module GraphQL
 
       attr_reader :query, :path, :object, :schema
 
-      def initialize(object: nil, query:, path:, **options)
+      def initialize(query:, path:, object: nil, **options)
         @object = object
         @query = query
         @schema = query.schema
@@ -181,23 +181,21 @@ module GraphQL
       end
 
       def path_cache_key
-        @path_cache_key ||= begin
-          @options.fetch(:path_cache_key) do
-            lookahead = query.lookahead
+        @path_cache_key ||= @options.fetch(:path_cache_key) do
+          lookahead = query.lookahead
 
-            path.map { |field_name|
-              # Handle cached fields inside collections:
-              next field_name if field_name.is_a?(Integer)
+          path.map { |field_name|
+            # Handle cached fields inside collections:
+            next field_name if field_name.is_a?(Integer)
 
-              lookahead = lookahead.selection_with_alias(field_name)
-              raise "Failed to look ahead the field: #{field_name}" if lookahead.is_a?(::GraphQL::Execution::Lookahead::NullLookahead)
+            lookahead = lookahead.selection_with_alias(field_name)
+            raise "Failed to look ahead the field: #{field_name}" if lookahead.is_a?(::GraphQL::Execution::Lookahead::NullLookahead)
 
-              next lookahead.field.name if lookahead.arguments.empty?
+            next lookahead.field.name if lookahead.arguments.empty?
 
-              args = lookahead.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
-              "#{lookahead.field.name}(#{args})"
-            }.join("/")
-          end
+            args = lookahead.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
+            "#{lookahead.field.name}(#{args})"
+          }.join("/")
         end
       end
 
