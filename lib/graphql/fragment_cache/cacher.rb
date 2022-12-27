@@ -47,7 +47,7 @@ module GraphQL
             hash = group.map { |fragment| [fragment.cache_key, fragment.value] }.to_h
 
             begin
-              FragmentCache.cache_store.write_multi(hash, **options)
+              FragmentCache.cache_store.write_multi(*hash, options)
             rescue => e
               raise WriteMultiError.new(e, hash)
             end
@@ -56,9 +56,9 @@ module GraphQL
 
         def persist(query)
           select_valid_fragments(query).each do |fragment|
-            FragmentCache.cache_store.write(fragment.cache_key, fragment.value, **fragment.options)
+            FragmentCache.cache_store.write(fragment.cache_key, fragment.value, fragment.options)
           rescue => e
-            raise WriteError.new(e, fragment.cache_key, fragment.value)
+            raise WriteError.new(e, fragment.cache_key, fragment.value), e
           end
         end
 
