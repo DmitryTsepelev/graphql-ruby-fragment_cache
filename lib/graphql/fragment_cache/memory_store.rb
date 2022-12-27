@@ -42,7 +42,8 @@ module GraphQL
         end
       end
 
-      def write(key, value, expires_in: default_expires_in, **options)
+      def write(key, value, options = {})
+        expires_in = options[:expires_in] || default_expires_in
         key = key.to_s
         @storage[key] = Entry.new(value: value, expires_at: expires_in ? Time.now + expires_in : nil)
       end

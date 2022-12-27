@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#94](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/94) Ruby 3 support ([@DmitryTsepelev][])
+
 ## 1.17.0 (2022-11-09)
 
 - [PR#92](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/92) Make cache keys human-readable ([@jeromedalbert][])

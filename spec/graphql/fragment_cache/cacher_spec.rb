@@ -36,8 +36,8 @@ describe GraphQL::FragmentCache::Cacher do
   context "when store not supports write_multi" do
     let(:write_multi_store_class) do
       Class.new(GraphQL::FragmentCache::MemoryStore) {
-        def write_multi(hash, **options)
-          hash.each { |key, value| write(key, value, **options) }
+        def write_multi(hash, options)
+          hash.each { |key, value| write(key, value, options) }
         end
       }
     end
@@ -59,7 +59,7 @@ describe GraphQL::FragmentCache::Cacher do
     context "when store raises error" do
       let(:write_with_error_store_class) do
         Class.new(GraphQL::FragmentCache::MemoryStore) {
-          def write_multi(hash, **options)
+          def write_multi(hash, options)
             raise StandardError, "something went wrong"
           end
         }
@@ -126,7 +126,7 @@ describe GraphQL::FragmentCache::Cacher do
   context "when store raises error" do
     let(:write_with_error_store_class) do
       Class.new(GraphQL::FragmentCache::MemoryStore) {
-        def write(key, value, **options)
+        def write(key, value, options)
           raise StandardError, "something went wrong"
         end
       }
