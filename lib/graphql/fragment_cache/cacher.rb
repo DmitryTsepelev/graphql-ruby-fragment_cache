@@ -47,7 +47,7 @@ module GraphQL
             hash = group.map { |fragment| [fragment.cache_key, fragment.value] }.to_h
 
             begin
-              FragmentCache.cache_store.write_multi(*hash, options)
+              FragmentCache.cache_store.write_multi(hash, options)
             rescue => e
               raise WriteMultiError.new(e, hash)
             end

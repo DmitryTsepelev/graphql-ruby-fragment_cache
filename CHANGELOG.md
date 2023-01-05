@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#96](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/96) Properly pass arguments to `write_multi` ([@DmitryTsepelev][])
+
 ## 1.18.0 (2022-12-28)
 
 - [PR#94](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/94) Ruby 3 support ([@DmitryTsepelev][])
