@@ -322,7 +322,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
   end
 
   context "when path_cache_key is nil" do
-    let(:options) { { path_cache_key: nil } }
+    let(:options) { {path_cache_key: nil} }
 
     specify { is_expected.to eq "graphql/schema_key-[id.title]" }
   end

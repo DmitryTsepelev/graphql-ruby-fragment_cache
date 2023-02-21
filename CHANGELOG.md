@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.18.2 (2023-02-21)
+
+- [PR#100](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/100) Fix an error when `path_cache_key` is nil ([@rince][])
+
 ## 1.18.1 (2023-01-06)
 
 - [PR#96](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/96) Properly pass arguments to `write_multi` ([@DmitryTsepelev][])
@@ -172,3 +176,4 @@
 [@daukadolt]: https://github.com/daukadolt
 [@frostmark]: https://github.com/frostmark
 [@KTSCode]: https://github.com/KTSCode
+[@rince]: https://github.com/rince
