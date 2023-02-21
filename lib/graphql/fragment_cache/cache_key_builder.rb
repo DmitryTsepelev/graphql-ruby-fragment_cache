@@ -177,6 +177,8 @@ module GraphQL
       end
 
       def simple_path_cache_key
+        return if path_cache_key.nil?
+
         path_cache_key.split("(").first
       end
 

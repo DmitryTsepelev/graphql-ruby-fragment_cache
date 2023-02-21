@@ -320,4 +320,10 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     specify { is_expected.to eq "graphql/post/schema_key-post(id:1)-cachedAuthor[name]" }
   end
+
+  context "when path_cache_key is nil" do
+    let(:options) { { path_cache_key: nil } }
+
+    specify { is_expected.to eq "graphql/schema_key-[id.title]" }
+  end
 end
