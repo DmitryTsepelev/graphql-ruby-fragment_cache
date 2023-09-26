@@ -78,7 +78,6 @@ module GraphQL
               "GraphQL::Execution::Interpreter should be enabled for fragment caching"
           end
 
-          puts "schema_defn.analysis_engine #{schema_defn.analysis_engine}"
           unless schema_defn.analysis_engine == GraphQL::Analysis::AST
             raise StandardError,
               "GraphQL::Analysis::AST should be enabled for fragment caching"
