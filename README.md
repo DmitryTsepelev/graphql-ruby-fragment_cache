@@ -469,7 +469,7 @@ def cached_author_inside_batch
 end
 ```
 
-2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
+2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `path_cache_key` explicitly:
 
 ```ruby
 field :cached_avatar_url, String, null: false
