@@ -65,6 +65,10 @@ module GraphQL
         check_graphql_version "> 2.0.13"
       end
 
+      def graphql_ruby_before_2_1_4?
+        check_graphql_version "< 2.1.4"
+      end
+
       private
 
       def check_graphql_version(predicate)

@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#104](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/104) Support graphql-ruby 2.1.4 ([@DmitryTsepelev][])
+
 ## 1.18.2 (2023-02-21)
 
 - [PR#100](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/100) Fix an error when `path_cache_key` is nil ([@rince][])
