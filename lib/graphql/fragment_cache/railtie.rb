@@ -23,10 +23,6 @@ module GraphQL
       end
 
       config.graphql_fragment_cache = Config
-
-      if ENV["RACK_ENV"] == "test" || ENV["RAILS_ENV"] == "test"
-        config.graphql_fragment_cache.store = :null_store
-      end
     end
   end
 end
