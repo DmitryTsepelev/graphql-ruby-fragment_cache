@@ -32,7 +32,9 @@ module GraphQL
         verify_interpreter_and_analysis!(schema_defn)
 
         schema_defn.tracer(Schema::Tracer)
-        schema_defn.instrument(:query, Schema::Instrumentation)
+        schema_defn.trace_with(GraphQL::Tracing::LegacyHooksTrace)
+        schema_defn.own_instrumenters[:query] << Schema::Instrumentation
+
         schema_defn.extend(Schema::Patch)
         schema_defn.lazy_resolve(Schema::LazyCacheResolver, :resolve)
 
