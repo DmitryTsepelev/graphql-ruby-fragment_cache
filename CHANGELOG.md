@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#108](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/108) Use trace_with instead of deprecated instrument method  ([@camero2734][])
+  
 ## 1.19.0 (2023-11-03)
 
 - [PR#104](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/104) Support graphql-ruby 2.1.4 ([@DmitryTsepelev][])
@@ -181,3 +183,4 @@
 [@frostmark]: https://github.com/frostmark
 [@KTSCode]: https://github.com/KTSCode
 [@rince]: https://github.com/rince
+[@camero2734]: https://github.com/camero2734

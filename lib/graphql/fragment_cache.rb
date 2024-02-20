@@ -32,7 +32,14 @@ module GraphQL
         verify_interpreter_and_analysis!(schema_defn)
 
         schema_defn.tracer(Schema::Tracer)
-        schema_defn.instrument(:query, Schema::Instrumentation)
+
+        if graphql_ruby_after_2_2_5?
+          schema_defn.trace_with(GraphQL::Tracing::LegacyHooksTrace)
+          schema_defn.instance_exec { own_instrumenters[:query] << Schema::Instrumentation }
+        else
+          schema_defn.instrument(:query, Schema::Instrumentation)
+        end
+
         schema_defn.extend(Schema::Patch)
         schema_defn.lazy_resolve(Schema::LazyCacheResolver, :resolve)
 
@@ -67,6 +74,10 @@ module GraphQL
 
       def graphql_ruby_before_2_1_4?
         check_graphql_version "< 2.1.4"
+      end
+
+      def graphql_ruby_after_2_2_5?
+        check_graphql_version "> 2.2.5"
       end
 
       private
