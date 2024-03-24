@@ -53,64 +53,66 @@ module GraphQL
           alias_selection(name, **kwargs)
         end
 
-        def alias_selection(name, selected_type: @selected_type, arguments: nil)
-          return alias_selections[name] if alias_selections.key?(name)
+        if GraphRubyVersion.before_2_1_4?
+          def alias_selection(name, selected_type: @selected_type, arguments: nil)
+            return alias_selections[name] if alias_selections.key?(name)
 
-          alias_node = lookup_alias_node(ast_nodes, name)
-          return ::GraphQL::Execution::Lookahead::NULL_LOOKAHEAD unless alias_node
+            alias_node = lookup_alias_node(ast_nodes, name)
+            return ::GraphQL::Execution::Lookahead::NULL_LOOKAHEAD unless alias_node
 
-          next_field_name = alias_node.name
+            next_field_name = alias_node.name
 
-          # From https://github.com/rmosolgo/graphql-ruby/blob/1a9a20f3da629e63ea8e5ee8400be82218f9edc3/lib/graphql/execution/lookahead.rb#L91
-          next_field_defn =
-            if GraphQL::FragmentCache.graphql_ruby_before_2_0?
-              get_class_based_field(selected_type, next_field_name)
-            else
-              @query.get_field(selected_type, next_field_name)
-            end
-
-          alias_selections[name] =
-            if next_field_defn
-              next_nodes = []
-              arguments = @query.arguments_for(alias_node, next_field_defn)
-              arguments = arguments.is_a?(::GraphQL::Execution::Interpreter::Arguments) ? arguments.keyword_arguments : arguments
-              @ast_nodes.each do |ast_node|
-                ast_node.selections.each do |selection|
-                  if GraphQL::FragmentCache.graphql_ruby_after_2_0_13? && GraphQL::FragmentCache.graphql_ruby_before_2_1_4?
-                    find_selected_nodes(selection, next_field_defn, arguments: arguments, matches: next_nodes)
-                  else
-                    find_selected_nodes(selection, next_field_name, next_field_defn, arguments: arguments, matches: next_nodes)
-                  end
-                end
+            # From https://github.com/rmosolgo/graphql-ruby/blob/1a9a20f3da629e63ea8e5ee8400be82218f9edc3/lib/graphql/execution/lookahead.rb#L91
+            next_field_defn =
+              if GraphRubyVersion.before_2_0?
+                get_class_based_field(selected_type, next_field_name)
+              else
+                @query.get_field(selected_type, next_field_name)
               end
 
-              if next_nodes.any?
-                ::GraphQL::Execution::Lookahead.new(query: @query, ast_nodes: next_nodes, field: next_field_defn, owner_type: selected_type)
+            alias_selections[name] =
+              if next_field_defn
+                next_nodes = []
+                arguments = @query.arguments_for(alias_node, next_field_defn)
+                arguments = arguments.is_a?(::GraphQL::Execution::Interpreter::Arguments) ? arguments.keyword_arguments : arguments
+                @ast_nodes.each do |ast_node|
+                  ast_node.selections.each do |selection|
+                    if GraphRubyVersion.after_2_0_13? && GraphRubyVersion.before_2_1_4?
+                      find_selected_nodes(selection, next_field_defn, arguments: arguments, matches: next_nodes)
+                    else
+                      find_selected_nodes(selection, next_field_name, next_field_defn, arguments: arguments, matches: next_nodes)
+                    end
+                  end
+                end
+
+                if next_nodes.any?
+                  ::GraphQL::Execution::Lookahead.new(query: @query, ast_nodes: next_nodes, field: next_field_defn, owner_type: selected_type)
+                else
+                  ::GraphQL::Execution::Lookahead::NULL_LOOKAHEAD
+                end
               else
                 ::GraphQL::Execution::Lookahead::NULL_LOOKAHEAD
               end
-            else
-              ::GraphQL::Execution::Lookahead::NULL_LOOKAHEAD
+          end
+
+          def alias_selections
+            return @alias_selections if defined?(@alias_selections)
+            @alias_selections ||= {}
+          end
+
+          def lookup_alias_node(nodes, name)
+            return if nodes.empty?
+
+            nodes.find do |node|
+              if node.is_a?(GraphQL::Language::Nodes::FragmentSpread)
+                node = @query.fragments[node.name]
+                raise("Invariant: Can't look ahead to nonexistent fragment #{node.name} (found: #{@query.fragments.keys})") unless node
+              end
+
+              return node if node.alias?(name)
+              child = lookup_alias_node(node.children, name)
+              return child if child
             end
-        end
-
-        def alias_selections
-          return @alias_selections if defined?(@alias_selections)
-          @alias_selections ||= {}
-        end
-
-        def lookup_alias_node(nodes, name)
-          return if nodes.empty?
-
-          nodes.find do |node|
-            if node.is_a?(GraphQL::Language::Nodes::FragmentSpread)
-              node = @query.fragments[node.name]
-              raise("Invariant: Can't look ahead to nonexistent fragment #{node.name} (found: #{@query.fragments.keys})") unless node
-            end
-
-            return node if node.alias?(name)
-            child = lookup_alias_node(node.children, name)
-            return child if child
           end
         end
       end

@@ -4,7 +4,7 @@ require "spec_helper"
 
 describe GraphQL::FragmentCache do
   describe ".use" do
-    if GraphQL::FragmentCache.graphql_ruby_before_2_0?
+    if GraphQL::FragmentCache::GraphRubyVersion.before_2_0?
       it "raises if interpreter is not used" do
         expect {
           Class.new(GraphQL::Schema) {

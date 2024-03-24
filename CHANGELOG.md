@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#109](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/109) Remove `Lookahead` patch in modern versions of graphql-ruby ([@DmitryTsepelev][])
+
 ## 1.20.0 (2024-03-02)
 
 - [PR#108](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/108) Use trace_with instead of deprecated instrument method  ([@camero2734][])
