@@ -116,7 +116,7 @@ module Types
 end
 
 class TestSchema < GraphQL::Schema
-  if GraphQL::FragmentCache.graphql_ruby_before_2_0?
+  if GraphQL::FragmentCache::GraphRubyVersion.before_2_0?
     use GraphQL::Execution::Interpreter
     use GraphQL::Analysis::AST
 

@@ -2,6 +2,8 @@
 
 require "graphql"
 
+require "graphql/fragment_cache/graphql_ruby_version"
+
 require "graphql/fragment_cache/ext/context_fragments"
 require "graphql/fragment_cache/ext/graphql_cache_key"
 require "graphql/fragment_cache/object"
@@ -33,7 +35,7 @@ module GraphQL
 
         schema_defn.tracer(Schema::Tracer)
 
-        if graphql_ruby_after_2_2_5?
+        if GraphRubyVersion.after_2_2_5?
           schema_defn.trace_with(GraphQL::Tracing::LegacyHooksTrace)
           schema_defn.instance_exec { own_instrumenters[:query] << Schema::Instrumentation }
         else
@@ -64,22 +66,6 @@ module GraphQL
 
       alias_method :skip_cache_when_query_has_errors?, :skip_cache_when_query_has_errors
 
-      def graphql_ruby_before_2_0?
-        check_graphql_version "< 2.0.0"
-      end
-
-      def graphql_ruby_after_2_0_13?
-        check_graphql_version "> 2.0.13"
-      end
-
-      def graphql_ruby_before_2_1_4?
-        check_graphql_version "< 2.1.4"
-      end
-
-      def graphql_ruby_after_2_2_5?
-        check_graphql_version "> 2.2.5"
-      end
-
       private
 
       def check_graphql_version(predicate)
@@ -87,7 +73,7 @@ module GraphQL
       end
 
       def verify_interpreter_and_analysis!(schema_defn)
-        if graphql_ruby_before_2_0?
+        if GraphRubyVersion.before_2_0?
           unless schema_defn.interpreter?
             raise StandardError,
               "GraphQL::Execution::Interpreter should be enabled for fragment caching"
