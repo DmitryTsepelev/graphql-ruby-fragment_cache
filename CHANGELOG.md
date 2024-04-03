@@ -2,6 +2,9 @@
 
 ## master
 
+## 1.20.1 (2024-04-03)
+
+- [PR#112](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/112) fix tracer deprecation warnings ([@diegofigueroa][])
 - [PR#109](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/109) Remove `Lookahead` patch in modern versions of graphql-ruby ([@DmitryTsepelev][])
 
 ## 1.20.0 (2024-03-02)
@@ -188,3 +191,4 @@
 [@KTSCode]: https://github.com/KTSCode
 [@rince]: https://github.com/rince
 [@camero2734]: https://github.com/camero2734
+[@diegofigueroa]: https://github.com/diegofigueroa
