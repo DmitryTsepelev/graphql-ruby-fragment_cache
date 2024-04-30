@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "combustion", "~> 1.1"
   spec.add_development_dependency "activerecord"
-  spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "sqlite3", "~> 1.4"
   spec.add_development_dependency "rake", ">= 13.0"
   spec.add_development_dependency "rspec", "~> 3.9"
   spec.add_development_dependency "timecop"
