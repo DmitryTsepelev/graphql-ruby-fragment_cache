@@ -16,5 +16,12 @@ describe GraphQL::FragmentCache::Railtie do
       expect(GraphQL::FragmentCache.cache_store).to be_a(ActiveSupport::Cache::MemoryStore)
       expect(GraphQL::FragmentCache.cache_store.options[:max_size]).to eq 10.megabytes
     end
+
+    it "updates ActiveSupport::Cache.format_version" do
+      Rails.application.config.active_support.cache_format_version = 7.0
+      Rails.application.config.graphql_fragment_cache.store = :memory_store
+
+      expect(ActiveSupport::Cache.format_version).to eq 7.0
+    end
   end
 end
