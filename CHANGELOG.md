@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#115](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/115) Fix deprecation warning for cache_format_version in Rails 7.1 ([@rince][])
+  
 ## 1.20.1 (2024-04-03)
 
 - [PR#112](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/112) fix tracer deprecation warnings ([@diegofigueroa][])
