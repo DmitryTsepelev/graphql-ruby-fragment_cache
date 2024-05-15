@@ -10,6 +10,11 @@ module GraphQL
       module Config
         class << self
           def store=(store)
+            if Rails.version.to_f >= 7.0 && Rails.application
+              cache_format_version = Rails.application.config.active_support.cache_format_version
+              ActiveSupport::Cache.format_version = cache_format_version if cache_format_version
+            end
+
             # Handle both:
             #   store = :memory
             #   store = :mem_cache, ENV['MEMCACHE']
