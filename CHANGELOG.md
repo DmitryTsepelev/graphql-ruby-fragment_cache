@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#116](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/116) Migrate CompiledQueries instrumentation to tracer ([@DmitryTsepelev][])
+
 ## 1.20.2 (2024-06-01)
 
 - [PR#115](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/115) Fix deprecation warning for cache_format_version in Rails 7.1 ([@rince][])
