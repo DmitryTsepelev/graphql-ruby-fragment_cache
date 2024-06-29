@@ -34,8 +34,7 @@ module GraphQL
         verify_interpreter_and_analysis!(schema_defn)
 
         if GraphRubyVersion.after_2_2_5?
-          schema_defn.trace_with(GraphQL::Tracing::LegacyHooksTrace)
-          schema_defn.instance_exec { own_instrumenters[:query] << Schema::Instrumentation }
+          schema_defn.trace_with(Schema::Instrumentation::Tracer)
         else
           schema_defn.tracer(Schema::Tracer)
           schema_defn.instrument(:query, Schema::Instrumentation)
