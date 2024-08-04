@@ -2,6 +2,7 @@
 
 ## master
 
+- [PR#117](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/117) Deprecate old ruby and gql versions  ([@DmitryTsepelev][])
 - [PR#116](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/116) Migrate CompiledQueries instrumentation to tracer ([@DmitryTsepelev][])
 
 ## 1.20.2 (2024-06-01)
