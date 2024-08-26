@@ -9,6 +9,8 @@ class PostType < BaseObject
 end
 ```
 
+You can support my open–source work [here](https://boosty.to/dmitry_tsepelev).
+
 ## Getting started
 
 Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class:
