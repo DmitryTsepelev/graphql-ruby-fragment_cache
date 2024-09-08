@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#118](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/118) Set null_store in test env AFTER Rails initializes ([@DmitryTsepelev][])
+
 ## 1.20.3 (2024-09-06)
 
 - [PR#117](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/117) Deprecate old ruby and gql versions  ([@DmitryTsepelev][])
