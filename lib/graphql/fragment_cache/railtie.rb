@@ -11,7 +11,7 @@ module GraphQL
         class << self
           def store=(store)
             if Rails.version.to_f >= 7.0 && Rails.application
-              cache_format_version = Rails.application.config.active_support.cache_format_version
+              cache_format_version = 7.0
               ActiveSupport::Cache.format_version = cache_format_version if cache_format_version
             end
 
