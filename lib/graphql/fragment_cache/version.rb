@@ -2,6 +2,6 @@
 
 module GraphQL
   module FragmentCache
-    VERSION = "1.20.3"
+    VERSION = "1.20.4"
   end
 end
