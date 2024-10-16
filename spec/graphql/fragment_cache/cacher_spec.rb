@@ -44,11 +44,9 @@ describe GraphQL::FragmentCache::Cacher do
 
     let(:store) { write_multi_store_class.new }
 
-    around do |ex|
-      old_store = GraphQL::FragmentCache.cache_store
+    before do
+      allow(store).to receive(:write_multi).and_call_original
       GraphQL::FragmentCache.cache_store = store
-      ex.run
-      GraphQL::FragmentCache.cache_store = old_store
     end
 
     it "uses #write_multi" do
@@ -134,11 +132,8 @@ describe GraphQL::FragmentCache::Cacher do
 
     let(:store) { write_with_error_store_class.new }
 
-    around do |ex|
-      old_store = GraphQL::FragmentCache.cache_store
+    before do
       GraphQL::FragmentCache.cache_store = store
-      ex.run
-      GraphQL::FragmentCache.cache_store = old_store
     end
 
     it "raises error" do
