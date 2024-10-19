@@ -10,11 +10,6 @@ module GraphQL
       module Config
         class << self
           def store=(store)
-            if Rails.version.to_f >= 7.0 && Rails.application
-              cache_format_version = 7.0
-              ActiveSupport::Cache.format_version = cache_format_version if cache_format_version
-            end
-
             # Handle both:
             #   store = :memory
             #   store = :mem_cache, ENV['MEMCACHE']
@@ -30,7 +25,13 @@ module GraphQL
       config.graphql_fragment_cache = Config
 
       if ENV["RACK_ENV"] == "test" || ENV["RAILS_ENV"] == "test"
-        config.graphql_fragment_cache.store = :null_store
+        initializer "graphql-fragment_cache" do
+          config.graphql_fragment_cache.store = if Rails.version.to_f >= 7.0
+            [:null_store, serializer: :marshal_7_0]
+          else
+            :null_store
+          end
+        end
       end
     end
   end
