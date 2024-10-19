@@ -4,6 +4,7 @@
 
 ## 1.20.4 (2024-10-05)
 
+- [PR#120](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/120) Fix warning on ActiveSupport::Cache.format_version ([@Drowze][])
 - [PR#119](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/119) Fix Rails cache_format_version deprecation ([@noma4i][])
 
 ## 1.20.3 (2024-09-06)
@@ -206,3 +207,4 @@
 [@camero2734]: https://github.com/camero2734
 [@diegofigueroa]: https://github.com/diegofigueroa
 [@noma4i]: https://github.com/noma4i
+[@Drowze]: https://github.com/Drowze
