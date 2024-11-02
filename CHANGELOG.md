@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.20.5 (2024-11-02)
+
 - [PR#120](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/120) Fix warning on ActiveSupport::Cache.format_version ([@Drowze][])
 
 ## 1.20.4 (2024-10-05)
