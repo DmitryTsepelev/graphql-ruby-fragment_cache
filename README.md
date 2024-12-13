@@ -477,7 +477,7 @@ end
 field :cached_avatar_url, String, null: false
 
 def cached_avatar_url
-  cache_fragment(query_cache_key: "post_avatar_url(#{object.id})") { object.avatar_url }
+  cache_fragment(path_cache_key: "post_avatar_url(#{object.id})") { object.avatar_url }
 end
 ```
 
