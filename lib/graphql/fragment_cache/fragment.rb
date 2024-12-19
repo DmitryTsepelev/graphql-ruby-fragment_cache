@@ -40,7 +40,7 @@ module GraphQL
               )
             end
           rescue
-            # Allow cache_lookup_event to fail when we do not have the data we need
+            # Allow cache_lookup_event to fail when we do not have all of the requested attributes
           end
 
           # Fragmenst without values or with renew_cache: true in their context will have nil values like the read method
@@ -101,7 +101,7 @@ module GraphQL
         @final_value ||= context.query.result["data"]
       end
 
-      def cache_lookup_event(cache_key, operation_name, path, cache_hit)
+      def cache_lookup_event(**args)
         # This method can be implemented in your application
         # This provides a mechanism to monitor cache hits for a fragment
       end
