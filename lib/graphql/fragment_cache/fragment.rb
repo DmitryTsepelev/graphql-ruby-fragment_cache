@@ -30,17 +30,19 @@ module GraphQL
             FragmentCache.cache_store.read_multi(*cache_keys)
           end
 
-          begin
-            fragments.map do |fragment|
-              cache_lookup_event(
-                cache_key: fragment.cache_key,
-                operation_name: fragment.context.query.operation_name,
-                path: fragment.path,
-                cache_hit: cache_keys_to_values.key?(fragment.cache_key)
-              )
+          if GraphQL::FragmentCache.monitoring_enabled
+            begin
+              fragments.map do |fragment|
+                cache_lookup_event(
+                  cache_key: fragment.cache_key,
+                  operation_name: fragment.context.query.operation_name,
+                  path: fragment.path,
+                  cache_hit: cache_keys_to_values.key?(fragment.cache_key)
+                )
+              end
+            rescue
+              # Allow cache_lookup_event to fail when we do not have all of the requested attributes
             end
-          rescue
-            # Allow cache_lookup_event to fail when we do not have all of the requested attributes
           end
 
           # Fragmenst without values or with renew_cache: true in their context will have nil values like the read method
