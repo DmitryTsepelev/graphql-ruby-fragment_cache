@@ -36,7 +36,7 @@ module GraphQL
                 cache_key: fragment.cache_key,
                 operation_name: fragment.context.query.operation_name,
                 path: fragment.path,
-                cache_hit: cache_keys_to_values.key?(fragment.cache_key),
+                cache_hit: cache_keys_to_values.key?(fragment.cache_key)
               )
             end
           rescue
