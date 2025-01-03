@@ -32,8 +32,6 @@ module GraphQL
       attr_accessor :skip_cache_when_query_has_errors
 
       def use(schema_defn, options = {})
-        verify_interpreter_and_analysis!(schema_defn)
-
         if GraphRubyVersion.after_2_2_5?
           schema_defn.trace_with(Schema::Instrumentation::Tracer)
         else
@@ -69,20 +67,6 @@ module GraphQL
 
       def check_graphql_version(predicate)
         Gem::Dependency.new("graphql", predicate).match?("graphql", GraphQL::VERSION)
-      end
-
-      def verify_interpreter_and_analysis!(schema_defn)
-        if GraphRubyVersion.before_2_0?
-          unless schema_defn.interpreter?
-            raise StandardError,
-              "GraphQL::Execution::Interpreter should be enabled for fragment caching"
-          end
-
-          unless schema_defn.analysis_engine == GraphQL::Analysis::AST
-            raise StandardError,
-              "GraphQL::Analysis::AST should be enabled for fragment caching"
-          end
-        end
       end
     end
 
