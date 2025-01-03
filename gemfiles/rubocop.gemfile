@@ -2,4 +2,5 @@ source "https://rubygems.org" do
   gem "rubocop-md", "~> 0.3"
   gem "standard", "1.20.0"
   gem "ruby-next", ">= 0.7.0"
+  gem "base64"
 end
