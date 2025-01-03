@@ -25,6 +25,7 @@ module GraphQL
     class << self
       attr_reader :cache_store
       attr_accessor :enabled
+      attr_accessor :monitoring_enabled
       attr_accessor :namespace
       attr_accessor :default_options
 
@@ -87,6 +88,7 @@ module GraphQL
 
     self.cache_store = MemoryStore.new
     self.enabled = true
+    self.monitoring_enabled = false
     self.namespace = "graphql"
     self.default_options = {}
     self.skip_cache_when_query_has_errors = false

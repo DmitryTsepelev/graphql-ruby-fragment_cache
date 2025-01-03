@@ -446,6 +446,30 @@ Cache processing can be disabled if needed. For example:
 GraphQL::FragmentCache.enabled = false if Rails.env.test?
 ```
 
+## Cache lookup monitoring
+
+It may be useful to capture cache lookup events. When monitoring is enabled, the `cache_key`, `operation_name`, `path` and a boolean indicating a cache hit or miss will be sent to a `cache_lookup_event` method. This method can be implemented in your application to handle the event.
+
+Example handler defined in a Rails initializer:
+
+```ruby
+module GraphQL
+  module FragmentCache
+    class Fragment
+      def self.cache_lookup_event(**args)
+        # Monitoring such as incrementing a cache hit counter metric
+      end
+    end
+  end
+end
+```
+
+Like managing caching itself, monitoring can be enabled if needed. It is disabled by default. For example:
+
+```ruby
+GraphQL::FragmentCache.monitoring_enabled = true
+```
+
 ## Limitations
 
 1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together. The problem appears when `cache_fragment` is _inside_ the `.then` block:
