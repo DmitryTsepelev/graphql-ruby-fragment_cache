@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#125](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/125) Introduce cache lookup instrumentation hook ([@danielhartnell][])
+
 ## 1.20.5 (2024-11-02)
 
 - [PR#120](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/120) Fix warning on ActiveSupport::Cache.format_version ([@Drowze][])
@@ -211,3 +213,4 @@
 [@diegofigueroa]: https://github.com/diegofigueroa
 [@noma4i]: https://github.com/noma4i
 [@Drowze]: https://github.com/Drowze
+[@danielhartnell]: https://github.com/danielhartnell
