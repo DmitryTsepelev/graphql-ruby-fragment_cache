@@ -24,14 +24,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "graphql", ">= 2.1.4"
 
-  # When gem is installed from source, we add `ruby-next` as a dependency
-  # to auto-transpile source files during the first load
-  if File.directory?(File.join(__dir__, ".git"))
-    spec.add_runtime_dependency "ruby-next", ">= 0.15.0"
-  else
-    spec.add_runtime_dependency "ruby-next-core", ">= 0.15.0"
-  end
-
   spec.add_development_dependency "combustion", "~> 1.1"
   spec.add_development_dependency "activerecord"
   spec.add_development_dependency "sqlite3"
