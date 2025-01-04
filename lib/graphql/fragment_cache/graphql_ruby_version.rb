@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-using RubyNext
-
 module GraphQL
   module FragmentCache
     module GraphRubyVersion

@@ -3,8 +3,6 @@
 require "json"
 require "digest"
 
-using RubyNext
-
 module GraphQL
   module FragmentCache
     using Ext
@@ -57,8 +55,6 @@ module GraphQL
 
     # Builds cache key for fragment
     class CacheKeyBuilder
-      using RubyNext
-
       class << self
         def call(**options)
           new(**options).build

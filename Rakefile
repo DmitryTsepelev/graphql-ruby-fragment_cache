@@ -3,11 +3,6 @@ require "rspec/core/rake_task"
 
 RSpec::Core::RakeTask.new(:spec)
 
-desc "Run Ruby Next nextify"
-task :nextify do
-  sh "bundle exec ruby-next nextify ./lib -V"
-end
-
 desc "Run specs without Rails"
 RSpec::Core::RakeTask.new("spec:norails") do |task|
   task.exclude_pattern = "**/rails/**"

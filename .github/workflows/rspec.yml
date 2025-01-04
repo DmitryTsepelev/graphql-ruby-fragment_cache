@@ -43,8 +43,6 @@ jobs:
         bundler-cache: true
         bundler: 2.2.0
         cache-version: 1
-    - name: Run Ruby Next
-      run: bundle exec rake nextify
     - name: Run RSpec
       run: |
         bundle exec rake spec
