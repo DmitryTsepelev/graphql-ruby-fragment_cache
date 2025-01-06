@@ -26,7 +26,9 @@ module GraphQL
 
       if ENV["RACK_ENV"] == "test" || ENV["RAILS_ENV"] == "test"
         initializer "graphql-fragment_cache" do
-          config.graphql_fragment_cache.store = if Rails.version.to_f >= 7.0
+          config.graphql_fragment_cache.store = if Rails.version.to_f >= 8.0
+            [:null_store]
+          elsif Rails.version.to_f >= 7.0
             [:null_store, serializer: :marshal_7_0]
           else
             :null_store
