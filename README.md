@@ -381,6 +381,34 @@ class QueryType < BaseObject
 end
 ```
 
+## Dataloader
+
+If you are using [Dataloader](https://graphql-ruby.org/dataloader/overview.html), you will need to let the gem know using `dataloader: true`:
+
+```ruby
+class PostType < BaseObject
+  field :author, User, null: false
+
+  def author
+    cache_fragment(dataloader: true) do
+      dataloader.with(AuthorDataloaderSource).load(object.id)
+    end
+  end
+end
+
+# or
+
+class PostType < BaseObject
+  field :author, User, null: false, cache_fragment: {dataloader: true}
+
+  def author
+    dataloader.with(AuthorDataloaderSource).load(object.id)
+  end
+end
+```
+
+The problem is that I didn't find a way to detect that dataloader (and, therefore, Fiber) is used, and the block is forced to resolve, causing the N+1 inside the Dataloader Source class.
+
 ## How to use `#cache_fragment` in extensions (and other places where context is not available)
 
 If you want to call `#cache_fragment` from places other that fields or resolvers, you'll need to pass `context` explicitly and turn on `raw_value` support. For instance, let's take a look at this extension:
