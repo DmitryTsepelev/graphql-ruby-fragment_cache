@@ -6,13 +6,19 @@ describe GraphQL::FragmentCache::Schema::LazyCacheResolver do
   describe "#initialize" do
     context "lazy cache resolver state management" do
       let(:state_key) { :lazy_cache_resolver_statez }
+      let(:gql_context) { instance_double "Context" }
+      let(:fragment) { GraphQL::FragmentCache::Fragment.new(gql_context) }
+
+      before do
+        allow(gql_context).to receive(:namespace).and_return({})
+      end
 
       it "adds lazy state property to the query context" do
         context = {}
 
         expect(context).not_to have_key(state_key)
 
-        GraphQL::FragmentCache::Schema::LazyCacheResolver.new(nil, context, {})
+        GraphQL::FragmentCache::Schema::LazyCacheResolver.new(fragment, context, {})
 
         expect(context).to have_key(state_key)
       end
@@ -20,7 +26,7 @@ describe GraphQL::FragmentCache::Schema::LazyCacheResolver do
       it "has :pending_fragments Set in state" do
         context = {}
 
-        GraphQL::FragmentCache::Schema::LazyCacheResolver.new({}, context, {})
+        GraphQL::FragmentCache::Schema::LazyCacheResolver.new(fragment, context, {})
 
         expect(context[state_key]).to have_key(:pending_fragments)
         expect(context[state_key][:pending_fragments]).to be_instance_of(Set)
@@ -29,7 +35,7 @@ describe GraphQL::FragmentCache::Schema::LazyCacheResolver do
       it "has :resolved_fragments Hash in state" do
         context = {}
 
-        GraphQL::FragmentCache::Schema::LazyCacheResolver.new({}, context, {})
+        GraphQL::FragmentCache::Schema::LazyCacheResolver.new(fragment, context, {})
 
         expect(context[state_key]).to have_key(:resolved_fragments)
         expect(context[state_key][:resolved_fragments]).to be_instance_of(Hash)
@@ -39,7 +45,7 @@ describe GraphQL::FragmentCache::Schema::LazyCacheResolver do
         context = {}
         fragments = []
 
-        3.times { fragments.push(Object.new) }
+        3.times { fragments.push(GraphQL::FragmentCache::Fragment.new(gql_context)) }
 
         fragments.each do |f|
           GraphQL::FragmentCache::Schema::LazyCacheResolver.new(f, context, {})
@@ -50,11 +56,5 @@ describe GraphQL::FragmentCache::Schema::LazyCacheResolver do
         end
       end
     end
-  end
-
-  it "has :resolve method" do
-    lazy_cache_resolver = GraphQL::FragmentCache::Schema::LazyCacheResolver.new({}, {}, {})
-
-    expect(lazy_cache_resolver).to respond_to(:resolve)
   end
 end

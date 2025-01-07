@@ -804,12 +804,13 @@ describe "#cache_fragment" do
     let!(:post1) { Post.create(id: 1, title: "object test 1", author: user1) }
     let!(:post2) { Post.create(id: 2, title: "object test 2", author: user2) }
 
+    let(:memory_store) { GraphQL::FragmentCache::MemoryStore.new }
+
     before do
       allow(User).to receive(:find_by_post_ids).and_call_original
 
       # warmup cache
       execute_query
-      expect(User).to have_received(:find_by_post_ids).with([post1.id, post2.id])
 
       # make objects dirty
       user1.name = "User #1 new"
@@ -827,6 +828,8 @@ describe "#cache_fragment" do
           "dataloaderCachedAuthor" => {"name" => "User #2"}
         }
       ])
+
+      expect(User).to have_received(:find_by_post_ids).with([post1.id, post2.id]).once
     end
   end
 

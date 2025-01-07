@@ -48,13 +48,6 @@ module GraphQL
 
         fragment = Fragment.new(context_to_use, **options)
 
-        if options.delete(:dataloader)
-          # the following line will block the current fiber until Dataloader is resolved, and we will
-          # use the resolved value as the `object_to_cache`
-          object_to_cache = block.call
-          block = nil
-        end
-
         GraphQL::FragmentCache::Schema::LazyCacheResolver.new(fragment, context_to_use, object_to_cache, &block)
       end
     end
