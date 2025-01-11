@@ -16,6 +16,8 @@ module GraphQL
           @block = block
 
           @lazy_state[:pending_fragments] << @fragment
+
+          ensure_dataloader_resulution! if @fragment.options[:dataloader]
         end
 
         def resolve
@@ -34,6 +36,15 @@ module GraphQL
           (@block ? @block.call : @object_to_cache).tap do |resolved_value|
             @query_ctx.fragments << @fragment
           end
+        end
+
+        private
+
+        def ensure_dataloader_resulution!
+          return if FragmentCache.cache_store.exist?(@fragment.cache_key)
+
+          @object_to_cache = @block.call
+          @block = nil
         end
       end
     end
