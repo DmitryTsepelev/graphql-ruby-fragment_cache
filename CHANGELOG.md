@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.21.0 (2025-02-01)
+
 - [PR#130](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/130) Dataloader support ([@DmitryTsepelev][])
 - [PR#125](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/125) Introduce cache lookup instrumentation hook ([@danielhartnell][])
 
