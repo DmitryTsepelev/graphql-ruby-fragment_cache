@@ -118,6 +118,30 @@ describe GraphQL::FragmentCache::Cacher do
 
         expect(args).to eq([{query_cache_key: "1"}, {query_cache_key: "2"}])
       end
+
+      context "when different options exist, but should be excluded" do
+        let(:schema) do
+          build_schema do
+            query(
+              Class.new(Types::Query) {
+                field :post, Types::Post, null: true do
+                  argument :id, GraphQL::Types::ID, required: true
+                  argument :cache_key, GraphQL::Types::String, required: true
+                end
+
+                define_method(:post) { |id:, cache_key:|
+                  cache_fragment(cache_key: {exclude_arguments: [:cache_key]}) { Post.find(id) }
+                }
+              }
+            )
+          end
+        end
+
+        it "uses #write_multi ony one time time" do
+          execute_query
+          expect(GraphQL::FragmentCache.cache_store).to have_received(:write_multi).once
+        end
+      end
     end
   end
 
