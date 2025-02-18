@@ -137,8 +137,12 @@ module GraphQL
       end
 
       def include_argument?(argument_name)
-        return false if @options[:exclude_arguments]&.include?(argument_name)
-        return false if @options[:include_arguments] && !@options[:include_arguments].include?(argument_name)
+        exclude_arguments = @options.dig(:cache_key, :exclude_arguments)
+        return false if exclude_arguments&.include?(argument_name)
+
+        include_arguments = @options.dig(:cache_key, :include_arguments)
+        return false if include_arguments && !include_arguments.include?(argument_name)
+
         true
       end
 

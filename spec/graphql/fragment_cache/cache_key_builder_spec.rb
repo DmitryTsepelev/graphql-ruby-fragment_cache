@@ -68,13 +68,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author[id.name]]" }
 
     context "when excluding arguments" do
-      let(:options) { {exclude_arguments: [:id]} }
+      let(:options) { {cache_key: {exclude_arguments: [:id]}} }
 
       specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost()[id.title.author[id.name]]" }
     end
 
     context "when including arguments" do
-      let(:options) { {include_arguments: [:id]} }
+      let(:options) { {cache_key: {include_arguments: [:id]}} }
 
       specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author[id.name]]" }
     end
@@ -144,13 +144,13 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id},int_arg:42},string_arg:woo})[id.title.author[id.name]]" }
 
       context "when excluding arguments" do
-        let(:options) { {exclude_arguments: [:int_arg]} }
+        let(:options) { {cache_key: {exclude_arguments: [:int_arg]}} }
 
         specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id}},string_arg:woo})[id.title.author[id.name]]" }
       end
 
       context "when including arguments" do
-        let(:options) { {include_arguments: [:complex_post_input, :input_with_id, :int_arg]} }
+        let(:options) { {cache_key: {include_arguments: [:complex_post_input, :input_with_id, :int_arg]}} }
 
         specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{int_arg:42}})[id.title.author[id.name]]" }
       end
