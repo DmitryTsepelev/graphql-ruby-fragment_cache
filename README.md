@@ -166,7 +166,7 @@ class QueryType < BaseObject
     if renew_cache
       context.scoped_set!(:renew_cache, true)
     end
-    cache_fragment(cache_key: { exclude_arguments: [:renew_cache] }) { Post.find(id) }
+    cache_fragment(cache_key: {exclude_arguments: [:renew_cache]}) { Post.find(id) }
   end
 end
 ```
