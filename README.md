@@ -147,6 +147,34 @@ class QueryType < BaseObject
 end
 ```
 
+### Query arguments processing
+
+You can influence the way that graphql arguments are include in the cache key.
+
+A use case might be a `:renew_cache` parameter that can be used to force a cache rewrite,
+but should not be included with the cache key itself. Use `cache_key: { exclude_arguments: […]}`
+to specify a list of arguments to be excluded from the implicit cache key.
+
+```ruby
+class QueryType < BaseObject
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+    argument :renew_cache, Boolean, required: false
+  end
+
+  def post(id:, renew_cache: false)
+    if renew_cache
+      context.scoped_set!(:renew_cache, true)
+    end
+    cache_fragment(cache_key: {exclude_arguments: [:renew_cache]}) { Post.find(id) }
+  end
+end
+```
+
+Likewise, you can use `cache_key: { include_arguments: […] }` to specify an allowlist of arguments
+to be included in the cache key. In this case all arguments for the cache key must be specified, including
+parent arguments of nested fields.
+
 ### User-provided cache key (custom key)
 
 In most cases you want your cache key to depend on the resolved object (say, `ActiveRecord` model). You can do that by passing an argument to the `#cache_fragment` method in a similar way to Rails views [`#cache` method](https://guides.rubyonrails.org/caching_with_rails.html#fragment-caching):

@@ -130,16 +130,26 @@ module GraphQL
 
             next lookahead.field.name if lookahead.arguments.empty?
 
-            args = lookahead.arguments.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
+            args = lookahead.arguments.select { include_argument?(_1) }.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")
             "#{lookahead.field.name}(#{args})"
           }.join("/")
         end
       end
 
+      def include_argument?(argument_name)
+        exclude_arguments = @options.dig(:cache_key, :exclude_arguments)
+        return false if exclude_arguments&.include?(argument_name)
+
+        include_arguments = @options.dig(:cache_key, :include_arguments)
+        return false if include_arguments && !include_arguments.include?(argument_name)
+
+        true
+      end
+
       def traverse_argument(argument)
         return argument unless argument.is_a?(GraphQL::Schema::InputObject)
 
-        "{#{argument.map { "#{_1}:#{traverse_argument(_2)}" }.sort.join(",")}}"
+        "{#{argument.map { include_argument?(_1) ? "#{_1}:#{traverse_argument(_2)}" : nil }.compact.sort.join(",")}}"
       end
 
       def object_cache_key
