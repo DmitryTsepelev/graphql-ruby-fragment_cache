@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.22.0 (2025-02-20)
+
+- [PR#134](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/134) Add possibility to include and exclude arguments from generated cache key ([@mgruner][])
+
 ## 1.21.0 (2025-02-01)
 
 - [PR#130](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/130) Dataloader support ([@DmitryTsepelev][])
@@ -217,3 +221,4 @@
 [@noma4i]: https://github.com/noma4i
 [@Drowze]: https://github.com/Drowze
 [@danielhartnell]: https://github.com/danielhartnell
+[@mgruner]: https://github.com/mgruner
