@@ -32,8 +32,11 @@ RSpec.configure do |config|
   config.include SchemaHelper
   config.include_context "graphql"
 
-  config.after do
-    GraphQL::FragmentCache.cache_store.clear if GraphQL::FragmentCache.cache_store.respond_to?(:clear)
+  config.before do
+    GraphQL::FragmentCache.cache_store = GraphQL::FragmentCache::MemoryStore.new
+  end
+
+  config.before do
     Post.delete_all
     Timecop.return
   end

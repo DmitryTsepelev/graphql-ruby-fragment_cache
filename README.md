@@ -9,6 +9,8 @@ class PostType < BaseObject
 end
 ```
 
+You can support my open–source work [here](https://boosty.to/dmitry_tsepelev).
+
 ## Getting started
 
 Add the gem to your Gemfile `gem 'graphql-fragment_cache'` and add the plugin to your schema class:
@@ -144,6 +146,34 @@ class QueryType < BaseObject
   end
 end
 ```
+
+### Query arguments processing
+
+You can influence the way that graphql arguments are include in the cache key.
+
+A use case might be a `:renew_cache` parameter that can be used to force a cache rewrite,
+but should not be included with the cache key itself. Use `cache_key: { exclude_arguments: […]}`
+to specify a list of arguments to be excluded from the implicit cache key.
+
+```ruby
+class QueryType < BaseObject
+  field :post, PostType, null: true do
+    argument :id, ID, required: true
+    argument :renew_cache, Boolean, required: false
+  end
+
+  def post(id:, renew_cache: false)
+    if renew_cache
+      context.scoped_set!(:renew_cache, true)
+    end
+    cache_fragment(cache_key: {exclude_arguments: [:renew_cache]}) { Post.find(id) }
+  end
+end
+```
+
+Likewise, you can use `cache_key: { include_arguments: […] }` to specify an allowlist of arguments
+to be included in the cache key. In this case all arguments for the cache key must be specified, including
+parent arguments of nested fields.
 
 ### User-provided cache key (custom key)
 
@@ -379,6 +409,34 @@ class QueryType < BaseObject
 end
 ```
 
+## Dataloader
+
+If you are using [Dataloader](https://graphql-ruby.org/dataloader/overview.html), you will need to let the gem know using `dataloader: true`:
+
+```ruby
+class PostType < BaseObject
+  field :author, User, null: false
+
+  def author
+    cache_fragment(dataloader: true) do
+      dataloader.with(AuthorDataloaderSource).load(object.id)
+    end
+  end
+end
+
+# or
+
+class PostType < BaseObject
+  field :author, User, null: false, cache_fragment: {dataloader: true}
+
+  def author
+    dataloader.with(AuthorDataloaderSource).load(object.id)
+  end
+end
+```
+
+The problem is that I didn't find a way to detect that dataloader (and, therefore, Fiber) is used, and the block is forced to resolve, causing the N+1 inside the Dataloader Source class.
+
 ## How to use `#cache_fragment` in extensions (and other places where context is not available)
 
 If you want to call `#cache_fragment` from places other that fields or resolvers, you'll need to pass `context` explicitly and turn on `raw_value` support. For instance, let's take a look at this extension:
@@ -444,6 +502,30 @@ Cache processing can be disabled if needed. For example:
 GraphQL::FragmentCache.enabled = false if Rails.env.test?
 ```
 
+## Cache lookup monitoring
+
+It may be useful to capture cache lookup events. When monitoring is enabled, the `cache_key`, `operation_name`, `path` and a boolean indicating a cache hit or miss will be sent to a `cache_lookup_event` method. This method can be implemented in your application to handle the event.
+
+Example handler defined in a Rails initializer:
+
+```ruby
+module GraphQL
+  module FragmentCache
+    class Fragment
+      def self.cache_lookup_event(**args)
+        # Monitoring such as incrementing a cache hit counter metric
+      end
+    end
+  end
+end
+```
+
+Like managing caching itself, monitoring can be enabled if needed. It is disabled by default. For example:
+
+```ruby
+GraphQL::FragmentCache.monitoring_enabled = true
+```
+
 ## Limitations
 
 1. `Schema#execute`, [graphql-batch](https://github.com/Shopify/graphql-batch) and _graphql-ruby-fragment_cache_ do not [play well](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/issues/45) together. The problem appears when `cache_fragment` is _inside_ the `.then` block:
@@ -469,13 +551,13 @@ def cached_author_inside_batch
 end
 ```
 
-2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `query_cache_key` explicitly:
+2. Caching does not work for Union types, because of the `Lookahead` implementation: it requires the exact type to be passed to the `selection` method (you can find the [discussion](https://github.com/rmosolgo/graphql-ruby/pull/3007) here). This method is used for cache key building, and I haven't found a workaround yet ([PR in progress](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/30)). If you get `Failed to look ahead the field` error — please pass `path_cache_key` explicitly:
 
 ```ruby
 field :cached_avatar_url, String, null: false
 
 def cached_avatar_url
-  cache_fragment(query_cache_key: "post_avatar_url(#{object.id})") { object.avatar_url }
+  cache_fragment(path_cache_key: "post_avatar_url(#{object.id})") { object.avatar_url }
 end
 ```
 

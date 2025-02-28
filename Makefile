@@ -1,9 +1,6 @@
 default: test
 
-nextify:
-	bundle exec rake nextify
-
-test: nextify
+test:
 	bundle exec rake
 	CI=true bundle exec rake
 

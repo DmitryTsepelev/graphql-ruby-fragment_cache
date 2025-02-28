@@ -66,6 +66,18 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     end
 
     specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author[id.name]]" }
+
+    context "when excluding arguments" do
+      let(:options) { {cache_key: {exclude_arguments: [:id]}} }
+
+      specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost()[id.title.author[id.name]]" }
+    end
+
+    context "when including arguments" do
+      let(:options) { {cache_key: {include_arguments: [:id]}} }
+
+      specify { is_expected.to eq "graphql/cachedPost/schema_key-cachedPost(id:#{id})[id.title.author[id.name]]" }
+    end
   end
 
   context "when cached field has aliased selections" do
@@ -109,7 +121,7 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
 
     specify { is_expected.to eq "graphql/cachedPostByInput/schema_key-cachedPostByInput(input_with_id:{id:#{id},int_arg:42})[id.title.author[id.name]]" }
 
-    context "when argument is complext input" do
+    context "when argument is complex input" do
       let(:query) do
         <<~GQL
           query GetPostByComplexInput($complexPostInput: ComplexPostInput!) {
@@ -130,6 +142,18 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
       let(:variables) { {complexPostInput: {stringArg: "woo", inputWithId: {id: id, intArg: 42}}} }
 
       specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id},int_arg:42},string_arg:woo})[id.title.author[id.name]]" }
+
+      context "when excluding arguments" do
+        let(:options) { {cache_key: {exclude_arguments: [:int_arg]}} }
+
+        specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{id:#{id}},string_arg:woo})[id.title.author[id.name]]" }
+      end
+
+      context "when including arguments" do
+        let(:options) { {cache_key: {include_arguments: [:complex_post_input, :input_with_id, :int_arg]}} }
+
+        specify { is_expected.to eq "graphql/cachedPostByComplexInput/schema_key-cachedPostByComplexInput(complex_post_input:{input_with_id:{int_arg:42}})[id.title.author[id.name]]" }
+      end
     end
   end
 
@@ -319,5 +343,11 @@ describe GraphQL::FragmentCache::CacheKeyBuilder do
     let(:path) { ["post", "author"] }
 
     specify { is_expected.to eq "graphql/post/schema_key-post(id:1)-cachedAuthor[name]" }
+  end
+
+  context "when path_cache_key is nil" do
+    let(:options) { {path_cache_key: nil} }
+
+    specify { is_expected.to eq "graphql/schema_key-[id.title]" }
   end
 end

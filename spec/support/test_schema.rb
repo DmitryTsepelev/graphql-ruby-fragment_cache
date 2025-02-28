@@ -7,6 +7,12 @@ class AuthorLoader < GraphQL::Batch::Loader
   end
 end
 
+class AuthorDataloaderSource < GraphQL::Dataloader::Source
+  def fetch(post_ids)
+    User.find_by_post_ids(post_ids)
+  end
+end
+
 module Types
   class Base < GraphQL::Schema::Object
     include GraphQL::FragmentCache::Object
@@ -41,6 +47,7 @@ module Types
     field :cached_author, User, null: false
     field :batched_cached_author, User, null: false
     field :cached_author_inside_batch, User, null: false
+    field :dataloader_cached_author, User, null: false
 
     field :meta, String, null: true
 
@@ -58,6 +65,12 @@ module Types
       AuthorLoader.load(object).then do |author|
         context.namespace(:interpreter)[:current_path] = outer_path
         cache_fragment(author, context: context)
+      end
+    end
+
+    def dataloader_cached_author
+      cache_fragment(dataloader: true) do
+        dataloader.with(AuthorDataloaderSource).load(object.id)
       end
     end
   end
@@ -116,13 +129,6 @@ module Types
 end
 
 class TestSchema < GraphQL::Schema
-  if GraphQL::FragmentCache.graphql_ruby_before_2_0?
-    use GraphQL::Execution::Interpreter
-    use GraphQL::Analysis::AST
-
-    use GraphQL::Pagination::Connections
-  end
-
   use GraphQL::Batch
   use GraphQL::FragmentCache
 

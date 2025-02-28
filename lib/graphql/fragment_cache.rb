@@ -2,6 +2,8 @@
 
 require "graphql"
 
+require "graphql/fragment_cache/graphql_ruby_version"
+
 require "graphql/fragment_cache/ext/context_fragments"
 require "graphql/fragment_cache/ext/graphql_cache_key"
 require "graphql/fragment_cache/object"
@@ -23,16 +25,20 @@ module GraphQL
     class << self
       attr_reader :cache_store
       attr_accessor :enabled
+      attr_accessor :monitoring_enabled
       attr_accessor :namespace
       attr_accessor :default_options
 
       attr_accessor :skip_cache_when_query_has_errors
 
       def use(schema_defn, options = {})
-        verify_interpreter_and_analysis!(schema_defn)
+        if GraphRubyVersion.after_2_2_5?
+          schema_defn.trace_with(Schema::Instrumentation::Tracer)
+        else
+          schema_defn.tracer(Schema::Tracer)
+          schema_defn.instrument(:query, Schema::Instrumentation)
+        end
 
-        schema_defn.tracer(Schema::Tracer)
-        schema_defn.instrument(:query, Schema::Instrumentation)
         schema_defn.extend(Schema::Patch)
         schema_defn.lazy_resolve(Schema::LazyCacheResolver, :resolve)
 
@@ -57,38 +63,16 @@ module GraphQL
 
       alias_method :skip_cache_when_query_has_errors?, :skip_cache_when_query_has_errors
 
-      def graphql_ruby_before_2_0?
-        check_graphql_version "< 2.0.0"
-      end
-
-      def graphql_ruby_after_2_0_13?
-        check_graphql_version "> 2.0.13"
-      end
-
       private
 
       def check_graphql_version(predicate)
         Gem::Dependency.new("graphql", predicate).match?("graphql", GraphQL::VERSION)
       end
-
-      def verify_interpreter_and_analysis!(schema_defn)
-        if graphql_ruby_before_2_0?
-          unless schema_defn.interpreter?
-            raise StandardError,
-              "GraphQL::Execution::Interpreter should be enabled for fragment caching"
-          end
-
-          puts "schema_defn.analysis_engine #{schema_defn.analysis_engine}"
-          unless schema_defn.analysis_engine == GraphQL::Analysis::AST
-            raise StandardError,
-              "GraphQL::Analysis::AST should be enabled for fragment caching"
-          end
-        end
-      end
     end
 
     self.cache_store = MemoryStore.new
     self.enabled = true
+    self.monitoring_enabled = false
     self.namespace = "graphql"
     self.default_options = {}
     self.skip_cache_when_query_has_errors = false

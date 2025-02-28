@@ -16,12 +16,10 @@ module GraphQL
             return fragments.map { |f| [f, f.read] }.to_h
           end
 
-          fragments_to_cache_keys = fragments
-            .map { |f| [f, f.cache_key] }.to_h
+          fragments_to_cache_keys = fragments.map { |f| [f, f.cache_key] }.to_h
 
           # Filter out all the cache_keys for fragments with renew_cache: true in their context
-          cache_keys = fragments_to_cache_keys
-            .reject { |k, _v| k.context[:renew_cache] == true }.values
+          cache_keys = fragments_to_cache_keys.reject { |k, _v| k.context[:renew_cache] == true }.values
 
           # If there are cache_keys look up values with read_multi otherwise return an empty hash
           cache_keys_to_values = if cache_keys.empty?
@@ -30,9 +28,23 @@ module GraphQL
             FragmentCache.cache_store.read_multi(*cache_keys)
           end
 
+          if GraphQL::FragmentCache.monitoring_enabled
+            begin
+              fragments.map do |fragment|
+                cache_lookup_event(
+                  cache_key: fragment.cache_key,
+                  operation_name: fragment.context.query.operation_name,
+                  path: fragment.path,
+                  cache_hit: cache_keys_to_values.key?(fragment.cache_key)
+                )
+              end
+            rescue
+              # Allow cache_lookup_event to fail when we do not have all of the requested attributes
+            end
+          end
+
           # Fragmenst without values or with renew_cache: true in their context will have nil values like the read method
-          fragments_to_cache_keys
-            .map { |fragment, cache_key| [fragment, cache_keys_to_values[cache_key]] }.to_h
+          fragments_to_cache_keys.map { |fragment, cache_key| [fragment, cache_keys_to_values[cache_key]] }.to_h
         end
       end
 
@@ -88,6 +100,11 @@ module GraphQL
 
       def final_value
         @final_value ||= context.query.result["data"]
+      end
+
+      def cache_lookup_event(**args)
+        # This method can be implemented in your application
+        # This provides a mechanism to monitor cache hits for a fragment
       end
     end
   end

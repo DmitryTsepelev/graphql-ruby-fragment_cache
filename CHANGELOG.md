@@ -2,6 +2,49 @@
 
 ## master
 
+## 1.22.0 (2025-02-20)
+
+- [PR#134](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/134) Add possibility to include and exclude arguments from generated cache key ([@mgruner][])
+
+## 1.21.0 (2025-02-01)
+
+- [PR#130](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/130) Dataloader support ([@DmitryTsepelev][])
+- [PR#125](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/125) Introduce cache lookup instrumentation hook ([@danielhartnell][])
+
+## 1.20.5 (2024-11-02)
+
+- [PR#120](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/120) Fix warning on ActiveSupport::Cache.format_version ([@Drowze][])
+
+## 1.20.4 (2024-10-05)
+
+- [PR#119](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/119) Fix Rails cache_format_version deprecation ([@noma4i][])
+
+## 1.20.3 (2024-09-06)
+
+- [PR#117](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/117) Deprecate old ruby and gql versions  ([@DmitryTsepelev][])
+- [PR#116](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/116) Migrate CompiledQueries instrumentation to tracer ([@DmitryTsepelev][])
+
+## 1.20.2 (2024-06-01)
+
+- [PR#115](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/115) Fix deprecation warning for cache_format_version in Rails 7.1 ([@rince][])
+
+## 1.20.1 (2024-04-03)
+
+- [PR#112](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/112) fix tracer deprecation warnings ([@diegofigueroa][])
+- [PR#109](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/109) Remove `Lookahead` patch in modern versions of graphql-ruby ([@DmitryTsepelev][])
+
+## 1.20.0 (2024-03-02)
+
+- [PR#108](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/108) Use trace_with instead of deprecated instrument method  ([@camero2734][])
+
+## 1.19.0 (2023-11-03)
+
+- [PR#104](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/104) Support graphql-ruby 2.1.4 ([@DmitryTsepelev][])
+
+## 1.18.2 (2023-02-21)
+
+- [PR#100](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/100) Fix an error when `path_cache_key` is nil ([@rince][])
+
 ## 1.18.1 (2023-01-06)
 
 - [PR#96](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/96) Properly pass arguments to `write_multi` ([@DmitryTsepelev][])
@@ -172,3 +215,10 @@
 [@daukadolt]: https://github.com/daukadolt
 [@frostmark]: https://github.com/frostmark
 [@KTSCode]: https://github.com/KTSCode
+[@rince]: https://github.com/rince
+[@camero2734]: https://github.com/camero2734
+[@diegofigueroa]: https://github.com/diegofigueroa
+[@noma4i]: https://github.com/noma4i
+[@Drowze]: https://github.com/Drowze
+[@danielhartnell]: https://github.com/danielhartnell
+[@mgruner]: https://github.com/mgruner
