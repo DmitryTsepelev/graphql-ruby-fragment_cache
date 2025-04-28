@@ -9,6 +9,10 @@ module GraphQL
         check_graphql_version "> 2.2.5"
       end
 
+      def before_2_3_11?
+        check_graphql_version "< 2.3.11"
+      end
+
       def check_graphql_version(predicate)
         Gem::Dependency.new("graphql", predicate).match?("graphql", GraphQL::VERSION)
       end

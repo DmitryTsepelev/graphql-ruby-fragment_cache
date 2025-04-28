@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#137](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/137) Remove new_connections? check for gql > 2.3.10 in Tracer ([@DmitryTsepelev][])
+
 ## 1.22.0 (2025-02-20)
 
 - [PR#134](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/134) Add possibility to include and exclude arguments from generated cache key ([@mgruner][])

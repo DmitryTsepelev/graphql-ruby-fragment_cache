@@ -12,7 +12,7 @@ module GraphQL
             yield.tap do |resolved_value|
               next unless connection_field?(key, data)
 
-              verify_connections!(data[:query].context)
+              verify_connections!(data[:query].context) if GraphRubyVersion.before_2_3_11?
             end
           end
 
