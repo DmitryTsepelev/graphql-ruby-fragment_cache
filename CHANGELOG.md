@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.22.1 (2025-06-07)
+
 - [PR#137](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/137) Remove new_connections? check for gql > 2.3.10 in Tracer ([@DmitryTsepelev][])
 
 ## 1.22.0 (2025-02-20)
