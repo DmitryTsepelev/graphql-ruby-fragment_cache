@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: [3.1, 3.2, 3.3, 3.4]
+        ruby: [3.2, 3.3, 3.4, 4.0]
         gemfile: [
           "gemfiles/graphql_2_1_4.gemfile",
           "gemfiles/graphql_2_3_0.gemfile",
@@ -27,13 +27,6 @@ jobs:
           "gemfiles/graphql_2_4_8.gemfile",
           "gemfiles/graphql_master.gemfile"
         ]
-        exclude:
-          - ruby: "3.1"
-            gemfile: gemfiles/graphql_2_3_0.gemfile
-          - ruby: "3.1"
-            gemfile: gemfiles/graphql_2_3_11.gemfile
-          - ruby: "3.1"
-            gemfile: gemfiles/graphql_master.gemfile
 
     steps:
     - uses: actions/checkout@v2
@@ -41,8 +34,8 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-        bundler: 2.2.0
-        cache-version: 1
+        bundler: 2.6.2
+        cache-version: 2
     - name: Run RSpec
       run: |
         bundle exec rake spec
