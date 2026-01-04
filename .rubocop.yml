@@ -1,7 +1,6 @@
 require:
   - standard
   - rubocop-md
-  - ruby-next/rubocop
 
 inherit_gem:
   standard: config/base.yml

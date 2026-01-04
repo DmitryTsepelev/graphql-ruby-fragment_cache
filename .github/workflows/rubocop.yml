@@ -14,9 +14,9 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.1
+        ruby-version: 3.2
         bundler-cache: true
-        bundler: 2.2.0
+        bundler: 2.6.2
     - name: Lint Ruby code with RuboCop
       run: |
         bundle install --gemfile gemfiles/rubocop.gemfile --jobs 4 --retry 3

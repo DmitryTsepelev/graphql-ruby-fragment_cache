@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "combustion", "~> 1.1"
   spec.add_development_dependency "activerecord"
+  spec.add_development_dependency "benchmark"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "rake", ">= 13.0"
   spec.add_development_dependency "rspec", "~> 3.9"
@@ -33,4 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "unparser", "0.6.0"
   spec.add_development_dependency "graphql-batch"
   spec.add_development_dependency "parser"
+  spec.add_development_dependency "ostruct"
 end
