@@ -13,8 +13,8 @@ class Post
       @store.values
     end
 
-    def create(id:, **attributes)
-      store[id] = new(id: id, **attributes)
+    def create(id:, **)
+      store[id] = new(id: id, **)
     end
 
     def delete_all

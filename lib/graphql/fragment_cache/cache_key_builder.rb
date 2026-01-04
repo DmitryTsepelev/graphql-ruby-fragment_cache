@@ -46,9 +46,9 @@ module GraphQL
       end
 
       refine ::GraphQL::Execution::Lookahead do
-        def selection_with_alias(name, **kwargs)
-          return selection(name, **kwargs) if selects?(name, **kwargs)
-          alias_selection(name, **kwargs)
+        def selection_with_alias(name, **)
+          return selection(name, **) if selects?(name, **)
+          alias_selection(name, **)
         end
       end
     })
@@ -56,8 +56,8 @@ module GraphQL
     # Builds cache key for fragment
     class CacheKeyBuilder
       class << self
-        def call(**options)
-          new(**options).build
+        def call(**)
+          new(**).build
         end
       end
 
