@@ -87,6 +87,8 @@ module GraphQL
       end
 
       def value_from_cache
+        return nil unless FragmentCache.cache_store.exist?(cache_key)
+
         FragmentCache.cache_store.read(cache_key).tap do |cached|
           return NIL_IN_CACHE if cached.nil? && FragmentCache.cache_store.exist?(cache_key)
         end
