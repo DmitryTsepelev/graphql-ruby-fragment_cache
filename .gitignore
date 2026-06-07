@@ -8,7 +8,6 @@
 /tmp/
 Gemfile.lock
 .DS_Store
-.rbnext/
 *.sqlite3
 *.sqlite3-*
 spec/internal/log/*.log
