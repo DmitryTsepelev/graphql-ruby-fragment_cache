@@ -700,13 +700,13 @@ describe "#cache_fragment" do
     end
 
     it "calls #read for each entry" do
-      # warmup calls
-      expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(3)
+      # cache was cold during warmup, so #exist? short-circuits before #read
+      expect(GraphQL::FragmentCache.cache_store).not_to have_received(:read)
 
       execute_query
 
-      # read key once
-      expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(6)
+      # cache is warm now: one #read per entry
+      expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(3)
     end
 
     context "when keep_in_context is true" do
@@ -717,13 +717,13 @@ describe "#cache_fragment" do
       end
 
       it "calls #read once" do
-        # warmup calls
-        expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(3)
+        # cache was cold during warmup, so #exist? short-circuits before #read
+        expect(GraphQL::FragmentCache.cache_store).not_to have_received(:read)
 
         execute_query
 
-        # read key once
-        expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(4)
+        # cache is warm now: read once, then reused from context for the other entries
+        expect(GraphQL::FragmentCache.cache_store).to have_received(:read).exactly(1)
       end
     end
   end

@@ -2,6 +2,9 @@
 
 ## master
 
+- [PR#99](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/99) Fix for race condition when reading from cache
+ ([@gsdean][])
+
 ## 1.22.1 (2025-06-07)
 
 - [PR#137](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/137) Remove new_connections? check for gql > 2.3.10 in Tracer ([@DmitryTsepelev][])
@@ -226,3 +229,4 @@
 [@Drowze]: https://github.com/Drowze
 [@danielhartnell]: https://github.com/danielhartnell
 [@mgruner]: https://github.com/mgruner
+[@gsdean]: https://github.com/gsdean

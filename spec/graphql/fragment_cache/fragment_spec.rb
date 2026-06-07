@@ -52,4 +52,61 @@ describe GraphQL::FragmentCache::Fragment do
       end
     end
   end
+
+  describe "#read" do
+    let(:cache_key) { "fragment-cache-key" }
+    let(:cache_store) { double("cache_store") }
+
+    let(:fragment) do
+      context = double("context")
+      allow(context).to receive(:namespace).with(:interpreter).and_return(current_path: ["post"])
+      allow(context).to receive(:[]).with(:renew_cache).and_return(nil)
+
+      described_class.new(context).tap do |fragment|
+        allow(fragment).to receive(:cache_key).and_return(cache_key)
+      end
+    end
+
+    before do
+      allow(GraphQL::FragmentCache).to receive(:cache_store).and_return(cache_store)
+    end
+
+    # Regression test for the race condition fixed in #99: existence is checked
+    # with #exist? *before* #read, so a key that is absent at lookup time is
+    # reported as a cache miss without being read — instead of being read first
+    # and mistaken for a cached nil if another request populates it in between.
+    context "when the cache key does not exist" do
+      before do
+        allow(cache_store).to receive(:exist?).with(cache_key).and_return(false)
+        allow(cache_store).to receive(:read).with(cache_key)
+      end
+
+      it "returns a cache miss without reading the absent key" do
+        expect(fragment.read).to be_nil
+        expect(cache_store).not_to have_received(:read)
+      end
+    end
+
+    context "when a nil value is stored in the cache" do
+      before do
+        allow(cache_store).to receive(:exist?).with(cache_key).and_return(true)
+        allow(cache_store).to receive(:read).with(cache_key).and_return(nil)
+      end
+
+      it "returns the sentinel for a cached nil" do
+        expect(fragment.read).to be(described_class::NIL_IN_CACHE)
+      end
+    end
+
+    context "when a value is stored in the cache" do
+      before do
+        allow(cache_store).to receive(:exist?).with(cache_key).and_return(true)
+        allow(cache_store).to receive(:read).with(cache_key).and_return("cached value")
+      end
+
+      it "returns the cached value" do
+        expect(fragment.read).to eq("cached value")
+      end
+    end
+  end
 end
