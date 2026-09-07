@@ -2,6 +2,8 @@
 
 ## master
 
+- [PR#144](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/144) Fix SystemStackError when cache_fragment is used inside a mutation
+ ([@LRFalk01][])
 - [PR#99](https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache/pull/99) Fix for race condition when reading from cache
  ([@gsdean][])
 
@@ -230,3 +232,4 @@
 [@danielhartnell]: https://github.com/danielhartnell
 [@mgruner]: https://github.com/mgruner
 [@gsdean]: https://github.com/gsdean
+[@LRFalk01]: https://github.com/LRFalk01
