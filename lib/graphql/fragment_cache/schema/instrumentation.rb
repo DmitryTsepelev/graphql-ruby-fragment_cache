@@ -25,13 +25,6 @@ module GraphQL
 
         # Instrumentations were deprecated in 2.2.5, this is a module to migrate to new interface
         module Tracer
-          def execute_query(query:)
-            result = super
-          ensure
-            GraphQL::FragmentCache::Schema::Instrumentation.after_query(query)
-            result
-          end
-
           def execute_multiplex(multiplex:)
             result = super
             multiplex.queries.each do |query|

@@ -128,9 +128,28 @@ module Types
   end
 end
 
+module Mutations
+  class UpdatePost < GraphQL::Schema::Mutation
+    argument :id, GraphQL::Types::ID, required: true
+
+    field :post, Types::Post, null: false
+
+    def resolve(id:)
+      {post: ::Post.find(id)}
+    end
+  end
+end
+
+module Types
+  class Mutation < GraphQL::Schema::Object
+    field :update_post, mutation: Mutations::UpdatePost
+  end
+end
+
 class TestSchema < GraphQL::Schema
   use GraphQL::Batch
   use GraphQL::FragmentCache
 
   query Types::Query
+  mutation Types::Mutation
 end
